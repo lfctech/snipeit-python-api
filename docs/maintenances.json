@@ -1,0 +1,801 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "Snipe-IT v6 API",
+        "version": "7.1.17"
+    },
+    "servers": [
+        {
+            "url": "https://web.archive.org/web/20250424002126/https://develop.snipeitapp.com/api/v1"
+        }
+    ],
+    "components": {
+        "securitySchemes": {}
+    },
+    "security": [
+        {}
+    ],
+    "paths": {
+        "/maintenances": {
+            "post": {
+                "summary": "/maintenances",
+                "description": "Create a new maintenance",
+                "operationId": "maintenances-1",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "title",
+                                    "asset_id",
+                                    "supplier_id",
+                                    "asset_maintenance_type",
+                                    "start_date"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "asset_id": {
+                                        "type": "integer",
+                                        "format": "int32"
+                                    },
+                                    "supplier_id": {
+                                        "type": "integer",
+                                        "format": "int32"
+                                    },
+                                    "is_warranty": {
+                                        "type": "boolean"
+                                    },
+                                    "cost": {
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "notes": {
+                                        "type": "string"
+                                    },
+                                    "asset_maintenance_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Maintenance",
+                                            "Repair",
+                                            "PAT Test",
+                                            "Upgrade",
+                                            "Hardware Support",
+                                            "Software Support"
+                                        ]
+                                    },
+                                    "start_date": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "completion_date": {
+                                        "type": "string",
+                                        "format": "date"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            },
+            "get": {
+                "summary": "/maintenances",
+                "description": "List asset maintenances",
+                "operationId": "maintenances",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of results to return",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 50
+                        }
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "Offset to use when retrieving results (useful in pagination)",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 0
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search string",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Field to order by",
+                        "schema": {
+                            "type": "string",
+                            "default": "created_at"
+                        }
+                    },
+                    {
+                        "name": "order",
+                        "in": "query",
+                        "description": "Sort order (asc or desc)",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "asset_id",
+                        "in": "query",
+                        "description": "Asset ID of the asset you'd like to return maintenances for",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n    \"total\": 2,\n    \"rows\": [\n        {\n            \"id\": 2,\n            \"asset\": {\n                \"id\": 1,\n                \"name\": \"Test Name\",\n                \"asset_tag\": \"02948\"\n            },\n            \"title\": \"Test with all fields\",\n            \"location\": {\n                \"id\": 3,\n                \"name\": \"East Pollyville\"\n            },\n            \"notes\": \"This is a test\",\n            \"supplier\": {\n                \"id\": 3,\n                \"name\": \"Effertz, Langworth and Prohaska\"\n            },\n            \"cost\": \"100.00\",\n            \"asset_maintenance_type\": \"Repair\",\n            \"start_date\": {\n                \"datetime\": \"2018-03-06 00:00:00\",\n                \"formatted\": \"Tue Mar 06, 2018 12:00AM\"\n            },\n            \"asset_maintenance_time\": 20,\n            \"completion_date\": {\n                \"datetime\": \"2018-03-26 00:00:00\",\n                \"formatted\": \"Mon Mar 26, 2018 12:00AM\"\n            },\n            \"user_id\": {\n                \"id\": 2,\n                \"name\": \"Snipe E. Head\"\n            },\n            \"created_at\": {\n                \"datetime\": \"2018-03-26 17:43:35\",\n                \"formatted\": \"Mon Mar 26, 2018 5:43PM\"\n            },\n            \"updated_at\": {\n                \"datetime\": \"2018-03-26 17:43:35\",\n                \"formatted\": \"Mon Mar 26, 2018 5:43PM\"\n            },\n            \"available_actions\": {\n                \"update\": true,\n                \"delete\": true\n            }\n        },\n        {\n            \"id\": 1,\n            \"asset\": {\n                \"id\": 1,\n                \"name\": \"Test Name\",\n                \"asset_tag\": \"02948\"\n            },\n            \"title\": \"adfasasd\",\n            \"location\": {\n                \"id\": 3,\n                \"name\": \"East Pollyville\"\n            },\n            \"notes\": null,\n            \"supplier\": {\n                \"id\": 3,\n                \"name\": \"Effertz, Langworth and Prohaska\"\n            },\n            \"cost\": null,\n            \"asset_maintenance_type\": \"Maintenance\",\n            \"start_date\": {\n                \"datetime\": \"2018-03-01 00:00:00\",\n                \"formatted\": \"Thu Mar 01, 2018 12:00AM\"\n            },\n            \"asset_maintenance_time\": null,\n            \"completion_date\": null,\n            \"user_id\": {\n                \"id\": 2,\n                \"name\": \"Snipe E. Head\"\n            },\n            \"created_at\": {\n                \"datetime\": \"2018-03-26 15:28:19\",\n                \"formatted\": \"Mon Mar 26, 2018 3:28PM\"\n            },\n            \"updated_at\": {\n                \"datetime\": \"2018-03-26 15:28:19\",\n                \"formatted\": \"Mon Mar 26, 2018 3:28PM\"\n            },\n            \"available_actions\": {\n                \"update\": true,\n                \"delete\": true\n            }\n        }\n    ]\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 2,
+                                            "default": 0
+                                        },
+                                        "rows": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 2,
+                                                        "default": 0
+                                                    },
+                                                    "asset": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1,
+                                                                "default": 0
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Test Name"
+                                                            },
+                                                            "asset_tag": {
+                                                                "type": "string",
+                                                                "example": "02948"
+                                                            }
+                                                        }
+                                                    },
+                                                    "title": {
+                                                        "type": "string",
+                                                        "example": "Test with all fields"
+                                                    },
+                                                    "location": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 3,
+                                                                "default": 0
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "East Pollyville"
+                                                            }
+                                                        }
+                                                    },
+                                                    "notes": {
+                                                        "type": "string",
+                                                        "example": "This is a test"
+                                                    },
+                                                    "supplier": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 3,
+                                                                "default": 0
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Effertz, Langworth and Prohaska"
+                                                            }
+                                                        }
+                                                    },
+                                                    "cost": {
+                                                        "type": "string",
+                                                        "example": "100.00"
+                                                    },
+                                                    "asset_maintenance_type": {
+                                                        "type": "string",
+                                                        "example": "Repair"
+                                                    },
+                                                    "start_date": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "datetime": {
+                                                                "type": "string",
+                                                                "example": "2018-03-06 00:00:00"
+                                                            },
+                                                            "formatted": {
+                                                                "type": "string",
+                                                                "example": "Tue Mar 06, 2018 12:00AM"
+                                                            }
+                                                        }
+                                                    },
+                                                    "asset_maintenance_time": {
+                                                        "type": "integer",
+                                                        "example": 20,
+                                                        "default": 0
+                                                    },
+                                                    "completion_date": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "datetime": {
+                                                                "type": "string",
+                                                                "example": "2018-03-26 00:00:00"
+                                                            },
+                                                            "formatted": {
+                                                                "type": "string",
+                                                                "example": "Mon Mar 26, 2018 12:00AM"
+                                                            }
+                                                        }
+                                                    },
+                                                    "user_id": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 2,
+                                                                "default": 0
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Snipe E. Head"
+                                                            }
+                                                        }
+                                                    },
+                                                    "created_at": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "datetime": {
+                                                                "type": "string",
+                                                                "example": "2018-03-26 17:43:35"
+                                                            },
+                                                            "formatted": {
+                                                                "type": "string",
+                                                                "example": "Mon Mar 26, 2018 5:43PM"
+                                                            }
+                                                        }
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "datetime": {
+                                                                "type": "string",
+                                                                "example": "2018-03-26 17:43:35"
+                                                            },
+                                                            "formatted": {
+                                                                "type": "string",
+                                                                "example": "Mon Mar 26, 2018 5:43PM"
+                                                            }
+                                                        }
+                                                    },
+                                                    "available_actions": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "update": {
+                                                                "type": "boolean",
+                                                                "example": true,
+                                                                "default": true
+                                                            },
+                                                            "delete": {
+                                                                "type": "boolean",
+                                                                "example": true,
+                                                                "default": true
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/maintenances/{id}": {
+            "delete": {
+                "summary": "/maintenances/:id",
+                "description": "Delete a maintenance",
+                "operationId": "maintenancesid",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Maintenance ID",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"success\",\n  \"messages\": \"The asset maintenance was deleted successfully.\",\n  \"payload\": {\n    \"id\": 1,\n    \"asset_id\": 1,\n    \"supplier_id\": 1,\n    \"asset_maintenance_type\": \"Maintenance\",\n    \"title\": \"deleteo\",\n    \"is_warranty\": 0,\n    \"start_date\": \"2022-11-16T08:00:00.000000Z\",\n    \"completion_date\": null,\n    \"asset_maintenance_time\": null,\n    \"notes\": null,\n    \"cost\": null,\n    \"deleted_at\": \"2022-11-15T17:25:48.000000Z\",\n    \"created_at\": \"2022-11-15T17:25:17.000000Z\",\n    \"updated_at\": \"2022-11-15T17:25:48.000000Z\",\n    \"user_id\": 1,\n    \"asset\": {\n      \"id\": 1,\n      \"name\": null,\n      \"asset_tag\": \"893278223\",\n      \"model_id\": 1,\n      \"serial\": \"c65ac2b6-bad7-34ef-86d0-b2f9b4abb83f\",\n      \"purchase_date\": \"2022-01-19T08:00:00.000000Z\",\n      \"purchase_cost\": \"551.40\",\n      \"order_number\": \"19494754\",\n      \"assigned_to\": null,\n      \"notes\": \"Created by DB seeder\",\n      \"image\": null,\n      \"user_id\": 1,\n      \"created_at\": \"2022-11-15T16:42:06.000000Z\",\n      \"updated_at\": \"2022-11-15T16:42:37.000000Z\",\n      \"physical\": 1,\n      \"deleted_at\": null,\n      \"status_id\": 1,\n      \"archived\": 0,\n      \"warranty_months\": null,\n      \"depreciate\": null,\n      \"supplier_id\": 3,\n      \"requestable\": 1,\n      \"rtd_location_id\": 4,\n      \"accepted\": null,\n      \"last_checkout\": null,\n      \"expected_checkin\": null,\n      \"company_id\": null,\n      \"assigned_type\": null,\n      \"last_audit_date\": null,\n      \"next_audit_date\": null,\n      \"location_id\": 4,\n      \"checkin_counter\": 0,\n      \"checkout_counter\": 0,\n      \"requests_counter\": 0,\n      \"_snipeit_imei_1\": null,\n      \"_snipeit_phone_number_2\": null,\n      \"_snipeit_ram_3\": null,\n      \"_snipeit_cpu_4\": null,\n      \"_snipeit_mac_address_5\": null\n    }\n  }\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "messages": {
+                                            "type": "string",
+                                            "example": "The asset maintenance was deleted successfully."
+                                        },
+                                        "payload": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1,
+                                                    "default": 0
+                                                },
+                                                "asset_id": {
+                                                    "type": "integer",
+                                                    "example": 1,
+                                                    "default": 0
+                                                },
+                                                "supplier_id": {
+                                                    "type": "integer",
+                                                    "example": 1,
+                                                    "default": 0
+                                                },
+                                                "asset_maintenance_type": {
+                                                    "type": "string",
+                                                    "example": "Maintenance"
+                                                },
+                                                "title": {
+                                                    "type": "string",
+                                                    "example": "deleteo"
+                                                },
+                                                "is_warranty": {
+                                                    "type": "integer",
+                                                    "example": 0,
+                                                    "default": 0
+                                                },
+                                                "start_date": {
+                                                    "type": "string",
+                                                    "example": "2022-11-16T08:00:00.000000Z"
+                                                },
+                                                "completion_date": {},
+                                                "asset_maintenance_time": {},
+                                                "notes": {},
+                                                "cost": {},
+                                                "deleted_at": {
+                                                    "type": "string",
+                                                    "example": "2022-11-15T17:25:48.000000Z"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "example": "2022-11-15T17:25:17.000000Z"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "example": "2022-11-15T17:25:48.000000Z"
+                                                },
+                                                "user_id": {
+                                                    "type": "integer",
+                                                    "example": 1,
+                                                    "default": 0
+                                                },
+                                                "asset": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1,
+                                                            "default": 0
+                                                        },
+                                                        "name": {},
+                                                        "asset_tag": {
+                                                            "type": "string",
+                                                            "example": "893278223"
+                                                        },
+                                                        "model_id": {
+                                                            "type": "integer",
+                                                            "example": 1,
+                                                            "default": 0
+                                                        },
+                                                        "serial": {
+                                                            "type": "string",
+                                                            "example": "c65ac2b6-bad7-34ef-86d0-b2f9b4abb83f"
+                                                        },
+                                                        "purchase_date": {
+                                                            "type": "string",
+                                                            "example": "2022-01-19T08:00:00.000000Z"
+                                                        },
+                                                        "purchase_cost": {
+                                                            "type": "string",
+                                                            "example": "551.40"
+                                                        },
+                                                        "order_number": {
+                                                            "type": "string",
+                                                            "example": "19494754"
+                                                        },
+                                                        "assigned_to": {},
+                                                        "notes": {
+                                                            "type": "string",
+                                                            "example": "Created by DB seeder"
+                                                        },
+                                                        "image": {},
+                                                        "user_id": {
+                                                            "type": "integer",
+                                                            "example": 1,
+                                                            "default": 0
+                                                        },
+                                                        "created_at": {
+                                                            "type": "string",
+                                                            "example": "2022-11-15T16:42:06.000000Z"
+                                                        },
+                                                        "updated_at": {
+                                                            "type": "string",
+                                                            "example": "2022-11-15T16:42:37.000000Z"
+                                                        },
+                                                        "physical": {
+                                                            "type": "integer",
+                                                            "example": 1,
+                                                            "default": 0
+                                                        },
+                                                        "deleted_at": {},
+                                                        "status_id": {
+                                                            "type": "integer",
+                                                            "example": 1,
+                                                            "default": 0
+                                                        },
+                                                        "archived": {
+                                                            "type": "integer",
+                                                            "example": 0,
+                                                            "default": 0
+                                                        },
+                                                        "warranty_months": {},
+                                                        "depreciate": {},
+                                                        "supplier_id": {
+                                                            "type": "integer",
+                                                            "example": 3,
+                                                            "default": 0
+                                                        },
+                                                        "requestable": {
+                                                            "type": "integer",
+                                                            "example": 1,
+                                                            "default": 0
+                                                        },
+                                                        "rtd_location_id": {
+                                                            "type": "integer",
+                                                            "example": 4,
+                                                            "default": 0
+                                                        },
+                                                        "accepted": {},
+                                                        "last_checkout": {},
+                                                        "expected_checkin": {},
+                                                        "company_id": {},
+                                                        "assigned_type": {},
+                                                        "last_audit_date": {},
+                                                        "next_audit_date": {},
+                                                        "location_id": {
+                                                            "type": "integer",
+                                                            "example": 4,
+                                                            "default": 0
+                                                        },
+                                                        "checkin_counter": {
+                                                            "type": "integer",
+                                                            "example": 0,
+                                                            "default": 0
+                                                        },
+                                                        "checkout_counter": {
+                                                            "type": "integer",
+                                                            "example": 0,
+                                                            "default": 0
+                                                        },
+                                                        "requests_counter": {
+                                                            "type": "integer",
+                                                            "example": 0,
+                                                            "default": 0
+                                                        },
+                                                        "_snipeit_imei_1": {},
+                                                        "_snipeit_phone_number_2": {},
+                                                        "_snipeit_ram_3": {},
+                                                        "_snipeit_cpu_4": {},
+                                                        "_snipeit_mac_address_5": {}
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/maintenances/:id": {
+            "put": {
+                "summary": "/maintenances/:id",
+                "description": "Update selected fields in an existing maintenance",
+                "operationId": "maintenances-copy",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "title",
+                                    "asset_id",
+                                    "supplier_id",
+                                    "asset_maintenance_type",
+                                    "start_date"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "asset_id": {
+                                        "type": "integer",
+                                        "format": "int32"
+                                    },
+                                    "supplier_id": {
+                                        "type": "integer",
+                                        "format": "int32"
+                                    },
+                                    "is_warranty": {
+                                        "type": "boolean"
+                                    },
+                                    "cost": {
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "notes": {
+                                        "type": "string"
+                                    },
+                                    "asset_maintenance_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Maintenance",
+                                            "Repair",
+                                            "PAT Test",
+                                            "Upgrade",
+                                            "Hardware Support",
+                                            "Software Support"
+                                        ]
+                                    },
+                                    "start_date": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "completion_date": {
+                                        "type": "string",
+                                        "format": "date"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            },
+            "patch": {
+                "summary": "/maintenances/:id",
+                "description": "Update selected fields in an existing maintenance",
+                "operationId": "maintenances-copy-1",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "asset_maintenance_type"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "asset_id": {
+                                        "type": "integer",
+                                        "format": "int32"
+                                    },
+                                    "supplier_id": {
+                                        "type": "integer",
+                                        "format": "int32"
+                                    },
+                                    "is_warranty": {
+                                        "type": "boolean"
+                                    },
+                                    "cost": {
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "notes": {
+                                        "type": "string"
+                                    },
+                                    "asset_maintenance_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Maintenance",
+                                            "Repair",
+                                            "PAT Test",
+                                            "Upgrade",
+                                            "Hardware Support",
+                                            "Software Support"
+                                        ]
+                                    },
+                                    "start_date": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "completion_date": {
+                                        "type": "string",
+                                        "format": "date"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        }
+    }
+}

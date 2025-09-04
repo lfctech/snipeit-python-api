@@ -1,0 +1,956 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "Snipe-IT v6 API",
+        "version": "7.1.17"
+    },
+    "servers": [
+        {
+            "url": "https://web.archive.org/web/20250424002126/https://develop.snipeitapp.com/api/v1"
+        }
+    ],
+    "components": {
+        "securitySchemes": {}
+    },
+    "security": [
+        {}
+    ],
+    "paths": {
+        "/accessories": {
+            "get": {
+                "summary": "/accessories",
+                "description": "Return a listing of accessories",
+                "operationId": "accessories",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Specify the number of results you wish to return",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 50
+                        }
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "Offset to use",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 0
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "A text string to search the assets data for",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "order_number",
+                        "in": "query",
+                        "description": "Return only assets associated with a specific order number",
+                        "schema": {
+                            "type": "string",
+                            "default": "null"
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Specify the column name you wish to sort by",
+                        "schema": {
+                            "type": "string",
+                            "default": "created_at"
+                        }
+                    },
+                    {
+                        "name": "order",
+                        "in": "query",
+                        "description": "Specify the order (asc or desc) you wish to order by on your sort column",
+                        "schema": {
+                            "type": "string",
+                            "default": "desc"
+                        }
+                    },
+                    {
+                        "name": "expand",
+                        "in": "query",
+                        "description": "Whether to include detailed information on categories, etc (true) or just the text name (false)",
+                        "schema": {
+                            "type": "string",
+                            "default": "false"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n    \"total\": 4,\n    \"rows\": [\n        {\n            \"id\": 1,\n            \"name\": \"USB Keyboard\",\n            \"company\": null,\n            \"manufacturer\": {\n                \"id\": 1,\n                \"name\": \"Apple\"\n            },\n            \"supplier\": {\n                \"id\": 1,\n                \"name\": \"Beier, Von and Schoen\"\n            },\n            \"model_number\": \"2033154\",\n            \"category\": {\n                \"id\": 8,\n                \"name\": \"Keyboards\"\n            },\n            \"location\": {\n                \"id\": 5,\n                \"name\": \"South Fred\"\n            },\n            \"notes\": null,\n            \"qty\": 15,\n            \"purchase_date\": null,\n            \"purchase_cost\": null,\n            \"order_number\": null,\n            \"min_qty\": 2,\n            \"remaining_qty\": 15,\n            \"image\": null,\n            \"created_at\": {\n                \"datetime\": \"2018-10-09 19:07:31\",\n                \"formatted\": \"2018-10-09 07:07 PM\"\n            },\n            \"updated_at\": {\n                \"datetime\": \"2018-10-09 19:07:31\",\n                \"formatted\": \"2018-10-09 07:07 PM\"\n            },\n            \"available_actions\": {\n                \"checkout\": true,\n                \"checkin\": false,\n                \"update\": true,\n                \"delete\": true\n            },\n            \"user_can_checkout\": true\n        },\n        {\n            \"id\": 2,\n            \"name\": \"Bluetooth Keyboard\",\n            \"company\": null,\n            \"manufacturer\": {\n                \"id\": 1,\n                \"name\": \"Apple\"\n            },\n            \"supplier\": {\n                \"id\": 5,\n                \"name\": \"Howell-Windler\"\n            },\n            \"model_number\": \"14966166\",\n            \"category\": {\n                \"id\": 8,\n                \"name\": \"Keyboards\"\n            },\n            \"location\": {\n                \"id\": 5,\n                \"name\": \"South Fred\"\n            },\n            \"notes\": null,\n            \"qty\": 10,\n            \"purchase_date\": null,\n            \"purchase_cost\": null,\n            \"order_number\": null,\n            \"min_qty\": 2,\n            \"remaining_qty\": 10,\n            \"image\": null,\n            \"created_at\": {\n                \"datetime\": \"2018-10-09 19:07:31\",\n                \"formatted\": \"2018-10-09 07:07 PM\"\n            },\n            \"updated_at\": {\n                \"datetime\": \"2018-10-09 19:07:31\",\n                \"formatted\": \"2018-10-09 07:07 PM\"\n            },\n            \"available_actions\": {\n                \"checkout\": true,\n                \"checkin\": false,\n                \"update\": true,\n                \"delete\": true\n            },\n            \"user_can_checkout\": true\n        },\n        {\n            \"id\": 3,\n            \"name\": \"Magic Mouse\",\n            \"company\": null,\n            \"manufacturer\": {\n                \"id\": 1,\n                \"name\": \"Apple\"\n            },\n            \"supplier\": {\n                \"id\": 1,\n                \"name\": \"Beier, Von and Schoen\"\n            },\n            \"model_number\": \"41452806\",\n            \"category\": {\n                \"id\": 9,\n                \"name\": \"Mouse\"\n            },\n            \"location\": {\n                \"id\": 5,\n                \"name\": \"South Fred\"\n            },\n            \"notes\": null,\n            \"qty\": 13,\n            \"purchase_date\": null,\n            \"purchase_cost\": null,\n            \"order_number\": null,\n            \"min_qty\": 2,\n            \"remaining_qty\": 13,\n            \"image\": null,\n            \"created_at\": {\n                \"datetime\": \"2018-10-09 19:07:31\",\n                \"formatted\": \"2018-10-09 07:07 PM\"\n            },\n            \"updated_at\": {\n                \"datetime\": \"2018-10-09 19:07:31\",\n                \"formatted\": \"2018-10-09 07:07 PM\"\n            },\n            \"available_actions\": {\n                \"checkout\": true,\n                \"checkin\": false,\n                \"update\": true,\n                \"delete\": true\n            },\n            \"user_can_checkout\": true\n        },\n        {\n            \"id\": 4,\n            \"name\": \"Sculpt Comfort Mouse\",\n            \"company\": null,\n            \"manufacturer\": {\n                \"id\": 2,\n                \"name\": \"Microsoft\"\n            },\n            \"supplier\": null,\n            \"model_number\": \"13797878\",\n            \"category\": {\n                \"id\": 9,\n                \"name\": \"Mouse\"\n            },\n            \"location\": {\n                \"id\": 5,\n                \"name\": \"South Fred\"\n            },\n            \"notes\": null,\n            \"qty\": 13,\n            \"purchase_date\": null,\n            \"purchase_cost\": null,\n            \"order_number\": null,\n            \"min_qty\": 2,\n            \"remaining_qty\": 13,\n            \"image\": null,\n            \"created_at\": {\n                \"datetime\": \"2018-10-09 19:07:31\",\n                \"formatted\": \"2018-10-09 07:07 PM\"\n            },\n            \"updated_at\": {\n                \"datetime\": \"2018-10-09 19:07:31\",\n                \"formatted\": \"2018-10-09 07:07 PM\"\n            },\n            \"available_actions\": {\n                \"checkout\": true,\n                \"checkin\": false,\n                \"update\": true,\n                \"delete\": true\n            },\n            \"user_can_checkout\": true\n        }\n    ]\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 4,
+                                            "default": 0
+                                        },
+                                        "rows": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1,
+                                                        "default": 0
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "USB Keyboard"
+                                                    },
+                                                    "company": {},
+                                                    "manufacturer": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1,
+                                                                "default": 0
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Apple"
+                                                            }
+                                                        }
+                                                    },
+                                                    "supplier": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1,
+                                                                "default": 0
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Beier, Von and Schoen"
+                                                            }
+                                                        }
+                                                    },
+                                                    "model_number": {
+                                                        "type": "string",
+                                                        "example": "2033154"
+                                                    },
+                                                    "category": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 8,
+                                                                "default": 0
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Keyboards"
+                                                            }
+                                                        }
+                                                    },
+                                                    "location": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 5,
+                                                                "default": 0
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "South Fred"
+                                                            }
+                                                        }
+                                                    },
+                                                    "notes": {},
+                                                    "qty": {
+                                                        "type": "integer",
+                                                        "example": 15,
+                                                        "default": 0
+                                                    },
+                                                    "purchase_date": {},
+                                                    "purchase_cost": {},
+                                                    "order_number": {},
+                                                    "min_qty": {
+                                                        "type": "integer",
+                                                        "example": 2,
+                                                        "default": 0
+                                                    },
+                                                    "remaining_qty": {
+                                                        "type": "integer",
+                                                        "example": 15,
+                                                        "default": 0
+                                                    },
+                                                    "image": {},
+                                                    "created_at": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "datetime": {
+                                                                "type": "string",
+                                                                "example": "2018-10-09 19:07:31"
+                                                            },
+                                                            "formatted": {
+                                                                "type": "string",
+                                                                "example": "2018-10-09 07:07 PM"
+                                                            }
+                                                        }
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "datetime": {
+                                                                "type": "string",
+                                                                "example": "2018-10-09 19:07:31"
+                                                            },
+                                                            "formatted": {
+                                                                "type": "string",
+                                                                "example": "2018-10-09 07:07 PM"
+                                                            }
+                                                        }
+                                                    },
+                                                    "available_actions": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "checkout": {
+                                                                "type": "boolean",
+                                                                "example": true,
+                                                                "default": true
+                                                            },
+                                                            "checkin": {
+                                                                "type": "boolean",
+                                                                "example": false,
+                                                                "default": true
+                                                            },
+                                                            "update": {
+                                                                "type": "boolean",
+                                                                "example": true,
+                                                                "default": true
+                                                            },
+                                                            "delete": {
+                                                                "type": "boolean",
+                                                                "example": true,
+                                                                "default": true
+                                                            }
+                                                        }
+                                                    },
+                                                    "user_can_checkout": {
+                                                        "type": "boolean",
+                                                        "example": true,
+                                                        "default": true
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "401",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"message\": \"Unauthorized.\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false,
+                "security": []
+            },
+            "post": {
+                "summary": "/accessories",
+                "description": "Create a new accessory",
+                "operationId": "accessories-1",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "name",
+                                    "qty",
+                                    "category_id"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "qty": {
+                                        "type": "integer",
+                                        "description": "Quantity of the accessory you have",
+                                        "format": "int32"
+                                    },
+                                    "order_number": {
+                                        "type": "string",
+                                        "description": "Order number for this accessory."
+                                    },
+                                    "purchase_cost": {
+                                        "type": "number",
+                                        "description": "Cost of item being purchased.",
+                                        "format": "float"
+                                    },
+                                    "purchase_date": {
+                                        "type": "string",
+                                        "description": "Date accessory was purchased"
+                                    },
+                                    "model_number": {
+                                        "type": "string",
+                                        "description": "Model number of Accessory"
+                                    },
+                                    "category_id": {
+                                        "type": "integer",
+                                        "description": "ID number of the category the accessory belongs to",
+                                        "format": "int32"
+                                    },
+                                    "company_id": {
+                                        "type": "integer",
+                                        "description": "ID Number of the company the accessory is assigned to",
+                                        "format": "int32"
+                                    },
+                                    "location_id": {
+                                        "type": "integer",
+                                        "description": "ID number of the location the accessory is assigned to",
+                                        "format": "int32"
+                                    },
+                                    "manufacturer_id": {
+                                        "type": "integer",
+                                        "description": "ID number of the manufacturer for this accessory.",
+                                        "format": "int32"
+                                    },
+                                    "supplier_id": {
+                                        "type": "integer",
+                                        "description": "ID number of the supplier for this accessory",
+                                        "format": "int32"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/accessories/{id}": {
+            "get": {
+                "summary": "/accessories/:id",
+                "description": "Get the details on an accessory",
+                "operationId": "accessoriesid",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            },
+            "delete": {
+                "summary": "/accessories/:id",
+                "description": "Deletes an accessory",
+                "operationId": "accessoriesid-3",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            },
+            "put": {
+                "summary": "/accessories/:id",
+                "description": "Updates an accessory",
+                "operationId": "accessoriesid-1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "name",
+                                    "qty",
+                                    "category_id"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "qty": {
+                                        "type": "integer",
+                                        "description": "Quantity of the accessory you have",
+                                        "format": "int32"
+                                    },
+                                    "category_id": {
+                                        "type": "integer",
+                                        "description": "ID number of the category the accessory belongs to",
+                                        "format": "int32"
+                                    },
+                                    "order_number": {
+                                        "type": "string",
+                                        "description": "Order number for this accessory."
+                                    },
+                                    "purchase_cost": {
+                                        "type": "number",
+                                        "description": "Cost of item being purchased.",
+                                        "format": "float"
+                                    },
+                                    "purchase_date": {
+                                        "type": "string",
+                                        "description": "Date accessory was purchased"
+                                    },
+                                    "model_number": {
+                                        "type": "string",
+                                        "description": "Model number of Accessory"
+                                    },
+                                    "company_id": {
+                                        "type": "integer",
+                                        "description": "ID Number of the company the accessory is assigned to",
+                                        "format": "int32"
+                                    },
+                                    "location_id": {
+                                        "type": "integer",
+                                        "description": "ID number of the location the accessory is assigned to",
+                                        "format": "int32"
+                                    },
+                                    "manufacturer_id": {
+                                        "type": "integer",
+                                        "description": "ID number of the manufacturer for this accessory.",
+                                        "format": "int32"
+                                    },
+                                    "supplier_id": {
+                                        "type": "integer",
+                                        "description": "ID number of the supplier for this accessory",
+                                        "format": "int32"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            },
+            "patch": {
+                "summary": "/accessories/:id",
+                "description": "Selectively updates an accessory",
+                "operationId": "accessoriesid-2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "qty": {
+                                        "type": "integer",
+                                        "description": "Quantity of the accessory you have",
+                                        "format": "int32"
+                                    },
+                                    "order_number": {
+                                        "type": "string",
+                                        "description": "Order number for this accessory."
+                                    },
+                                    "purchase_cost": {
+                                        "type": "number",
+                                        "description": "Cost of item being purchased.",
+                                        "format": "float"
+                                    },
+                                    "purchase_date": {
+                                        "type": "string",
+                                        "description": "Date accessory was purchased"
+                                    },
+                                    "model_number": {
+                                        "type": "string",
+                                        "description": "Model number of Accessory"
+                                    },
+                                    "category_id": {
+                                        "type": "integer",
+                                        "description": "ID number of the category the accessory belongs to",
+                                        "format": "int32"
+                                    },
+                                    "company_id": {
+                                        "type": "integer",
+                                        "description": "ID Number of the company the accessory is assigned to",
+                                        "format": "int32"
+                                    },
+                                    "location_id": {
+                                        "type": "integer",
+                                        "description": "ID number of the location the accessory is assigned to",
+                                        "format": "int32"
+                                    },
+                                    "manufacturer_id": {
+                                        "type": "integer",
+                                        "description": "ID number of the manufacturer for this accessory.",
+                                        "format": "int32"
+                                    },
+                                    "supplier_id": {
+                                        "type": "integer",
+                                        "description": "ID number of the supplier for this accessory",
+                                        "format": "int32"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/accessories/{id}/checkedout": {
+            "get": {
+                "summary": "/accessories/:id/checkedout",
+                "description": "Show which users a specific accessory has been checked out to",
+                "operationId": "accessoriesidcheckedout",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/accessories/{id}/checkin": {
+            "post": {
+                "summary": "/accessories/:id/checkin",
+                "description": "Checkin an accessory from a user",
+                "operationId": "accessories-checkin",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "This is the ID of the accessory+user relationships in the accessories_users table",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/accessories/{id}/checkout": {
+            "post": {
+                "summary": "/accessories/:id/checkout",
+                "description": "Check an accessory out to a user",
+                "operationId": "accessories-checkout",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "assigned_user"
+                                ],
+                                "properties": {
+                                    "assigned_user": {
+                                        "type": "integer",
+                                        "description": "User ID of a user to check an accessory out to",
+                                        "format": "int32"
+                                    },
+                                    "note": {
+                                        "type": "string",
+                                        "description": "Note comment on the checkout"
+                                    },
+                                    "checkout_qty": {
+                                        "type": "integer",
+                                        "default": 1,
+                                        "format": "int32"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        }
+    }
+}

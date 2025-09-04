@@ -1,0 +1,971 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "Snipe-IT v6 API",
+        "version": "7.1.17"
+    },
+    "servers": [
+        {
+            "url": "https://web.archive.org/web/20250424002126/https://develop.snipeitapp.com/api/v1"
+        }
+    ],
+    "components": {
+        "securitySchemes": {}
+    },
+    "security": [
+        {}
+    ],
+    "paths": {
+        "/fieldsets/{id}": {
+            "delete": {
+                "summary": "/fieldsets/:id",
+                "description": "Delete a Fieldset",
+                "operationId": "fieldsetsid-2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Custom field ID",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n    \"status\": \"success\",\n    \"messages\": \"The fieldset was deleted successfully.\"\n}"
+                                    },
+                                    "Not Found": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Fieldset not found\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "success"
+                                                },
+                                                "messages": {
+                                                    "type": "string",
+                                                    "example": "The fieldset was deleted successfully."
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "title": "Not Found",
+                                            "type": "object",
+                                            "properties": {
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "error"
+                                                },
+                                                "messages": {
+                                                    "type": "string",
+                                                    "example": "Fieldset not found"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "401",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"message\": \"Unauthorized.\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "405",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Method not allowed\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "messages": {
+                                            "type": "string",
+                                            "example": "Method not allowed"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            },
+            "get": {
+                "summary": "/fieldsets/:id",
+                "description": "Return fieldset info by id",
+                "operationId": "fieldsetsid",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID number of the fieldset",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"id\": 1,\n  \"name\": \"Asset with MAC Address\",\n  \"fields\": {\n    \"total\": 1,\n    \"rows\": [\n      {\n        \"name\": \"Quality-focused local GraphicalUserInterface\",\n        \"db_column_name\": \"_snipeit_quality_focused_local_graphicaluserinterf_2\",\n        \"format\": \"IP\",\n        \"required\": 0,\n        \"created_at\": {\n          \"datetime\": \"2017-10-30 21:00:42\",\n          \"formatted\": \"Mon Oct 30, 2017 9:00PM\"\n        },\n        \"updated_at\": {\n          \"datetime\": \"2017-10-30 21:00:42\",\n          \"formatted\": \"Mon Oct 30, 2017 9:00PM\"\n        }\n      }\n    ]\n  },\n  \"models\": {\n    \"total\": 0,\n    \"rows\": []\n  },\n  \"created_at\": null,\n  \"updated_at\": null\n}"
+                                    },
+                                    "Not Found": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Fieldset not found\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1,
+                                                    "default": 0
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Asset with MAC Address"
+                                                },
+                                                "fields": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "total": {
+                                                            "type": "integer",
+                                                            "example": 1,
+                                                            "default": 0
+                                                        },
+                                                        "rows": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "object",
+                                                                "properties": {
+                                                                    "name": {
+                                                                        "type": "string",
+                                                                        "example": "Quality-focused local GraphicalUserInterface"
+                                                                    },
+                                                                    "db_column_name": {
+                                                                        "type": "string",
+                                                                        "example": "_snipeit_quality_focused_local_graphicaluserinterf_2"
+                                                                    },
+                                                                    "format": {
+                                                                        "type": "string",
+                                                                        "example": "IP"
+                                                                    },
+                                                                    "required": {
+                                                                        "type": "integer",
+                                                                        "example": 0,
+                                                                        "default": 0
+                                                                    },
+                                                                    "created_at": {
+                                                                        "type": "object",
+                                                                        "properties": {
+                                                                            "datetime": {
+                                                                                "type": "string",
+                                                                                "example": "2017-10-30 21:00:42"
+                                                                            },
+                                                                            "formatted": {
+                                                                                "type": "string",
+                                                                                "example": "Mon Oct 30, 2017 9:00PM"
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    "updated_at": {
+                                                                        "type": "object",
+                                                                        "properties": {
+                                                                            "datetime": {
+                                                                                "type": "string",
+                                                                                "example": "2017-10-30 21:00:42"
+                                                                            },
+                                                                            "formatted": {
+                                                                                "type": "string",
+                                                                                "example": "Mon Oct 30, 2017 9:00PM"
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                                "models": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "total": {
+                                                            "type": "integer",
+                                                            "example": 0,
+                                                            "default": 0
+                                                        },
+                                                        "rows": {
+                                                            "type": "array"
+                                                        }
+                                                    }
+                                                },
+                                                "created_at": {},
+                                                "updated_at": {}
+                                            }
+                                        },
+                                        {
+                                            "title": "Not Found",
+                                            "type": "object",
+                                            "properties": {
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "error"
+                                                },
+                                                "messages": {
+                                                    "type": "string",
+                                                    "example": "Fieldset not found"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "401",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"message\": \"Unauthorized.\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "405",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Method not allowed\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "messages": {
+                                            "type": "string",
+                                            "example": "Method not allowed"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            },
+            "put": {
+                "summary": "/fieldsets/:id",
+                "description": "Update a Fieldset",
+                "operationId": "fieldsetsid-1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Custom field ID",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "description": "Model name"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n    \"status\": \"success\",\n    \"payload\": {\n        \"id\": 2,\n        \"name\": \"Updated Laptop Fields\",\n        \"created_at\": \"2017-01-18 04:42:35\",\n        \"updated_at\": \"2017-07-12 20:07:41\",\n        \"user_id\": 1\n    },\n    \"messages\": \"Fieldset updated successfully.\"\n}"
+                                    },
+                                    "Not Found": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Fieldset not found\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "success"
+                                                },
+                                                "payload": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 2,
+                                                            "default": 0
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "Updated Laptop Fields"
+                                                        },
+                                                        "created_at": {
+                                                            "type": "string",
+                                                            "example": "2017-01-18 04:42:35"
+                                                        },
+                                                        "updated_at": {
+                                                            "type": "string",
+                                                            "example": "2017-07-12 20:07:41"
+                                                        },
+                                                        "user_id": {
+                                                            "type": "integer",
+                                                            "example": 1,
+                                                            "default": 0
+                                                        }
+                                                    }
+                                                },
+                                                "messages": {
+                                                    "type": "string",
+                                                    "example": "Fieldset updated successfully."
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "title": "Not Found",
+                                            "type": "object",
+                                            "properties": {
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "error"
+                                                },
+                                                "messages": {
+                                                    "type": "string",
+                                                    "example": "Fieldset not found"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "401",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"message\": \"Unauthorized.\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "405",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Method not allowed\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "messages": {
+                                            "type": "string",
+                                            "example": "Method not allowed"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/fieldsets": {
+            "get": {
+                "summary": "/fieldsets",
+                "description": "List all custom fieldsets",
+                "operationId": "fields",
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n    \"total\": 2,\n    \"rows\": [\n        {\n            \"id\": 1,\n            \"name\": \"Mobile Devices\",\n            \"fields\": {\n                \"total\": 2,\n                \"rows\": [\n                    {\n                        \"id\": 1,\n                        \"name\": \"IMEI\",\n                        \"db_column_name\": \"_snipeit_imei_1\",\n                        \"format\": \"regex:/^[0-9]{15}$/\",\n                        \"field_values\": null,\n                        \"field_values_array\": null,\n                        \"type\": \"text\",\n                        \"required\": 0,\n                        \"created_at\": {\n                            \"datetime\": \"2020-11-27 21:05:14\",\n                            \"formatted\": \"Fri Nov 27, 2020 9:05PM\"\n                        },\n                        \"updated_at\": {\n                            \"datetime\": \"2020-11-27 21:05:14\",\n                            \"formatted\": \"Fri Nov 27, 2020 9:05PM\"\n                        }\n                    },\n                    {\n                        \"id\": 2,\n                        \"name\": \"Phone Number\",\n                        \"db_column_name\": \"_snipeit_phone_number_2\",\n                        \"format\": \"ANY\",\n                        \"field_values\": null,\n                        \"field_values_array\": null,\n                        \"type\": \"text\",\n                        \"required\": 0,\n                        \"created_at\": {\n                            \"datetime\": \"2020-11-27 21:05:14\",\n                            \"formatted\": \"Fri Nov 27, 2020 9:05PM\"\n                        },\n                        \"updated_at\": {\n                            \"datetime\": \"2020-11-27 21:05:14\",\n                            \"formatted\": \"Fri Nov 27, 2020 9:05PM\"\n                        }\n                    }\n                ]\n            },\n            \"models\": {\n                \"total\": 2,\n                \"rows\": [\n                    {\n                        \"id\": 15,\n                        \"name\": \"iPhone 6s\"\n                    },\n                    {\n                        \"id\": 16,\n                        \"name\": \"iPhone 7\"\n                    }\n                ]\n            },\n            \"created_at\": {\n                \"datetime\": \"2020-11-27 21:05:14\",\n                \"formatted\": \"Fri Nov 27, 2020 9:05PM\"\n            },\n            \"updated_at\": {\n                \"datetime\": \"2020-11-27 21:05:14\",\n                \"formatted\": \"Fri Nov 27, 2020 9:05PM\"\n            }\n        },\n        {\n            \"id\": 2,\n            \"name\": \"Laptops and Desktops\",\n            \"fields\": {\n                \"total\": 3,\n                \"rows\": [\n                    {\n                        \"id\": 3,\n                        \"name\": \"RAM\",\n                        \"db_column_name\": \"_snipeit_ram_3\",\n                        \"format\": \"ANY\",\n                        \"field_values\": null,\n                        \"field_values_array\": null,\n                        \"type\": \"text\",\n                        \"required\": 0,\n                        \"created_at\": {\n                            \"datetime\": \"2020-11-27 21:05:14\",\n                            \"formatted\": \"Fri Nov 27, 2020 9:05PM\"\n                        },\n                        \"updated_at\": {\n                            \"datetime\": \"2020-11-27 21:05:14\",\n                            \"formatted\": \"Fri Nov 27, 2020 9:05PM\"\n                        }\n                    },\n                    {\n                        \"id\": 4,\n                        \"name\": \"CPU\",\n                        \"db_column_name\": \"_snipeit_cpu_4\",\n                        \"format\": \"ANY\",\n                        \"field_values\": null,\n                        \"field_values_array\": null,\n                        \"type\": \"text\",\n                        \"required\": 0,\n                        \"created_at\": {\n                            \"datetime\": \"2020-11-27 21:05:14\",\n                            \"formatted\": \"Fri Nov 27, 2020 9:05PM\"\n                        },\n                        \"updated_at\": {\n                            \"datetime\": \"2020-11-27 21:05:14\",\n                            \"formatted\": \"Fri Nov 27, 2020 9:05PM\"\n                        }\n                    },\n                    {\n                        \"id\": 5,\n                        \"name\": \"MAC Address\",\n                        \"db_column_name\": \"_snipeit_mac_address_5\",\n                        \"format\": \"regex:/^([0-9a-fA-F]{2}[:-]){5}[0-9a-fA-F]{2}$/\",\n                        \"field_values\": null,\n                        \"field_values_array\": null,\n                        \"type\": \"text\",\n                        \"required\": 0,\n                        \"created_at\": {\n                            \"datetime\": \"2020-11-27 21:05:14\",\n                            \"formatted\": \"Fri Nov 27, 2020 9:05PM\"\n                        },\n                        \"updated_at\": {\n                            \"datetime\": \"2020-11-27 21:05:14\",\n                            \"formatted\": \"Fri Nov 27, 2020 9:05PM\"\n                        }\n                    }\n                ]\n            },\n            \"models\": {\n                \"total\": 10,\n                \"rows\": [\n                    {\n                        \"id\": 1,\n                        \"name\": \"Macbook Pro 13&quot;\"\n                    },\n                    {\n                        \"id\": 2,\n                        \"name\": \"Macbook Air\"\n                    },\n                    {\n                        \"id\": 3,\n                        \"name\": \"Surface\"\n                    },\n                    {\n                        \"id\": 4,\n                        \"name\": \"XPS 13\"\n                    },\n                    {\n                        \"id\": 5,\n                        \"name\": \"Spectre\"\n                    },\n                    {\n                        \"id\": 6,\n                        \"name\": \"ZenBook UX310\"\n                    },\n                    {\n                        \"id\": 7,\n                        \"name\": \"Yoga 910\"\n                    },\n                    {\n                        \"id\": 8,\n                        \"name\": \"iMac Pro\"\n                    },\n                    {\n                        \"id\": 9,\n                        \"name\": \"Lenovo Intel Core i5\"\n                    },\n                    {\n                        \"id\": 10,\n                        \"name\": \"OptiPlex\"\n                    }\n                ]\n            },\n            \"created_at\": {\n                \"datetime\": \"2020-11-27 21:05:14\",\n                \"formatted\": \"Fri Nov 27, 2020 9:05PM\"\n            },\n            \"updated_at\": {\n                \"datetime\": \"2020-11-27 21:05:14\",\n                \"formatted\": \"Fri Nov 27, 2020 9:05PM\"\n            }\n        }\n    ]\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 2,
+                                            "default": 0
+                                        },
+                                        "rows": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1,
+                                                        "default": 0
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Mobile Devices"
+                                                    },
+                                                    "fields": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "total": {
+                                                                "type": "integer",
+                                                                "example": 2,
+                                                                "default": 0
+                                                            },
+                                                            "rows": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "id": {
+                                                                            "type": "integer",
+                                                                            "example": 1,
+                                                                            "default": 0
+                                                                        },
+                                                                        "name": {
+                                                                            "type": "string",
+                                                                            "example": "IMEI"
+                                                                        },
+                                                                        "db_column_name": {
+                                                                            "type": "string",
+                                                                            "example": "_snipeit_imei_1"
+                                                                        },
+                                                                        "format": {
+                                                                            "type": "string",
+                                                                            "example": "regex:/^[0-9]{15}$/"
+                                                                        },
+                                                                        "field_values": {},
+                                                                        "field_values_array": {},
+                                                                        "type": {
+                                                                            "type": "string",
+                                                                            "example": "text"
+                                                                        },
+                                                                        "required": {
+                                                                            "type": "integer",
+                                                                            "example": 0,
+                                                                            "default": 0
+                                                                        },
+                                                                        "created_at": {
+                                                                            "type": "object",
+                                                                            "properties": {
+                                                                                "datetime": {
+                                                                                    "type": "string",
+                                                                                    "example": "2020-11-27 21:05:14"
+                                                                                },
+                                                                                "formatted": {
+                                                                                    "type": "string",
+                                                                                    "example": "Fri Nov 27, 2020 9:05PM"
+                                                                                }
+                                                                            }
+                                                                        },
+                                                                        "updated_at": {
+                                                                            "type": "object",
+                                                                            "properties": {
+                                                                                "datetime": {
+                                                                                    "type": "string",
+                                                                                    "example": "2020-11-27 21:05:14"
+                                                                                },
+                                                                                "formatted": {
+                                                                                    "type": "string",
+                                                                                    "example": "Fri Nov 27, 2020 9:05PM"
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    },
+                                                    "models": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "total": {
+                                                                "type": "integer",
+                                                                "example": 2,
+                                                                "default": 0
+                                                            },
+                                                            "rows": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "id": {
+                                                                            "type": "integer",
+                                                                            "example": 15,
+                                                                            "default": 0
+                                                                        },
+                                                                        "name": {
+                                                                            "type": "string",
+                                                                            "example": "iPhone 6s"
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    },
+                                                    "created_at": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "datetime": {
+                                                                "type": "string",
+                                                                "example": "2020-11-27 21:05:14"
+                                                            },
+                                                            "formatted": {
+                                                                "type": "string",
+                                                                "example": "Fri Nov 27, 2020 9:05PM"
+                                                            }
+                                                        }
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "datetime": {
+                                                                "type": "string",
+                                                                "example": "2020-11-27 21:05:14"
+                                                            },
+                                                            "formatted": {
+                                                                "type": "string",
+                                                                "example": "Fri Nov 27, 2020 9:05PM"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "401",
+                        "content": {
+                            "text/plain": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"message\": \"Unauthorized.\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            },
+            "post": {
+                "summary": "/fieldsets",
+                "description": "Create a Fieldset",
+                "operationId": "fieldsets",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "description": "Fieldset name"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": ""
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "401",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"message\": \"Unauthorized.\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "405",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Method not allowed\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "messages": {
+                                            "type": "string",
+                                            "example": "Method not allowed"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/fieldsets/{id}/fields": {
+            "get": {
+                "summary": "/fieldsets/:id/fields",
+                "description": "Return list of associated fields within a fieldset",
+                "operationId": "fieldsetsidfields",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID number of the fieldset",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n    \"total\": 3,\n    \"rows\": [\n        {\n            \"id\": 3,\n            \"name\": \"RAM\",\n            \"db_column_name\": \"_snipeit_ram_3\",\n            \"format\": \"ANY\",\n            \"field_values\": null,\n            \"field_values_array\": null,\n            \"type\": \"text\",\n            \"required\": 0,\n            \"created_at\": {\n                \"datetime\": \"2020-11-27 21:05:14\",\n                \"formatted\": \"Fri Nov 27, 2020 9:05PM\"\n            },\n            \"updated_at\": {\n                \"datetime\": \"2020-11-27 21:05:14\",\n                \"formatted\": \"Fri Nov 27, 2020 9:05PM\"\n            }\n        },\n        {\n            \"id\": 4,\n            \"name\": \"CPU\",\n            \"db_column_name\": \"_snipeit_cpu_4\",\n            \"format\": \"ANY\",\n            \"field_values\": null,\n            \"field_values_array\": null,\n            \"type\": \"text\",\n            \"required\": 0,\n            \"created_at\": {\n                \"datetime\": \"2020-11-27 21:05:14\",\n                \"formatted\": \"Fri Nov 27, 2020 9:05PM\"\n            },\n            \"updated_at\": {\n                \"datetime\": \"2020-11-27 21:05:14\",\n                \"formatted\": \"Fri Nov 27, 2020 9:05PM\"\n            }\n        },\n        {\n            \"id\": 5,\n            \"name\": \"MAC Address\",\n            \"db_column_name\": \"_snipeit_mac_address_5\",\n            \"format\": \"regex:/^([0-9a-fA-F]{2}[:-]){5}[0-9a-fA-F]{2}$/\",\n            \"field_values\": null,\n            \"field_values_array\": null,\n            \"type\": \"text\",\n            \"required\": 0,\n            \"created_at\": {\n                \"datetime\": \"2020-11-27 21:05:14\",\n                \"formatted\": \"Fri Nov 27, 2020 9:05PM\"\n            },\n            \"updated_at\": {\n                \"datetime\": \"2020-11-27 21:05:14\",\n                \"formatted\": \"Fri Nov 27, 2020 9:05PM\"\n            }\n        }\n    ]\n}"
+                                    },
+                                    "Not Found": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Fieldset not found\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 3,
+                                                    "default": 0
+                                                },
+                                                "rows": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 3,
+                                                                "default": 0
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "RAM"
+                                                            },
+                                                            "db_column_name": {
+                                                                "type": "string",
+                                                                "example": "_snipeit_ram_3"
+                                                            },
+                                                            "format": {
+                                                                "type": "string",
+                                                                "example": "ANY"
+                                                            },
+                                                            "field_values": {},
+                                                            "field_values_array": {},
+                                                            "type": {
+                                                                "type": "string",
+                                                                "example": "text"
+                                                            },
+                                                            "required": {
+                                                                "type": "integer",
+                                                                "example": 0,
+                                                                "default": 0
+                                                            },
+                                                            "created_at": {
+                                                                "type": "object",
+                                                                "properties": {
+                                                                    "datetime": {
+                                                                        "type": "string",
+                                                                        "example": "2020-11-27 21:05:14"
+                                                                    },
+                                                                    "formatted": {
+                                                                        "type": "string",
+                                                                        "example": "Fri Nov 27, 2020 9:05PM"
+                                                                    }
+                                                                }
+                                                            },
+                                                            "updated_at": {
+                                                                "type": "object",
+                                                                "properties": {
+                                                                    "datetime": {
+                                                                        "type": "string",
+                                                                        "example": "2020-11-27 21:05:14"
+                                                                    },
+                                                                    "formatted": {
+                                                                        "type": "string",
+                                                                        "example": "Fri Nov 27, 2020 9:05PM"
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "title": "Not Found",
+                                            "type": "object",
+                                            "properties": {
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "error"
+                                                },
+                                                "messages": {
+                                                    "type": "string",
+                                                    "example": "Fieldset not found"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "401",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"message\": \"Unauthorized.\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "405",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Method not allowed\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "messages": {
+                                            "type": "string",
+                                            "example": "Method not allowed"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        }
+    }
+}

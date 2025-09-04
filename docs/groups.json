@@ -1,0 +1,384 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "Snipe-IT v6 API",
+        "version": "7.1.17"
+    },
+    "servers": [
+        {
+            "url": "https://web.archive.org/web/20250424002126/https://develop.snipeitapp.com/api/v1"
+        }
+    ],
+    "components": {
+        "securitySchemes": {}
+    },
+    "security": [
+        {}
+    ],
+    "paths": {
+        "/groups/{id}": {
+            "get": {
+                "summary": "/groups/:id",
+                "description": "Return a group",
+                "operationId": "groupsid",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Group ID",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            },
+            "put": {
+                "summary": "/groups/:id",
+                "description": "Edit a group",
+                "operationId": "groupsid-2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Group ID",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "permissions": {
+                                        "type": "string",
+                                        "format": "json"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            },
+            "delete": {
+                "summary": "/groups/:id",
+                "description": "Delete a group",
+                "operationId": "groupsid-3",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Group ID",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            },
+            "patch": {
+                "summary": "/groups/:id",
+                "description": "Partially edit a group",
+                "operationId": "groupsid-4",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Group ID",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "permissions": {
+                                        "type": "string",
+                                        "format": "json"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/groups": {
+            "get": {
+                "summary": "/groups",
+                "description": "",
+                "operationId": "groups-1",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            },
+            "post": {
+                "summary": "/groups",
+                "description": "Create a group",
+                "operationId": "groupsid-1",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "permissions": {
+                                        "type": "string",
+                                        "description": "The string value should be a JSON document of permissions, but expressed as a string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        }
+    }
+}

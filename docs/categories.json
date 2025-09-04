@@ -1,0 +1,898 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "Snipe-IT v6 API",
+        "version": "7.1.17"
+    },
+    "servers": [
+        {
+            "url": "https://web.archive.org/web/20250424002126/https://develop.snipeitapp.com/api/v1"
+        }
+    ],
+    "components": {
+        "securitySchemes": {}
+    },
+    "security": [
+        {}
+    ],
+    "paths": {
+        "/categories/{id}": {
+            "get": {
+                "summary": "/categories/:id",
+                "description": "Return a Category by id",
+                "operationId": "categoriesid-3",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Category ID",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"id\": 3,\n  \"name\": \"Rohan-Bergstrom\",\n  \"created_at\": \"2017-01-11 03:31:25\",\n  \"updated_at\": \"2017-01-11 03:31:25\"\n}"
+                                    },
+                                    "Not Found": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Company not found\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 3,
+                                                    "default": 0
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Rohan-Bergstrom"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "example": "2017-01-11 03:31:25"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "example": "2017-01-11 03:31:25"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "title": "Not Found",
+                                            "type": "object",
+                                            "properties": {
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "error"
+                                                },
+                                                "messages": {
+                                                    "type": "string",
+                                                    "example": "Company not found"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "401",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"message\": \"Unauthorized.\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "405",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Method not allowed\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "messages": {
+                                            "type": "string",
+                                            "example": "Method not allowed"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            },
+            "put": {
+                "summary": "/categories/:id",
+                "description": "Update a Category",
+                "operationId": "categoriesid",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Category ID",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "name",
+                                    "category_type"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "description": "Category name"
+                                    },
+                                    "category_type": {
+                                        "type": "string",
+                                        "description": "(asset, accessory, consumable, component, license) - as of post-v5.2, this is no longer case sensitive",
+                                        "enum": [
+                                            "asset",
+                                            "accessory",
+                                            "consumable",
+                                            "component",
+                                            "license"
+                                        ]
+                                    },
+                                    "use_default_eula": {
+                                        "type": "boolean",
+                                        "default": false
+                                    },
+                                    "require_acceptance": {
+                                        "type": "boolean",
+                                        "default": false
+                                    },
+                                    "checkin_email": {
+                                        "type": "boolean",
+                                        "description": "Should the user be emailed the EULA and/or an acceptance confirmation email when this item is checked in?",
+                                        "default": false
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"id\": 3,\n  \"name\": \"Rohan-Bergstrom\",\n  \"created_at\": \"2017-01-11 03:31:25\",\n  \"updated_at\": \"2017-01-11 03:31:25\"\n}"
+                                    },
+                                    "Not Found": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Company not found\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 3,
+                                                    "default": 0
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Rohan-Bergstrom"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "example": "2017-01-11 03:31:25"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "example": "2017-01-11 03:31:25"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "title": "Not Found",
+                                            "type": "object",
+                                            "properties": {
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "error"
+                                                },
+                                                "messages": {
+                                                    "type": "string",
+                                                    "example": "Company not found"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "401",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"message\": \"Unauthorized.\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "405",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Method not allowed\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "messages": {
+                                            "type": "string",
+                                            "example": "Method not allowed"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            },
+            "delete": {
+                "summary": "/categories/:id",
+                "description": "Delete a Category",
+                "operationId": "categoriesid-2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Category ID",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"id\": 3,\n  \"name\": \"Rohan-Bergstrom\",\n  \"created_at\": \"2017-01-11 03:31:25\",\n  \"updated_at\": \"2017-01-11 03:31:25\"\n}"
+                                    },
+                                    "Not Found": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Company not found\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 3,
+                                                    "default": 0
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Rohan-Bergstrom"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "example": "2017-01-11 03:31:25"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "example": "2017-01-11 03:31:25"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "title": "Not Found",
+                                            "type": "object",
+                                            "properties": {
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "error"
+                                                },
+                                                "messages": {
+                                                    "type": "string",
+                                                    "example": "Company not found"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "401",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"message\": \"Unauthorized.\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "405",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Method not allowed\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "messages": {
+                                            "type": "string",
+                                            "example": "Method not allowed"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            },
+            "patch": {
+                "summary": "/categories/:id",
+                "description": "Update a Category",
+                "operationId": "categoriesid-1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Category ID",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "name",
+                                    "category_type"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "description": "Category name"
+                                    },
+                                    "category_type": {
+                                        "type": "string",
+                                        "description": "(asset, accessory, consumable, component) - as of post-v5.2, this is no longer case sensitive"
+                                    },
+                                    "use_default_eula": {
+                                        "type": "boolean",
+                                        "default": false
+                                    },
+                                    "require_acceptance": {
+                                        "type": "boolean",
+                                        "default": false
+                                    },
+                                    "checkin_email": {
+                                        "type": "boolean",
+                                        "description": "Should the user be emailed the EULA and/or an acceptance confirmation email when this item is checked in?",
+                                        "default": false
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"id\": 3,\n  \"name\": \"Rohan-Bergstrom\",\n  \"created_at\": \"2017-01-11 03:31:25\",\n  \"updated_at\": \"2017-01-11 03:31:25\"\n}"
+                                    },
+                                    "Not Found": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Company not found\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 3,
+                                                    "default": 0
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Rohan-Bergstrom"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "example": "2017-01-11 03:31:25"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "example": "2017-01-11 03:31:25"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "title": "Not Found",
+                                            "type": "object",
+                                            "properties": {
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "error"
+                                                },
+                                                "messages": {
+                                                    "type": "string",
+                                                    "example": "Company not found"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "401",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"message\": \"Unauthorized.\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "405",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Method not allowed\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "messages": {
+                                            "type": "string",
+                                            "example": "Method not allowed"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/categories": {
+            "post": {
+                "summary": "/categories",
+                "description": "Create a Category",
+                "operationId": "categories-2",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "name",
+                                    "category_type"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "description": "Category name"
+                                    },
+                                    "category_type": {
+                                        "type": "string",
+                                        "description": "(asset, accessory, consumable, component, license) - as of post-v5.2, this is no longer case sensitive",
+                                        "enum": [
+                                            "asset",
+                                            "accessory",
+                                            "consumable",
+                                            "component",
+                                            "license"
+                                        ]
+                                    },
+                                    "use_default_eula": {
+                                        "type": "boolean",
+                                        "default": false
+                                    },
+                                    "require_acceptance": {
+                                        "type": "boolean",
+                                        "default": false
+                                    },
+                                    "checkin_email": {
+                                        "type": "boolean",
+                                        "description": "Should the user be emailed the EULA and/or an acceptance confirmation email when this item is checked in?",
+                                        "default": false
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"id\": 3,\n  \"name\": \"Rohan-Bergstrom\",\n  \"created_at\": \"2017-01-11 03:31:25\",\n  \"updated_at\": \"2017-01-11 03:31:25\"\n}"
+                                    },
+                                    "Not Found": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Company not found\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 3,
+                                                    "default": 0
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Rohan-Bergstrom"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "example": "2017-01-11 03:31:25"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "example": "2017-01-11 03:31:25"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "title": "Not Found",
+                                            "type": "object",
+                                            "properties": {
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "error"
+                                                },
+                                                "messages": {
+                                                    "type": "string",
+                                                    "example": "Company not found"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "401",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"message\": \"Unauthorized.\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "405",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Method not allowed\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "messages": {
+                                            "type": "string",
+                                            "example": "Method not allowed"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            },
+            "get": {
+                "summary": "/categories",
+                "description": "List categories",
+                "operationId": "categories-1",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "Category name",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of results to return",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 50
+                        }
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "Offset number (useful in pagination)",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 0
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search string",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "default": "created_at"
+                        }
+                    },
+                    {
+                        "name": "order",
+                        "in": "query",
+                        "description": "Sort order (asc or desc)",
+                        "schema": {
+                            "type": "string",
+                            "default": "desc"
+                        }
+                    },
+                    {
+                        "name": "category_id",
+                        "in": "query",
+                        "description": "ID number of the category you'd like to filter by",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "category_type",
+                        "in": "query",
+                        "description": "Type of category",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "asset",
+                                "accessory",
+                                "consumable",
+                                "component",
+                                "license"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "use_default_eula",
+                        "in": "query",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "require_acceptance",
+                        "in": "query",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "checkin_email",
+                        "in": "query",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        }
+    }
+}

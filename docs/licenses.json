@@ -1,0 +1,1698 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "Snipe-IT v6 API",
+        "version": "7.1.17"
+    },
+    "servers": [
+        {
+            "url": "https://web.archive.org/web/20250424002126/https://develop.snipeitapp.com/api/v1"
+        }
+    ],
+    "components": {
+        "securitySchemes": {}
+    },
+    "security": [
+        {}
+    ],
+    "paths": {
+        "/licenses": {
+            "get": {
+                "summary": "/licenses",
+                "description": "Return a listing of licenses",
+                "operationId": "licenses",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "product_key",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Specify the number of results you wish to return",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 50
+                        }
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "Offset to use",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 0
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "A text string to search the assets data for",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "order_number",
+                        "in": "query",
+                        "description": "Return only assets associated with a specific order number",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Specify the column name you wish to sort by",
+                        "schema": {
+                            "type": "string",
+                            "default": "created_at"
+                        }
+                    },
+                    {
+                        "name": "order",
+                        "in": "query",
+                        "description": "Specify the order (asc or desc) you wish to order by on your sort column",
+                        "schema": {
+                            "type": "string",
+                            "default": "desc"
+                        }
+                    },
+                    {
+                        "name": "expand",
+                        "in": "query",
+                        "description": "Whether to include detailed information on categories, etc (true) or just the text name (false)",
+                        "schema": {
+                            "type": "string",
+                            "default": "false"
+                        }
+                    },
+                    {
+                        "name": "purchase_order",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "license_name",
+                        "in": "query",
+                        "description": "Name of the person on the license",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "license_email",
+                        "in": "query",
+                        "description": "Email address associated with license",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "manufacturer_id",
+                        "in": "query",
+                        "description": "Manufacturer ID",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "supplier_id",
+                        "in": "query",
+                        "description": "Supplier ID",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "category_id",
+                        "in": "query",
+                        "description": "Category ID",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "depreciation_id",
+                        "in": "query",
+                        "description": "Depreciation ID",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "maintained",
+                        "in": "query",
+                        "description": "true / false",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "deleted",
+                        "in": "query",
+                        "description": "Set to true to return deleted licenses",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n    \"total\": 4,\n    \"rows\": [\n        {\n            \"id\": 1,\n            \"name\": \"Photoshop\",\n            \"company\": null,\n            \"manufacturer\": {\n                \"id\": 9,\n                \"name\": \"Adobe\"\n            },\n            \"product_key\": \"0d5254fb-b9f9-342c-a210-5feba9ea08b0\",\n            \"order_number\": \"27709963\",\n            \"purchase_order\": \"\",\n            \"purchase_date\": {\n                \"date\": \"2017-07-04\",\n                \"formatted\": \"2017-07-04\"\n            },\n            \"purchase_cost\": \"299.99\",\n            \"notes\": \"Created by DB seeder\",\n            \"expiration_date\": null,\n            \"seats\": 10,\n            \"free_seats_count\": 10,\n            \"license_name\": \"Prof. Alba Sawayn\",\n            \"license_email\": \"merlin50@example.org\",\n            \"maintained\": false,\n            \"supplier\": null,\n            \"created_at\": {\n                \"datetime\": \"2017-11-11 18:18:03\",\n                \"formatted\": \"2017-11-11 06:18 PM\"\n            },\n            \"updated_at\": {\n                \"datetime\": \"2017-11-11 18:18:03\",\n                \"formatted\": \"2017-11-11 06:18 PM\"\n            },\n            \"user_can_checkout\": true,\n            \"available_actions\": {\n                \"checkout\": true,\n                \"checkin\": true,\n                \"clone\": true,\n                \"update\": true,\n                \"delete\": true\n            }\n        },\n        {\n            \"id\": 2,\n            \"name\": \"Acrobat\",\n            \"company\": null,\n            \"manufacturer\": {\n                \"id\": 9,\n                \"name\": \"Adobe\"\n            },\n            \"product_key\": \"fb382c35-4514-3c60-ab99-9fd2f7d492ea\",\n            \"order_number\": \"30329422\",\n            \"purchase_order\": \"\",\n            \"purchase_date\": {\n                \"date\": \"2017-01-15\",\n                \"formatted\": \"2017-01-15\"\n            },\n            \"purchase_cost\": \"29.99\",\n            \"notes\": \"Created by DB seeder\",\n            \"expiration_date\": null,\n            \"seats\": 10,\n            \"free_seats_count\": 10,\n            \"license_name\": \"Katelyn Boehm\",\n            \"license_email\": \"beverly.hartmann@example.com\",\n            \"maintained\": false,\n            \"supplier\": null,\n            \"created_at\": {\n                \"datetime\": \"2017-11-11 18:18:03\",\n                \"formatted\": \"2017-11-11 06:18 PM\"\n            },\n            \"updated_at\": {\n                \"datetime\": \"2017-11-11 18:18:03\",\n                \"formatted\": \"2017-11-11 06:18 PM\"\n            },\n            \"user_can_checkout\": true,\n            \"available_actions\": {\n                \"checkout\": true,\n                \"checkin\": true,\n                \"clone\": true,\n                \"update\": true,\n                \"delete\": true\n            }\n        },\n        {\n            \"id\": 3,\n            \"name\": \"InDesign\",\n            \"company\": null,\n            \"manufacturer\": {\n                \"id\": 9,\n                \"name\": \"Adobe\"\n            },\n            \"product_key\": \"5b8704bb-6948-3fd3-82df-ba344a5b10eb\",\n            \"order_number\": \"23796169\",\n            \"purchase_order\": \"\",\n            \"purchase_date\": {\n                \"date\": \"2017-08-14\",\n                \"formatted\": \"2017-08-14\"\n            },\n            \"purchase_cost\": \"199.99\",\n            \"notes\": \"Created by DB seeder\",\n            \"expiration_date\": null,\n            \"seats\": 10,\n            \"free_seats_count\": 10,\n            \"license_name\": \"Mrs. Elisha Howe DVM\",\n            \"license_email\": \"ofisher@example.com\",\n            \"maintained\": false,\n            \"supplier\": null,\n            \"created_at\": {\n                \"datetime\": \"2017-11-11 18:18:03\",\n                \"formatted\": \"2017-11-11 06:18 PM\"\n            },\n            \"updated_at\": {\n                \"datetime\": \"2017-11-11 18:18:03\",\n                \"formatted\": \"2017-11-11 06:18 PM\"\n            },\n            \"user_can_checkout\": true,\n            \"available_actions\": {\n                \"checkout\": true,\n                \"checkin\": true,\n                \"clone\": true,\n                \"update\": true,\n                \"delete\": true\n            }\n        },\n        {\n            \"id\": 4,\n            \"name\": \"Office\",\n            \"company\": null,\n            \"manufacturer\": {\n                \"id\": 2,\n                \"name\": \"Microsoft\"\n            },\n            \"product_key\": \"4a1d4573-154a-3f8d-94a8-b71c49fde89a\",\n            \"order_number\": \"13062244\",\n            \"purchase_order\": \"\",\n            \"purchase_date\": {\n                \"date\": \"2017-06-02\",\n                \"formatted\": \"2017-06-02\"\n            },\n            \"purchase_cost\": \"49.99\",\n            \"notes\": \"Created by DB seeder\",\n            \"expiration_date\": null,\n            \"seats\": 20,\n            \"free_seats_count\": 20,\n            \"license_name\": \"Brannon Kutch\",\n            \"license_email\": \"kennith15@example.com\",\n            \"maintained\": false,\n            \"supplier\": null,\n            \"created_at\": {\n                \"datetime\": \"2017-11-11 18:18:03\",\n                \"formatted\": \"2017-11-11 06:18 PM\"\n            },\n            \"updated_at\": {\n                \"datetime\": \"2017-11-11 18:18:03\",\n                \"formatted\": \"2017-11-11 06:18 PM\"\n            },\n            \"user_can_checkout\": true,\n            \"available_actions\": {\n                \"checkout\": true,\n                \"checkin\": true,\n                \"clone\": true,\n                \"update\": true,\n                \"delete\": true\n            }\n        }\n    ]\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 4,
+                                            "default": 0
+                                        },
+                                        "rows": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1,
+                                                        "default": 0
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Photoshop"
+                                                    },
+                                                    "company": {},
+                                                    "manufacturer": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 9,
+                                                                "default": 0
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Adobe"
+                                                            }
+                                                        }
+                                                    },
+                                                    "product_key": {
+                                                        "type": "string",
+                                                        "example": "0d5254fb-b9f9-342c-a210-5feba9ea08b0"
+                                                    },
+                                                    "order_number": {
+                                                        "type": "string",
+                                                        "example": "27709963"
+                                                    },
+                                                    "purchase_order": {
+                                                        "type": "string",
+                                                        "example": ""
+                                                    },
+                                                    "purchase_date": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "date": {
+                                                                "type": "string",
+                                                                "example": "2017-07-04"
+                                                            },
+                                                            "formatted": {
+                                                                "type": "string",
+                                                                "example": "2017-07-04"
+                                                            }
+                                                        }
+                                                    },
+                                                    "purchase_cost": {
+                                                        "type": "string",
+                                                        "example": "299.99"
+                                                    },
+                                                    "notes": {
+                                                        "type": "string",
+                                                        "example": "Created by DB seeder"
+                                                    },
+                                                    "expiration_date": {},
+                                                    "seats": {
+                                                        "type": "integer",
+                                                        "example": 10,
+                                                        "default": 0
+                                                    },
+                                                    "free_seats_count": {
+                                                        "type": "integer",
+                                                        "example": 10,
+                                                        "default": 0
+                                                    },
+                                                    "license_name": {
+                                                        "type": "string",
+                                                        "example": "Prof. Alba Sawayn"
+                                                    },
+                                                    "license_email": {
+                                                        "type": "string",
+                                                        "example": "merlin50@example.org"
+                                                    },
+                                                    "maintained": {
+                                                        "type": "boolean",
+                                                        "example": false,
+                                                        "default": true
+                                                    },
+                                                    "supplier": {},
+                                                    "created_at": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "datetime": {
+                                                                "type": "string",
+                                                                "example": "2017-11-11 18:18:03"
+                                                            },
+                                                            "formatted": {
+                                                                "type": "string",
+                                                                "example": "2017-11-11 06:18 PM"
+                                                            }
+                                                        }
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "datetime": {
+                                                                "type": "string",
+                                                                "example": "2017-11-11 18:18:03"
+                                                            },
+                                                            "formatted": {
+                                                                "type": "string",
+                                                                "example": "2017-11-11 06:18 PM"
+                                                            }
+                                                        }
+                                                    },
+                                                    "user_can_checkout": {
+                                                        "type": "boolean",
+                                                        "example": true,
+                                                        "default": true
+                                                    },
+                                                    "available_actions": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "checkout": {
+                                                                "type": "boolean",
+                                                                "example": true,
+                                                                "default": true
+                                                            },
+                                                            "checkin": {
+                                                                "type": "boolean",
+                                                                "example": true,
+                                                                "default": true
+                                                            },
+                                                            "clone": {
+                                                                "type": "boolean",
+                                                                "example": true,
+                                                                "default": true
+                                                            },
+                                                            "update": {
+                                                                "type": "boolean",
+                                                                "example": true,
+                                                                "default": true
+                                                            },
+                                                            "delete": {
+                                                                "type": "boolean",
+                                                                "example": true,
+                                                                "default": true
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "401",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"message\": \"Unauthorized.\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false,
+                "security": []
+            },
+            "post": {
+                "summary": "/licenses/",
+                "description": "",
+                "operationId": "testinput",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "name",
+                                    "seats",
+                                    "category_id"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "description": "Name of license being created"
+                                    },
+                                    "seats": {
+                                        "type": "integer",
+                                        "description": "Number of license seats owned.",
+                                        "format": "int32"
+                                    },
+                                    "category_id": {
+                                        "type": "integer",
+                                        "description": "Valid license category ID",
+                                        "format": "int32"
+                                    },
+                                    "company_id": {
+                                        "type": "integer",
+                                        "description": "Id number of company license belongs to",
+                                        "format": "int32"
+                                    },
+                                    "expiration_date": {
+                                        "type": "string",
+                                        "description": "Date of license expiration",
+                                        "format": "date"
+                                    },
+                                    "license_email": {
+                                        "type": "string",
+                                        "description": "Email address associated with license"
+                                    },
+                                    "license_name": {
+                                        "type": "string",
+                                        "description": "Name of license contact person"
+                                    },
+                                    "serial": {
+                                        "type": "string"
+                                    },
+                                    "maintained": {
+                                        "type": "boolean",
+                                        "description": "Maintained status of license."
+                                    },
+                                    "manufacturer_id": {
+                                        "type": "integer",
+                                        "description": "ID number of manufacturer of license.",
+                                        "format": "int32"
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "description": "License Notes"
+                                    },
+                                    "order_number": {
+                                        "type": "string",
+                                        "description": "Order number of license purchase"
+                                    },
+                                    "purchase_cost": {
+                                        "type": "number",
+                                        "description": "Cost of license",
+                                        "format": "float"
+                                    },
+                                    "purchase_date": {
+                                        "type": "string",
+                                        "description": "Date of license purchase",
+                                        "format": "date"
+                                    },
+                                    "purchase_order": {
+                                        "type": "string",
+                                        "description": "Purchase Order #"
+                                    },
+                                    "reassignable": {
+                                        "type": "boolean",
+                                        "description": "Is license reassignable?"
+                                    },
+                                    "supplier_id": {
+                                        "type": "integer",
+                                        "description": "ID number of license supplier",
+                                        "format": "int32"
+                                    },
+                                    "termination_date": {
+                                        "type": "string",
+                                        "description": "Termination date for license.",
+                                        "format": "date"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "200 Ok": {
+                                        "value": "{\n    \"status\": \"success\",\n    \"messages\": \"License created successfully.\",\n    \"payload\": {\n        \"name\": \"TEST License\",\n        \"seats\": \"25\",\n        \"updated_at\": \"2018-02-25 18:23:49\",\n        \"created_at\": \"2018-02-25 18:23:49\",\n        \"id\": 9\n    }\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "messages": {
+                                            "type": "string",
+                                            "example": "License created successfully."
+                                        },
+                                        "payload": {
+                                            "type": "object",
+                                            "properties": {
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "TEST License"
+                                                },
+                                                "seats": {
+                                                    "type": "string",
+                                                    "example": "25"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "example": "2018-02-25 18:23:49"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "example": "2018-02-25 18:23:49"
+                                                },
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 9,
+                                                    "default": 0
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "401",
+                        "content": {
+                            "text/plain": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"message\": \"Unauthorized.\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/licenses/{id}": {
+            "put": {
+                "summary": "/licenses/:id",
+                "description": "",
+                "operationId": "licensesid-1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID (not name) of license being updated",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "category_id"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "description": "Name of license being created"
+                                    },
+                                    "category_id": {
+                                        "type": "integer",
+                                        "description": "Valid license category ID",
+                                        "format": "int32"
+                                    },
+                                    "company_id": {
+                                        "type": "integer",
+                                        "description": "Id number of company license belongs to",
+                                        "format": "int32"
+                                    },
+                                    "expiration_date": {
+                                        "type": "string",
+                                        "description": "Date of license expiration",
+                                        "format": "date"
+                                    },
+                                    "license_email": {
+                                        "type": "string",
+                                        "description": "Email address associated with license"
+                                    },
+                                    "license_name": {
+                                        "type": "string",
+                                        "description": "Name of license contact person"
+                                    },
+                                    "serial": {
+                                        "type": "string",
+                                        "description": "Product key of the license"
+                                    },
+                                    "maintained": {
+                                        "type": "boolean",
+                                        "description": "Maintained status of license."
+                                    },
+                                    "manufacturer_id": {
+                                        "type": "integer",
+                                        "description": "ID number of manufacturer of license.",
+                                        "format": "int32"
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "description": "License Notes"
+                                    },
+                                    "order_number": {
+                                        "type": "string",
+                                        "description": "Order number of license purchase"
+                                    },
+                                    "purchase_cost": {
+                                        "type": "number",
+                                        "description": "Cost of license",
+                                        "format": "float"
+                                    },
+                                    "purchase_date": {
+                                        "type": "string",
+                                        "description": "Date of license purchase",
+                                        "format": "date"
+                                    },
+                                    "purchase_order": {
+                                        "type": "string",
+                                        "description": "Purchase Order #"
+                                    },
+                                    "reassignable": {
+                                        "type": "boolean",
+                                        "description": "Is license reassignable?"
+                                    },
+                                    "seats": {
+                                        "type": "integer",
+                                        "description": "Number of license seats owned.",
+                                        "format": "int32"
+                                    },
+                                    "supplier_id": {
+                                        "type": "integer",
+                                        "description": "ID number of license supplier",
+                                        "format": "int32"
+                                    },
+                                    "termination_date": {
+                                        "type": "string",
+                                        "description": "Termination date for license.",
+                                        "format": "date"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            },
+            "delete": {
+                "summary": "/licenses/:id",
+                "description": "",
+                "operationId": "licensesid-3",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID (not name) of license to delete",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n    \"status\": \"success\",\n    \"messages\": \"The license was deleted successfully.\",\n    \"payload\": null\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "messages": {
+                                            "type": "string",
+                                            "example": "The license was deleted successfully."
+                                        },
+                                        "payload": {}
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            },
+            "get": {
+                "summary": "/licenses/:id",
+                "description": "",
+                "operationId": "licensesid",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The id (not name) of the license.",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n    \"id\": 1,\n    \"name\": \"Photoshop\",\n    \"company\": null,\n    \"manufacturer\": {\n        \"id\": 9,\n        \"name\": \"Adobe\"\n    },\n    \"product_key\": \"0d5254fb-b9f9-342c-a210-5feba9ea08b0\",\n    \"order_number\": \"27709963\",\n    \"purchase_order\": \"\",\n    \"purchase_date\": {\n        \"date\": \"2017-07-04\",\n        \"formatted\": \"2017-07-04\"\n    },\n    \"purchase_cost\": \"299.99\",\n    \"notes\": \"Created by DB seeder\",\n    \"expiration_date\": null,\n    \"seats\": 10,\n    \"free_seats_count\": 0,\n    \"license_name\": \"Prof. Alba Sawayn\",\n    \"license_email\": \"merlin50@example.org\",\n    \"maintained\": false,\n    \"supplier\": null,\n    \"created_at\": {\n        \"datetime\": \"2017-11-11 18:18:03\",\n        \"formatted\": \"2017-11-11 06:18 PM\"\n    },\n    \"updated_at\": {\n        \"datetime\": \"2017-11-11 18:18:03\",\n        \"formatted\": \"2017-11-11 06:18 PM\"\n    },\n    \"user_can_checkout\": false,\n    \"available_actions\": {\n        \"checkout\": true,\n        \"checkin\": true,\n        \"clone\": true,\n        \"update\": true,\n        \"delete\": true\n    }\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1,
+                                            "default": 0
+                                        },
+                                        "name": {
+                                            "type": "string",
+                                            "example": "Photoshop"
+                                        },
+                                        "company": {},
+                                        "manufacturer": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 9,
+                                                    "default": 0
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Adobe"
+                                                }
+                                            }
+                                        },
+                                        "product_key": {
+                                            "type": "string",
+                                            "example": "0d5254fb-b9f9-342c-a210-5feba9ea08b0"
+                                        },
+                                        "order_number": {
+                                            "type": "string",
+                                            "example": "27709963"
+                                        },
+                                        "purchase_order": {
+                                            "type": "string",
+                                            "example": ""
+                                        },
+                                        "purchase_date": {
+                                            "type": "object",
+                                            "properties": {
+                                                "date": {
+                                                    "type": "string",
+                                                    "example": "2017-07-04"
+                                                },
+                                                "formatted": {
+                                                    "type": "string",
+                                                    "example": "2017-07-04"
+                                                }
+                                            }
+                                        },
+                                        "purchase_cost": {
+                                            "type": "string",
+                                            "example": "299.99"
+                                        },
+                                        "notes": {
+                                            "type": "string",
+                                            "example": "Created by DB seeder"
+                                        },
+                                        "expiration_date": {},
+                                        "seats": {
+                                            "type": "integer",
+                                            "example": 10,
+                                            "default": 0
+                                        },
+                                        "free_seats_count": {
+                                            "type": "integer",
+                                            "example": 0,
+                                            "default": 0
+                                        },
+                                        "license_name": {
+                                            "type": "string",
+                                            "example": "Prof. Alba Sawayn"
+                                        },
+                                        "license_email": {
+                                            "type": "string",
+                                            "example": "merlin50@example.org"
+                                        },
+                                        "maintained": {
+                                            "type": "boolean",
+                                            "example": false,
+                                            "default": true
+                                        },
+                                        "supplier": {},
+                                        "created_at": {
+                                            "type": "object",
+                                            "properties": {
+                                                "datetime": {
+                                                    "type": "string",
+                                                    "example": "2017-11-11 18:18:03"
+                                                },
+                                                "formatted": {
+                                                    "type": "string",
+                                                    "example": "2017-11-11 06:18 PM"
+                                                }
+                                            }
+                                        },
+                                        "updated_at": {
+                                            "type": "object",
+                                            "properties": {
+                                                "datetime": {
+                                                    "type": "string",
+                                                    "example": "2017-11-11 18:18:03"
+                                                },
+                                                "formatted": {
+                                                    "type": "string",
+                                                    "example": "2017-11-11 06:18 PM"
+                                                }
+                                            }
+                                        },
+                                        "user_can_checkout": {
+                                            "type": "boolean",
+                                            "example": false,
+                                            "default": true
+                                        },
+                                        "available_actions": {
+                                            "type": "object",
+                                            "properties": {
+                                                "checkout": {
+                                                    "type": "boolean",
+                                                    "example": true,
+                                                    "default": true
+                                                },
+                                                "checkin": {
+                                                    "type": "boolean",
+                                                    "example": true,
+                                                    "default": true
+                                                },
+                                                "clone": {
+                                                    "type": "boolean",
+                                                    "example": true,
+                                                    "default": true
+                                                },
+                                                "update": {
+                                                    "type": "boolean",
+                                                    "example": true,
+                                                    "default": true
+                                                },
+                                                "delete": {
+                                                    "type": "boolean",
+                                                    "example": true,
+                                                    "default": true
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            },
+            "patch": {
+                "summary": "/licenses/:id",
+                "description": "",
+                "operationId": "licensesid-2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID (not name) of license being updated",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "description": "Name of license being created"
+                                    },
+                                    "category_id": {
+                                        "type": "string",
+                                        "description": "Valid license category ID"
+                                    },
+                                    "company_id": {
+                                        "type": "integer",
+                                        "description": "Id number of company license belongs to",
+                                        "format": "int32"
+                                    },
+                                    "expiration_date": {
+                                        "type": "string",
+                                        "description": "Date of license expiration",
+                                        "format": "date"
+                                    },
+                                    "license_email": {
+                                        "type": "string",
+                                        "description": "Email address associated with license"
+                                    },
+                                    "license_name": {
+                                        "type": "string",
+                                        "description": "Name of license contact person"
+                                    },
+                                    "serial": {
+                                        "type": "string",
+                                        "description": "Product key of the license"
+                                    },
+                                    "maintained": {
+                                        "type": "boolean",
+                                        "description": "Maintained status of license."
+                                    },
+                                    "manufacturer_id": {
+                                        "type": "integer",
+                                        "description": "ID number of manufacturer of license.",
+                                        "format": "int32"
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "description": "License Notes"
+                                    },
+                                    "order_number": {
+                                        "type": "string",
+                                        "description": "Order number of license purchase"
+                                    },
+                                    "purchase_cost": {
+                                        "type": "number",
+                                        "description": "Cost of license",
+                                        "format": "float"
+                                    },
+                                    "purchase_date": {
+                                        "type": "string",
+                                        "description": "Date of license purchase",
+                                        "format": "date"
+                                    },
+                                    "purchase_order": {
+                                        "type": "string",
+                                        "description": "Purchase Order #"
+                                    },
+                                    "reassignable": {
+                                        "type": "boolean",
+                                        "description": "Is license reassignable?"
+                                    },
+                                    "seats": {
+                                        "type": "integer",
+                                        "description": "Number of license seats owned.",
+                                        "format": "int32"
+                                    },
+                                    "supplier_id": {
+                                        "type": "integer",
+                                        "description": "ID number of license supplier",
+                                        "format": "int32"
+                                    },
+                                    "termination_date": {
+                                        "type": "string",
+                                        "description": "Termination date for license.",
+                                        "format": "date"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/licenses/{id}/seats/{seat_id}": {
+            "get": {
+                "summary": "/licenses/:id/seats/:seat_id",
+                "description": "Get details for one specific unique Seat ID for a particular license",
+                "operationId": "licensesidseatsseat_id",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The id (not name) of the license.",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    },
+                    {
+                        "name": "seat_id",
+                        "in": "path",
+                        "description": "The Unique Seat ID for this seat for this license",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"id\": 10,\n  \"license_id\": 1,\n  \"assigned_user\": {\n    \"id\": 1,\n    \"name\": \"Admin User\",\n    \"department\": {\n      \"id\": 1,\n      \"name\": \"Human Resources\"\n    }\n  },\n  \"assigned_asset\": null,\n  \"location\": {\n    \"id\": 5,\n    \"name\": \"Hubertchester\"\n  },\n  \"reassignable\": false,\n  \"user_can_checkout\": false,\n  \"available_actions\": {\n    \"checkout\": true,\n    \"checkin\": true,\n    \"clone\": true,\n    \"update\": true,\n    \"delete\": true\n  }\n}\n"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 10,
+                                            "default": 0
+                                        },
+                                        "license_id": {
+                                            "type": "integer",
+                                            "example": 1,
+                                            "default": 0
+                                        },
+                                        "assigned_user": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1,
+                                                    "default": 0
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Admin User"
+                                                },
+                                                "department": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1,
+                                                            "default": 0
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "Human Resources"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "assigned_asset": {},
+                                        "location": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 5,
+                                                    "default": 0
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Hubertchester"
+                                                }
+                                            }
+                                        },
+                                        "reassignable": {
+                                            "type": "boolean",
+                                            "example": false,
+                                            "default": true
+                                        },
+                                        "user_can_checkout": {
+                                            "type": "boolean",
+                                            "example": false,
+                                            "default": true
+                                        },
+                                        "available_actions": {
+                                            "type": "object",
+                                            "properties": {
+                                                "checkout": {
+                                                    "type": "boolean",
+                                                    "example": true,
+                                                    "default": true
+                                                },
+                                                "checkin": {
+                                                    "type": "boolean",
+                                                    "example": true,
+                                                    "default": true
+                                                },
+                                                "clone": {
+                                                    "type": "boolean",
+                                                    "example": true,
+                                                    "default": true
+                                                },
+                                                "update": {
+                                                    "type": "boolean",
+                                                    "example": true,
+                                                    "default": true
+                                                },
+                                                "delete": {
+                                                    "type": "boolean",
+                                                    "example": true,
+                                                    "default": true
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            },
+            "put": {
+                "summary": "/licenses/:id/seats/:seat_id",
+                "description": "Update user or asset a license is checked-out to (Check-in/Check-out)",
+                "operationId": "licensesidseatsseat_id-1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The id (not name) of the license.",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    },
+                    {
+                        "name": "seat_id",
+                        "in": "path",
+                        "description": "The Seat ID (unique seat identifier) of the license seat that will be modified",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "assigned_to": {
+                                        "type": "integer",
+                                        "description": "The User ID to assign the license to",
+                                        "format": "int32"
+                                    },
+                                    "asset_id": {
+                                        "type": "integer",
+                                        "description": "The Asset ID to assign this license to",
+                                        "format": "int32"
+                                    },
+                                    "note": {
+                                        "type": "string",
+                                        "description": "Note to be associated with the checkin/checkout"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"success\",\n  \"messages\": \"License updated successfully.\",\n  \"payload\": {\n    \"id\": 10,\n    \"license_id\": 1,\n    \"assigned_to\": \"2\",\n    \"notes\": null,\n    \"user_id\": 1,\n    \"created_at\": \"2021-10-12T21:01:10.000000Z\",\n    \"updated_at\": \"2022-08-08T23:23:00.000000Z\",\n    \"deleted_at\": null,\n    \"asset_id\": null\n  }\n}\n"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "messages": {
+                                            "type": "string",
+                                            "example": "License updated successfully."
+                                        },
+                                        "payload": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 10,
+                                                    "default": 0
+                                                },
+                                                "license_id": {
+                                                    "type": "integer",
+                                                    "example": 1,
+                                                    "default": 0
+                                                },
+                                                "assigned_to": {
+                                                    "type": "string",
+                                                    "example": "2"
+                                                },
+                                                "notes": {},
+                                                "user_id": {
+                                                    "type": "integer",
+                                                    "example": 1,
+                                                    "default": 0
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "example": "2021-10-12T21:01:10.000000Z"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "example": "2022-08-08T23:23:00.000000Z"
+                                                },
+                                                "deleted_at": {},
+                                                "asset_id": {}
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            },
+            "patch": {
+                "summary": "/licenses/:id/seats/:seat_id",
+                "description": "Update user or asset a license is checked-out to (Check-in/Check-out)",
+                "operationId": "licensesidseatsseat_id-2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The id (not name) of the license.",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    },
+                    {
+                        "name": "seat_id",
+                        "in": "path",
+                        "description": "The Seat ID (unique seat identifier) of the license seat that will be modified",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "assigned_to": {
+                                        "type": "integer",
+                                        "description": "The User ID to assign the license to",
+                                        "format": "int32"
+                                    },
+                                    "asset_id": {
+                                        "type": "integer",
+                                        "description": "The Asset ID to assign this license to",
+                                        "format": "int32"
+                                    },
+                                    "note": {
+                                        "type": "string",
+                                        "description": "Note to be associated with the checkin/checkout"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"success\",\n  \"messages\": \"License updated successfully.\",\n  \"payload\": {\n    \"id\": 10,\n    \"license_id\": 1,\n    \"assigned_to\": \"2\",\n    \"notes\": null,\n    \"user_id\": 1,\n    \"created_at\": \"2021-10-12T21:01:10.000000Z\",\n    \"updated_at\": \"2022-08-08T23:23:00.000000Z\",\n    \"deleted_at\": null,\n    \"asset_id\": null\n  }\n}\n"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "messages": {
+                                            "type": "string",
+                                            "example": "License updated successfully."
+                                        },
+                                        "payload": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 10,
+                                                    "default": 0
+                                                },
+                                                "license_id": {
+                                                    "type": "integer",
+                                                    "example": 1,
+                                                    "default": 0
+                                                },
+                                                "assigned_to": {
+                                                    "type": "string",
+                                                    "example": "2"
+                                                },
+                                                "notes": {},
+                                                "user_id": {
+                                                    "type": "integer",
+                                                    "example": 1,
+                                                    "default": 0
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "example": "2021-10-12T21:01:10.000000Z"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "example": "2022-08-08T23:23:00.000000Z"
+                                                },
+                                                "deleted_at": {},
+                                                "asset_id": {}
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/licenses/{id}/seats": {
+            "get": {
+                "summary": "/licenses/:id/seats",
+                "description": "Return all unique Seat ID's for a particular license",
+                "operationId": "licensesidseats",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The id (not name) of the license.",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"total\": 10,\n  \"rows\": [\n    {\n      \"id\": 10,\n      \"license_id\": 1,\n      \"assigned_user\": {\n        \"id\": 1,\n        \"name\": \"Admin User\",\n        \"department\": {\n          \"id\": 1,\n          \"name\": \"Human Resources\"\n        }\n      },\n      \"assigned_asset\": null,\n      \"location\": {\n        \"id\": 5,\n        \"name\": \"Hubertchester\"\n      },\n      \"reassignable\": false,\n      \"user_can_checkout\": false,\n      \"name\": \"Seat 1\",\n      \"available_actions\": {\n        \"checkout\": true,\n        \"checkin\": true,\n        \"clone\": true,\n        \"update\": true,\n        \"delete\": true\n      }\n    },\n    {\n      \"id\": 9,\n      \"license_id\": 1,\n      \"assigned_user\": null,\n      \"assigned_asset\": null,\n      \"location\": null,\n      \"reassignable\": false,\n      \"user_can_checkout\": true,\n      \"name\": \"Seat 2\",\n      \"available_actions\": {\n        \"checkout\": true,\n        \"checkin\": true,\n        \"clone\": true,\n        \"update\": true,\n        \"delete\": true\n      }\n    },\n    {\n      \"id\": 8,\n      \"license_id\": 1,\n      \"assigned_user\": null,\n      \"assigned_asset\": null,\n      \"location\": null,\n      \"reassignable\": false,\n      \"user_can_checkout\": true,\n      \"name\": \"Seat 3\",\n      \"available_actions\": {\n        \"checkout\": true,\n        \"checkin\": true,\n        \"clone\": true,\n        \"update\": true,\n        \"delete\": true\n      }\n    }\n  ]\n}\n"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 10,
+                                            "default": 0
+                                        },
+                                        "rows": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 10,
+                                                        "default": 0
+                                                    },
+                                                    "license_id": {
+                                                        "type": "integer",
+                                                        "example": 1,
+                                                        "default": 0
+                                                    },
+                                                    "assigned_user": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1,
+                                                                "default": 0
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Admin User"
+                                                            },
+                                                            "department": {
+                                                                "type": "object",
+                                                                "properties": {
+                                                                    "id": {
+                                                                        "type": "integer",
+                                                                        "example": 1,
+                                                                        "default": 0
+                                                                    },
+                                                                    "name": {
+                                                                        "type": "string",
+                                                                        "example": "Human Resources"
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    },
+                                                    "assigned_asset": {},
+                                                    "location": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 5,
+                                                                "default": 0
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Hubertchester"
+                                                            }
+                                                        }
+                                                    },
+                                                    "reassignable": {
+                                                        "type": "boolean",
+                                                        "example": false,
+                                                        "default": true
+                                                    },
+                                                    "user_can_checkout": {
+                                                        "type": "boolean",
+                                                        "example": false,
+                                                        "default": true
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Seat 1"
+                                                    },
+                                                    "available_actions": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "checkout": {
+                                                                "type": "boolean",
+                                                                "example": true,
+                                                                "default": true
+                                                            },
+                                                            "checkin": {
+                                                                "type": "boolean",
+                                                                "example": true,
+                                                                "default": true
+                                                            },
+                                                            "clone": {
+                                                                "type": "boolean",
+                                                                "example": true,
+                                                                "default": true
+                                                            },
+                                                            "update": {
+                                                                "type": "boolean",
+                                                                "example": true,
+                                                                "default": true
+                                                            },
+                                                            "delete": {
+                                                                "type": "boolean",
+                                                                "example": true,
+                                                                "default": true
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        }
+    }
+}

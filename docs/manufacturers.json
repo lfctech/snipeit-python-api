@@ -1,0 +1,793 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "Snipe-IT v6 API",
+        "version": "7.1.17"
+    },
+    "servers": [
+        {
+            "url": "https://web.archive.org/web/20250424002126/https://develop.snipeitapp.com/api/v1"
+        }
+    ],
+    "components": {
+        "securitySchemes": {}
+    },
+    "security": [
+        {}
+    ],
+    "paths": {
+        "/manufacturers": {
+            "get": {
+                "summary": "/manufacturers",
+                "description": "",
+                "operationId": "manufacturers",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "Name of the manufacturer",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "url",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "support_url",
+                        "in": "query",
+                        "description": "Support URL",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "support_phone",
+                        "in": "query",
+                        "description": "Support phone number",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "support_email",
+                        "in": "query",
+                        "description": "Support email",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"total\": 11,\n  \"rows\": [\n    {\n      \"id\": 1,\n      \"name\": \"Apple\",\n      \"url\": \"https://apple.com\",\n      \"image\": \"https://develop.snipeitapp.com/uploads/manufacturers/apple.jpg\",\n      \"support_url\": \"https://support.apple.com\",\n      \"support_phone\": \"1-585-974-5602\",\n      \"support_email\": \"nitzsche.keeley@example.org\",\n      \"assets_count\": 159,\n      \"licenses_count\": 0,\n      \"consumables_count\": 0,\n      \"accessories_count\": 3,\n      \"created_at\": {\n        \"datetime\": \"2022-11-15 08:42:05\",\n        \"formatted\": \"Tue Nov 15, 2022 8:42AM\"\n      },\n      \"updated_at\": {\n        \"datetime\": \"2022-11-15 08:42:05\",\n        \"formatted\": \"Tue Nov 15, 2022 8:42AM\"\n      },\n      \"deleted_at\": null,\n      \"available_actions\": {\n        \"update\": true,\n        \"restore\": false,\n        \"delete\": false\n      }\n    },\n    {\n      \"id\": 2,\n      \"name\": \"Microsoft\",\n      \"url\": \"https://microsoft.com\",\n      \"image\": \"https://develop.snipeitapp.com/uploads/manufacturers/microsoft.png\",\n      \"support_url\": \"https://support.microsoft.com\",\n      \"support_phone\": \"+1-863-476-3389\",\n      \"support_email\": \"kenyon.frami@example.net\",\n      \"assets_count\": 5,\n      \"licenses_count\": 1,\n      \"consumables_count\": 0,\n      \"accessories_count\": 1,\n      \"created_at\": {\n        \"datetime\": \"2022-11-15 08:42:05\",\n        \"formatted\": \"Tue Nov 15, 2022 8:42AM\"\n      },\n      \"updated_at\": {\n        \"datetime\": \"2022-11-15 08:42:05\",\n        \"formatted\": \"Tue Nov 15, 2022 8:42AM\"\n      },\n      \"deleted_at\": null,\n      \"available_actions\": {\n        \"update\": true,\n        \"restore\": false,\n        \"delete\": false\n      }\n    },\n    {\n      \"id\": 3,\n      \"name\": \"Dell\",\n      \"url\": \"https://dell.com\",\n      \"image\": \"https://develop.snipeitapp.com/uploads/manufacturers/dell.png\",\n      \"support_url\": \"https://support.dell.com\",\n      \"support_phone\": \"1-929-770-7775\",\n      \"support_email\": \"mattie44@example.org\",\n      \"assets_count\": 45,\n      \"licenses_count\": 0,\n      \"consumables_count\": 0,\n      \"accessories_count\": 0,\n      \"created_at\": {\n        \"datetime\": \"2022-11-15 08:42:05\",\n        \"formatted\": \"Tue Nov 15, 2022 8:42AM\"\n      },\n      \"updated_at\": {\n        \"datetime\": \"2022-11-15 08:42:05\",\n        \"formatted\": \"Tue Nov 15, 2022 8:42AM\"\n      },\n      \"deleted_at\": null,\n      \"available_actions\": {\n        \"update\": true,\n        \"restore\": false,\n        \"delete\": false\n      }\n    },\n    {\n      \"id\": 4,\n      \"name\": \"Asus\",\n      \"url\": \"https://asus.com\",\n      \"image\": \"https://develop.snipeitapp.com/uploads/manufacturers/asus.png\",\n      \"support_url\": \"https://support.asus.com\",\n      \"support_phone\": \"609.538.7815\",\n      \"support_email\": \"johns.gunnar@example.net\",\n      \"assets_count\": 5,\n      \"licenses_count\": 0,\n      \"consumables_count\": 0,\n      \"accessories_count\": 0,\n      \"created_at\": {\n        \"datetime\": \"2022-11-15 08:42:05\",\n        \"formatted\": \"Tue Nov 15, 2022 8:42AM\"\n      },\n      \"updated_at\": {\n        \"datetime\": \"2022-11-15 08:42:05\",\n        \"formatted\": \"Tue Nov 15, 2022 8:42AM\"\n      },\n      \"deleted_at\": null,\n      \"available_actions\": {\n        \"update\": true,\n        \"restore\": false,\n        \"delete\": false\n      }\n    },\n    {\n      \"id\": 5,\n      \"name\": \"HP\",\n      \"url\": \"https://hp.com\",\n      \"image\": \"https://develop.snipeitapp.com/uploads/manufacturers/hp.png\",\n      \"support_url\": \"https://support.hp.com\",\n      \"support_phone\": \"534.589.2160\",\n      \"support_email\": \"tessie.barrows@example.com\",\n      \"assets_count\": 5,\n      \"licenses_count\": 0,\n      \"consumables_count\": 1,\n      \"accessories_count\": 0,\n      \"created_at\": {\n        \"datetime\": \"2022-11-15 08:42:05\",\n        \"formatted\": \"Tue Nov 15, 2022 8:42AM\"\n      },\n      \"updated_at\": {\n        \"datetime\": \"2022-11-15 08:42:05\",\n        \"formatted\": \"Tue Nov 15, 2022 8:42AM\"\n      },\n      \"deleted_at\": null,\n      \"available_actions\": {\n        \"update\": true,\n        \"restore\": false,\n        \"delete\": false\n      }\n    },\n    {\n      \"id\": 6,\n      \"name\": \"Lenovo\",\n      \"url\": \"https://lenovo.com\",\n      \"image\": \"https://develop.snipeitapp.com/uploads/manufacturers/lenovo.jpg\",\n      \"support_url\": \"https://support.lenovo.com\",\n      \"support_phone\": \"+1 (319) 552-9214\",\n      \"support_email\": \"zhayes@example.net\",\n      \"assets_count\": 37,\n      \"licenses_count\": 0,\n      \"consumables_count\": 0,\n      \"accessories_count\": 0,\n      \"created_at\": {\n        \"datetime\": \"2022-11-15 08:42:05\",\n        \"formatted\": \"Tue Nov 15, 2022 8:42AM\"\n      },\n      \"updated_at\": {\n        \"datetime\": \"2022-11-15 08:42:05\",\n        \"formatted\": \"Tue Nov 15, 2022 8:42AM\"\n      },\n      \"deleted_at\": null,\n      \"available_actions\": {\n        \"update\": true,\n        \"restore\": false,\n        \"delete\": false\n      }\n    },\n    {\n      \"id\": 7,\n      \"name\": \"LG\",\n      \"url\": \"https://lg.com\",\n      \"image\": \"https://develop.snipeitapp.com/uploads/manufacturers/lg.jpg\",\n      \"support_url\": \"https://support.lg.com\",\n      \"support_phone\": \"+1.240.416.3513\",\n      \"support_email\": \"janae55@example.com\",\n      \"assets_count\": 10,\n      \"licenses_count\": 0,\n      \"consumables_count\": 0,\n      \"accessories_count\": 0,\n      \"created_at\": {\n        \"datetime\": \"2022-11-15 08:42:05\",\n        \"formatted\": \"Tue Nov 15, 2022 8:42AM\"\n      },\n      \"updated_at\": {\n        \"datetime\": \"2022-11-15 08:42:05\",\n        \"formatted\": \"Tue Nov 15, 2022 8:42AM\"\n      },\n      \"deleted_at\": null,\n      \"available_actions\": {\n        \"update\": true,\n        \"restore\": false,\n        \"delete\": false\n      }\n    },\n    {\n      \"id\": 8,\n      \"name\": \"Polycom\",\n      \"url\": \"https://polycom.com\",\n      \"image\": \"https://develop.snipeitapp.com/uploads/manufacturers/polycom.png\",\n      \"support_url\": \"https://support.polycom.com\",\n      \"support_phone\": \"757-657-3125\",\n      \"support_email\": \"kaylie.simonis@example.com\",\n      \"assets_count\": 7,\n      \"licenses_count\": 0,\n      \"consumables_count\": 0,\n      \"accessories_count\": 0,\n      \"created_at\": {\n        \"datetime\": \"2022-11-15 08:42:05\",\n        \"formatted\": \"Tue Nov 15, 2022 8:42AM\"\n      },\n      \"updated_at\": {\n        \"datetime\": \"2022-11-15 08:42:05\",\n        \"formatted\": \"Tue Nov 15, 2022 8:42AM\"\n      },\n      \"deleted_at\": null,\n      \"available_actions\": {\n        \"update\": true,\n        \"restore\": false,\n        \"delete\": false\n      }\n    },\n    {\n      \"id\": 9,\n      \"name\": \"Adobe\",\n      \"url\": \"https://adobe.com\",\n      \"image\": \"https://develop.snipeitapp.com/uploads/manufacturers/adobe.jpg\",\n      \"support_url\": \"https://support.adobe.com\",\n      \"support_phone\": \"805-872-5237\",\n      \"support_email\": \"dkreiger@example.org\",\n      \"assets_count\": 0,\n      \"licenses_count\": 3,\n      \"consumables_count\": 0,\n      \"accessories_count\": 0,\n      \"created_at\": {\n        \"datetime\": \"2022-11-15 08:42:05\",\n        \"formatted\": \"Tue Nov 15, 2022 8:42AM\"\n      },\n      \"updated_at\": {\n        \"datetime\": \"2022-11-15 08:42:05\",\n        \"formatted\": \"Tue Nov 15, 2022 8:42AM\"\n      },\n      \"deleted_at\": null,\n      \"available_actions\": {\n        \"update\": true,\n        \"restore\": false,\n        \"delete\": false\n      }\n    },\n    {\n      \"id\": 10,\n      \"name\": \"Avery\",\n      \"url\": \"https://avery.com\",\n      \"image\": \"https://develop.snipeitapp.com/uploads/manufacturers/avery.png\",\n      \"support_url\": \"https://support.avery.com\",\n      \"support_phone\": \"+1.463.255.5332\",\n      \"support_email\": \"hosea96@example.net\",\n      \"assets_count\": 0,\n      \"licenses_count\": 0,\n      \"consumables_count\": 2,\n      \"accessories_count\": 0,\n      \"created_at\": {\n        \"datetime\": \"2022-11-15 08:42:05\",\n        \"formatted\": \"Tue Nov 15, 2022 8:42AM\"\n      },\n      \"updated_at\": {\n        \"datetime\": \"2022-11-15 08:42:05\",\n        \"formatted\": \"Tue Nov 15, 2022 8:42AM\"\n      },\n      \"deleted_at\": null,\n      \"available_actions\": {\n        \"update\": true,\n        \"restore\": false,\n        \"delete\": false\n      }\n    },\n    {\n      \"id\": 11,\n      \"name\": \"Crucial\",\n      \"url\": \"https://crucial.com\",\n      \"image\": \"https://develop.snipeitapp.com/uploads/manufacturers/crucial.jpg\",\n      \"support_url\": \"https://support.crucial.com\",\n      \"support_phone\": \"1-828-426-8679\",\n      \"support_email\": \"kpfannerstill@example.org\",\n      \"assets_count\": 0,\n      \"licenses_count\": 0,\n      \"consumables_count\": 0,\n      \"accessories_count\": 0,\n      \"created_at\": {\n        \"datetime\": \"2022-11-15 08:42:05\",\n        \"formatted\": \"Tue Nov 15, 2022 8:42AM\"\n      },\n      \"updated_at\": {\n        \"datetime\": \"2022-11-15 08:42:05\",\n        \"formatted\": \"Tue Nov 15, 2022 8:42AM\"\n      },\n      \"deleted_at\": null,\n      \"available_actions\": {\n        \"update\": true,\n        \"restore\": false,\n        \"delete\": true\n      }\n    }\n  ]\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 11,
+                                            "default": 0
+                                        },
+                                        "rows": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1,
+                                                        "default": 0
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Apple"
+                                                    },
+                                                    "url": {
+                                                        "type": "string",
+                                                        "example": "https://web.archive.org/web/20250424002126/https://apple.com"
+                                                    },
+                                                    "image": {
+                                                        "type": "string",
+                                                        "example": "https://web.archive.org/web/20250424002126/https://develop.snipeitapp.com/uploads/manufacturers/apple.jpg"
+                                                    },
+                                                    "support_url": {
+                                                        "type": "string",
+                                                        "example": "https://web.archive.org/web/20250424002126/https://support.apple.com"
+                                                    },
+                                                    "support_phone": {
+                                                        "type": "string",
+                                                        "example": "1-585-974-5602"
+                                                    },
+                                                    "support_email": {
+                                                        "type": "string",
+                                                        "example": "nitzsche.keeley@example.org"
+                                                    },
+                                                    "assets_count": {
+                                                        "type": "integer",
+                                                        "example": 159,
+                                                        "default": 0
+                                                    },
+                                                    "licenses_count": {
+                                                        "type": "integer",
+                                                        "example": 0,
+                                                        "default": 0
+                                                    },
+                                                    "consumables_count": {
+                                                        "type": "integer",
+                                                        "example": 0,
+                                                        "default": 0
+                                                    },
+                                                    "accessories_count": {
+                                                        "type": "integer",
+                                                        "example": 3,
+                                                        "default": 0
+                                                    },
+                                                    "created_at": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "datetime": {
+                                                                "type": "string",
+                                                                "example": "2022-11-15 08:42:05"
+                                                            },
+                                                            "formatted": {
+                                                                "type": "string",
+                                                                "example": "Tue Nov 15, 2022 8:42AM"
+                                                            }
+                                                        }
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "datetime": {
+                                                                "type": "string",
+                                                                "example": "2022-11-15 08:42:05"
+                                                            },
+                                                            "formatted": {
+                                                                "type": "string",
+                                                                "example": "Tue Nov 15, 2022 8:42AM"
+                                                            }
+                                                        }
+                                                    },
+                                                    "deleted_at": {},
+                                                    "available_actions": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "update": {
+                                                                "type": "boolean",
+                                                                "example": true,
+                                                                "default": true
+                                                            },
+                                                            "restore": {
+                                                                "type": "boolean",
+                                                                "example": false,
+                                                                "default": true
+                                                            },
+                                                            "delete": {
+                                                                "type": "boolean",
+                                                                "example": false,
+                                                                "default": true
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            },
+            "post": {
+                "summary": "/manufacturers",
+                "description": "Create a manufacturer",
+                "operationId": "manufacturers-1",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "description": "Manufacturer name"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/manufacturers/{id}": {
+            "put": {
+                "summary": "/manufacturers/:id",
+                "description": "Update a Manufacturer",
+                "operationId": "manufacturersid-3",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Manufacturer ID",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "description": "Model name"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"id\": 3,\n  \"name\": \"Rohan-Bergstrom\",\n  \"created_at\": \"2017-01-11 03:31:25\",\n  \"updated_at\": \"2017-01-11 03:31:25\"\n}"
+                                    },
+                                    "Not Found": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Company not found\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 3,
+                                                    "default": 0
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Rohan-Bergstrom"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "example": "2017-01-11 03:31:25"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "example": "2017-01-11 03:31:25"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "title": "Not Found",
+                                            "type": "object",
+                                            "properties": {
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "error"
+                                                },
+                                                "messages": {
+                                                    "type": "string",
+                                                    "example": "Company not found"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "401",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"message\": \"Unauthorized.\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "405",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Method not allowed\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "messages": {
+                                            "type": "string",
+                                            "example": "Method not allowed"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            },
+            "patch": {
+                "summary": "/manufacturers/:id",
+                "description": "Partially update a Manufacturer",
+                "operationId": "manufacturersid",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Manufacturer ID",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "description": "Model name"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"id\": 3,\n  \"name\": \"Rohan-Bergstrom\",\n  \"created_at\": \"2017-01-11 03:31:25\",\n  \"updated_at\": \"2017-01-11 03:31:25\"\n}"
+                                    },
+                                    "Not Found": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Company not found\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 3,
+                                                    "default": 0
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Rohan-Bergstrom"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "example": "2017-01-11 03:31:25"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "example": "2017-01-11 03:31:25"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "title": "Not Found",
+                                            "type": "object",
+                                            "properties": {
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "error"
+                                                },
+                                                "messages": {
+                                                    "type": "string",
+                                                    "example": "Company not found"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "401",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"message\": \"Unauthorized.\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "405",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Method not allowed\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "messages": {
+                                            "type": "string",
+                                            "example": "Method not allowed"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            },
+            "delete": {
+                "summary": "/manufacturers/:id",
+                "description": "Delete a manufacturer",
+                "operationId": "manufacturersid-2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Manufacturer ID",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"id\": 3,\n  \"name\": \"Rohan-Bergstrom\",\n  \"created_at\": \"2017-01-11 03:31:25\",\n  \"updated_at\": \"2017-01-11 03:31:25\"\n}"
+                                    },
+                                    "Not Found": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Company not found\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 3,
+                                                    "default": 0
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Rohan-Bergstrom"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "example": "2017-01-11 03:31:25"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "example": "2017-01-11 03:31:25"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "title": "Not Found",
+                                            "type": "object",
+                                            "properties": {
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "error"
+                                                },
+                                                "messages": {
+                                                    "type": "string",
+                                                    "example": "Company not found"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "401",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"message\": \"Unauthorized.\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "405",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Method not allowed\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "messages": {
+                                            "type": "string",
+                                            "example": "Method not allowed"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            },
+            "get": {
+                "summary": "/manufacturers/:id",
+                "description": "View a manufacturer",
+                "operationId": "manufacturersid-1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Manufacturer ID",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"id\": 3,\n  \"name\": \"Rohan-Bergstrom\",\n  \"created_at\": \"2017-01-11 03:31:25\",\n  \"updated_at\": \"2017-01-11 03:31:25\"\n}"
+                                    },
+                                    "Not Found": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Company not found\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 3,
+                                                    "default": 0
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Rohan-Bergstrom"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "example": "2017-01-11 03:31:25"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "example": "2017-01-11 03:31:25"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "title": "Not Found",
+                                            "type": "object",
+                                            "properties": {
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "error"
+                                                },
+                                                "messages": {
+                                                    "type": "string",
+                                                    "example": "Company not found"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "401",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"message\": \"Unauthorized.\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "405",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Method not allowed\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "messages": {
+                                            "type": "string",
+                                            "example": "Method not allowed"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        }
+    }
+}

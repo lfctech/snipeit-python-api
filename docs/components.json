@@ -1,0 +1,914 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "Snipe-IT v6 API",
+        "version": "7.1.17"
+    },
+    "servers": [
+        {
+            "url": "https://web.archive.org/web/20250424002126/https://develop.snipeitapp.com/api/v1"
+        }
+    ],
+    "components": {
+        "securitySchemes": {}
+    },
+    "security": [
+        {}
+    ],
+    "paths": {
+        "/components": {
+            "post": {
+                "summary": "/components",
+                "description": "Creates a component",
+                "operationId": "components-1",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "name",
+                                    "qty",
+                                    "category_id"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "qty": {
+                                        "type": "integer",
+                                        "format": "int32"
+                                    },
+                                    "category_id": {
+                                        "type": "integer",
+                                        "format": "int32"
+                                    },
+                                    "location_id": {
+                                        "type": "integer",
+                                        "format": "int32"
+                                    },
+                                    "company_id": {
+                                        "type": "integer",
+                                        "format": "int32"
+                                    },
+                                    "order_number": {
+                                        "type": "string"
+                                    },
+                                    "purchase_date": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "purchase_cost": {
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "min_amt": {
+                                        "type": "integer",
+                                        "format": "int32"
+                                    },
+                                    "serial": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            },
+            "get": {
+                "summary": "/components",
+                "description": "Return a listing of components",
+                "operationId": "components",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Specify the number of results you wish to return",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 50
+                        }
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "Offset to use",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 0
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "A text string to search the assets data for",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "order_number",
+                        "in": "query",
+                        "description": "Return only assets associated with a specific order number",
+                        "schema": {
+                            "type": "string",
+                            "default": "null"
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Specify the column name you wish to sort by",
+                        "schema": {
+                            "type": "string",
+                            "default": "created_at"
+                        }
+                    },
+                    {
+                        "name": "order",
+                        "in": "query",
+                        "description": "Specify the order (asc or desc) you wish to order by on your sort column",
+                        "schema": {
+                            "type": "string",
+                            "default": "desc"
+                        }
+                    },
+                    {
+                        "name": "expand",
+                        "in": "query",
+                        "description": "Whether to include detailed information on categories, etc (true) or just the text name (false)",
+                        "schema": {
+                            "type": "string",
+                            "default": "false"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n    \"total\": 4,\n    \"rows\": [\n        {\n            \"id\": 1,\n            \"name\": \"Crucial 4GB DDR3L-1600 SODIMM\",\n            \"image\": null,\n            \"serial\": null,\n            \"location\": {\n                \"id\": 3,\n                \"name\": \"Nikitaborough\"\n            },\n            \"qty\": 10,\n            \"min_amt\": 2,\n            \"category\": {\n                \"id\": 13,\n                \"name\": \"RAM\"\n            },\n            \"order_number\": \"48349590\",\n            \"purchase_date\": {\n                \"date\": \"2017-11-28\",\n                \"formatted\": \"2017-11-28\"\n            },\n            \"purchase_cost\": \"2.45\",\n            \"remaining\": 10,\n            \"company\": {\n                \"id\": 2,\n                \"name\": \"Hagenes, Kulas and Rutherford\"\n            },\n            \"created_at\": {\n                \"datetime\": \"2018-10-09 19:09:21\",\n                \"formatted\": \"2018-10-09 07:09 PM\"\n            },\n            \"updated_at\": {\n                \"datetime\": \"2018-10-09 19:09:21\",\n                \"formatted\": \"2018-10-09 07:09 PM\"\n            },\n            \"user_can_checkout\": 1,\n            \"available_actions\": {\n                \"checkout\": true,\n                \"checkin\": true,\n                \"update\": true,\n                \"delete\": true\n            }\n        },\n        {\n            \"id\": 2,\n            \"name\": \"Crucial 8GB DDR3L-1600 SODIMM Memory for Mac\",\n            \"image\": null,\n            \"serial\": null,\n            \"location\": null,\n            \"qty\": 10,\n            \"min_amt\": 2,\n            \"category\": {\n                \"id\": 13,\n                \"name\": \"RAM\"\n            },\n            \"order_number\": \"20322504\",\n            \"purchase_date\": {\n                \"date\": \"2018-04-28\",\n                \"formatted\": \"2018-04-28\"\n            },\n            \"purchase_cost\": \"44.27\",\n            \"remaining\": 10,\n            \"company\": null,\n            \"created_at\": {\n                \"datetime\": \"2018-10-09 19:09:21\",\n                \"formatted\": \"2018-10-09 07:09 PM\"\n            },\n            \"updated_at\": {\n                \"datetime\": \"2018-10-09 19:09:21\",\n                \"formatted\": \"2018-10-09 07:09 PM\"\n            },\n            \"user_can_checkout\": 1,\n            \"available_actions\": {\n                \"checkout\": true,\n                \"checkin\": true,\n                \"update\": true,\n                \"delete\": true\n            }\n        },\n        {\n            \"id\": 3,\n            \"name\": \"Crucial BX300 120GB SATA Internal SSD\",\n            \"image\": null,\n            \"serial\": null,\n            \"location\": null,\n            \"qty\": 10,\n            \"min_amt\": 2,\n            \"category\": {\n                \"id\": 12,\n                \"name\": \"HDD/SSD\"\n            },\n            \"order_number\": \"41502705\",\n            \"purchase_date\": {\n                \"date\": \"2017-10-11\",\n                \"formatted\": \"2017-10-11\"\n            },\n            \"purchase_cost\": \"23.12\",\n            \"remaining\": 10,\n            \"company\": null,\n            \"created_at\": {\n                \"datetime\": \"2018-10-09 19:09:21\",\n                \"formatted\": \"2018-10-09 07:09 PM\"\n            },\n            \"updated_at\": {\n                \"datetime\": \"2018-10-09 19:09:21\",\n                \"formatted\": \"2018-10-09 07:09 PM\"\n            },\n            \"user_can_checkout\": 1,\n            \"available_actions\": {\n                \"checkout\": true,\n                \"checkin\": true,\n                \"update\": true,\n                \"delete\": true\n            }\n        },\n        {\n            \"id\": 4,\n            \"name\": \"Crucial BX300 240GB SATA Internal SSD\",\n            \"image\": null,\n            \"serial\": null,\n            \"location\": null,\n            \"qty\": 10,\n            \"min_amt\": 2,\n            \"category\": {\n                \"id\": 12,\n                \"name\": \"HDD/SSD\"\n            },\n            \"order_number\": \"48987394\",\n            \"purchase_date\": {\n                \"date\": \"2018-09-08\",\n                \"formatted\": \"2018-09-08\"\n            },\n            \"purchase_cost\": \"48.72\",\n            \"remaining\": 10,\n            \"company\": null,\n            \"created_at\": {\n                \"datetime\": \"2018-10-09 19:09:21\",\n                \"formatted\": \"2018-10-09 07:09 PM\"\n            },\n            \"updated_at\": {\n                \"datetime\": \"2018-10-09 19:09:21\",\n                \"formatted\": \"2018-10-09 07:09 PM\"\n            },\n            \"user_can_checkout\": 1,\n            \"available_actions\": {\n                \"checkout\": true,\n                \"checkin\": true,\n                \"update\": true,\n                \"delete\": true\n            }\n        }\n    ]\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 4,
+                                            "default": 0
+                                        },
+                                        "rows": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1,
+                                                        "default": 0
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Crucial 4GB DDR3L-1600 SODIMM"
+                                                    },
+                                                    "image": {},
+                                                    "serial": {},
+                                                    "location": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 3,
+                                                                "default": 0
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Nikitaborough"
+                                                            }
+                                                        }
+                                                    },
+                                                    "qty": {
+                                                        "type": "integer",
+                                                        "example": 10,
+                                                        "default": 0
+                                                    },
+                                                    "min_amt": {
+                                                        "type": "integer",
+                                                        "example": 2,
+                                                        "default": 0
+                                                    },
+                                                    "category": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 13,
+                                                                "default": 0
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "RAM"
+                                                            }
+                                                        }
+                                                    },
+                                                    "order_number": {
+                                                        "type": "string",
+                                                        "example": "48349590"
+                                                    },
+                                                    "purchase_date": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "date": {
+                                                                "type": "string",
+                                                                "example": "2017-11-28"
+                                                            },
+                                                            "formatted": {
+                                                                "type": "string",
+                                                                "example": "2017-11-28"
+                                                            }
+                                                        }
+                                                    },
+                                                    "purchase_cost": {
+                                                        "type": "string",
+                                                        "example": "2.45"
+                                                    },
+                                                    "remaining": {
+                                                        "type": "integer",
+                                                        "example": 10,
+                                                        "default": 0
+                                                    },
+                                                    "company": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 2,
+                                                                "default": 0
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Hagenes, Kulas and Rutherford"
+                                                            }
+                                                        }
+                                                    },
+                                                    "created_at": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "datetime": {
+                                                                "type": "string",
+                                                                "example": "2018-10-09 19:09:21"
+                                                            },
+                                                            "formatted": {
+                                                                "type": "string",
+                                                                "example": "2018-10-09 07:09 PM"
+                                                            }
+                                                        }
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "datetime": {
+                                                                "type": "string",
+                                                                "example": "2018-10-09 19:09:21"
+                                                            },
+                                                            "formatted": {
+                                                                "type": "string",
+                                                                "example": "2018-10-09 07:09 PM"
+                                                            }
+                                                        }
+                                                    },
+                                                    "user_can_checkout": {
+                                                        "type": "integer",
+                                                        "example": 1,
+                                                        "default": 0
+                                                    },
+                                                    "available_actions": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "checkout": {
+                                                                "type": "boolean",
+                                                                "example": true,
+                                                                "default": true
+                                                            },
+                                                            "checkin": {
+                                                                "type": "boolean",
+                                                                "example": true,
+                                                                "default": true
+                                                            },
+                                                            "update": {
+                                                                "type": "boolean",
+                                                                "example": true,
+                                                                "default": true
+                                                            },
+                                                            "delete": {
+                                                                "type": "boolean",
+                                                                "example": true,
+                                                                "default": true
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "401",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"message\": \"Unauthorized.\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false,
+                "security": []
+            }
+        },
+        "/components/{id}": {
+            "get": {
+                "summary": "/components/:id",
+                "description": "Get the details on a component",
+                "operationId": "componentsid",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            },
+            "put": {
+                "summary": "/components/:id",
+                "description": "Updates a component",
+                "operationId": "componentsid-1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "name",
+                                    "qty",
+                                    "category_id"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "qty": {
+                                        "type": "integer",
+                                        "format": "int32"
+                                    },
+                                    "category_id": {
+                                        "type": "integer",
+                                        "format": "int32"
+                                    },
+                                    "location_id": {
+                                        "type": "integer",
+                                        "format": "int32"
+                                    },
+                                    "company_id": {
+                                        "type": "integer",
+                                        "format": "int32"
+                                    },
+                                    "order_number": {
+                                        "type": "string"
+                                    },
+                                    "purchase_date": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "purchase_cost": {
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "min_amt": {
+                                        "type": "integer",
+                                        "format": "int32"
+                                    },
+                                    "serial": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            },
+            "delete": {
+                "summary": "/components/:id",
+                "description": "Deletes a component",
+                "operationId": "componentsid-3",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            },
+            "patch": {
+                "summary": "/components/:id",
+                "description": "Updates a some details of a component",
+                "operationId": "componentsid-2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "name",
+                                    "qty",
+                                    "category_id"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "qty": {
+                                        "type": "integer",
+                                        "format": "int32"
+                                    },
+                                    "category_id": {
+                                        "type": "integer",
+                                        "format": "int32"
+                                    },
+                                    "location_id": {
+                                        "type": "integer",
+                                        "format": "int32"
+                                    },
+                                    "company_id": {
+                                        "type": "integer",
+                                        "format": "int32"
+                                    },
+                                    "order_number": {
+                                        "type": "string"
+                                    },
+                                    "purchase_date": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "purchase_cost": {
+                                        "type": "number",
+                                        "format": "float"
+                                    },
+                                    "min_amt": {
+                                        "type": "integer",
+                                        "format": "int32"
+                                    },
+                                    "serial": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/components/{id}/assets": {
+            "get": {
+                "summary": "/components/:id/assets",
+                "description": "Returns a list of which assets a component has been checked out to",
+                "operationId": "componentsidassets",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/components/{id}/checkin": {
+            "post": {
+                "summary": "/components/:id/checkin",
+                "description": "Check a component back in from an asset",
+                "operationId": "componentsidcheckin",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the record in the components_assets *join* record",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "checkin_qty"
+                                ],
+                                "properties": {
+                                    "checkin_qty": {
+                                        "type": "integer",
+                                        "description": "Quantity of the components to check in from the asset",
+                                        "format": "int32"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/components/{id}/checkout": {
+            "post": {
+                "summary": "/components/:id/checkout",
+                "description": "Check an accessory out to an asset",
+                "operationId": "componentsidcheckout",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the component to check out",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "assigned_to",
+                                    "assigned_qty"
+                                ],
+                                "properties": {
+                                    "assigned_to": {
+                                        "type": "integer",
+                                        "description": "User ID of an asset to check a component out to",
+                                        "format": "int32"
+                                    },
+                                    "assigned_qty": {
+                                        "type": "integer",
+                                        "description": "Quantity of the components to check out to the asset",
+                                        "format": "int32"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        }
+    }
+}

@@ -1,0 +1,954 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "Snipe-IT v6 API",
+        "version": "7.1.17"
+    },
+    "servers": [
+        {
+            "url": "https://web.archive.org/web/20250424002126/https://develop.snipeitapp.com/api/v1"
+        }
+    ],
+    "components": {
+        "securitySchemes": {}
+    },
+    "security": [
+        {}
+    ],
+    "paths": {
+        "/fields/{id}": {
+            "put": {
+                "summary": "/fields/:id",
+                "description": "Update a custom field",
+                "operationId": "update-fields",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Custom field ID",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "name",
+                                    "element"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "description": "Model name"
+                                    },
+                                    "element": {
+                                        "type": "string",
+                                        "description": "The type of form field you want to display",
+                                        "enum": [
+                                            "text",
+                                            "textarea",
+                                            "checkbox",
+                                            "radio",
+                                            "listbox"
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": ""
+                                    },
+                                    "Not Found": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Fieldset not found\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "messages": {
+                                            "type": "string",
+                                            "example": "Fieldset not found"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "401",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"message\": \"Unauthorized.\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "405",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Method not allowed\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "messages": {
+                                            "type": "string",
+                                            "example": "Method not allowed"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            },
+            "delete": {
+                "summary": "/fields/:id",
+                "description": "Delete a custom field",
+                "operationId": "fieldsid-1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Custom field ID",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n    \"status\": \"success\",\n    \"messages\": \"The field was deleted successfully.\"\n}"
+                                    },
+                                    "Not Found": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Fieldset not found\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "success"
+                                                },
+                                                "messages": {
+                                                    "type": "string",
+                                                    "example": "The field was deleted successfully."
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "title": "Not Found",
+                                            "type": "object",
+                                            "properties": {
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "error"
+                                                },
+                                                "messages": {
+                                                    "type": "string",
+                                                    "example": "Fieldset not found"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "401",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"message\": \"Unauthorized.\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "405",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Method not allowed\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "messages": {
+                                            "type": "string",
+                                            "example": "Method not allowed"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            },
+            "get": {
+                "summary": "/fields/:id",
+                "description": "Return field info by id",
+                "operationId": "fieldsid",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The ID number of the custom field",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": ""
+                                    },
+                                    "Not Found": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Fieldset not found\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "messages": {
+                                            "type": "string",
+                                            "example": "Fieldset not found"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "401",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"message\": \"Unauthorized.\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "405",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Method not allowed\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "messages": {
+                                            "type": "string",
+                                            "example": "Method not allowed"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            },
+            "patch": {
+                "summary": "/fields/:id",
+                "description": "Update a custom field",
+                "operationId": "fieldsid-2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Custom field ID",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "description": "Model name"
+                                    },
+                                    "element": {
+                                        "type": "string",
+                                        "description": "The type of form field you want to display",
+                                        "enum": [
+                                            "text",
+                                            "textarea",
+                                            "checkbox",
+                                            "radio",
+                                            "listbox"
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": ""
+                                    },
+                                    "Not Found": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Fieldset not found\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "messages": {
+                                            "type": "string",
+                                            "example": "Fieldset not found"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "401",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"message\": \"Unauthorized.\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "405",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Method not allowed\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "messages": {
+                                            "type": "string",
+                                            "example": "Method not allowed"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/fields": {
+            "post": {
+                "summary": "/fields",
+                "description": "Create a custom field",
+                "operationId": "fields-2",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "name",
+                                    "element"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "description": "The field's name, which is also the form label"
+                                    },
+                                    "element": {
+                                        "type": "string",
+                                        "description": "Form field type that should be displayed.",
+                                        "enum": [
+                                            "text",
+                                            "textarea",
+                                            "checkbox",
+                                            "radio",
+                                            "listbox"
+                                        ]
+                                    },
+                                    "field_values": {
+                                        "type": "string",
+                                        "description": "In the case of list boxes, etc, this should be a list of the options available"
+                                    },
+                                    "show_in_email": {
+                                        "type": "boolean",
+                                        "description": "Whether or not to show the custom field in email notifications",
+                                        "default": false
+                                    },
+                                    "format": {
+                                        "type": "string",
+                                        "description": "Validation constraints on this field"
+                                    },
+                                    "field_encrypted": {
+                                        "type": "boolean",
+                                        "description": "Whether the field should be encrypted. (This can cause issues if you change it after the field was created.)",
+                                        "default": false
+                                    },
+                                    "help_text": {
+                                        "type": "string",
+                                        "description": "Any additional text you wish to display under the new form field to make it clearer what the gauges should be."
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": ""
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "401",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"message\": \"Unauthorized.\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "405",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Method not allowed\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "messages": {
+                                            "type": "string",
+                                            "example": "Method not allowed"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            },
+            "get": {
+                "summary": "/fields",
+                "description": "Returns a listing of available custom fields",
+                "operationId": "fields-1",
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n    \"total\": 6,\n    \"rows\": [\n        {\n            \"id\": 1,\n            \"name\": \"IMEI\",\n            \"db_column_name\": \"_snipeit_imei_1\",\n            \"format\": \"regex:/^[0-9]{15}$/\",\n            \"field_values\": null,\n            \"field_values_array\": null,\n            \"type\": \"text\",\n            \"required\": false,\n            \"created_at\": {\n                \"datetime\": \"2020-11-27 21:05:14\",\n                \"formatted\": \"Fri Nov 27, 2020 9:05PM\"\n            },\n            \"updated_at\": {\n                \"datetime\": \"2020-11-27 21:05:14\",\n                \"formatted\": \"Fri Nov 27, 2020 9:05PM\"\n            }\n        },\n        {\n            \"id\": 2,\n            \"name\": \"Phone Number\",\n            \"db_column_name\": \"_snipeit_phone_number_2\",\n            \"format\": \"ANY\",\n            \"field_values\": null,\n            \"field_values_array\": null,\n            \"type\": \"text\",\n            \"required\": false,\n            \"created_at\": {\n                \"datetime\": \"2020-11-27 21:05:14\",\n                \"formatted\": \"Fri Nov 27, 2020 9:05PM\"\n            },\n            \"updated_at\": {\n                \"datetime\": \"2020-11-27 21:05:14\",\n                \"formatted\": \"Fri Nov 27, 2020 9:05PM\"\n            }\n        },\n        {\n            \"id\": 3,\n            \"name\": \"RAM\",\n            \"db_column_name\": \"_snipeit_ram_3\",\n            \"format\": \"ANY\",\n            \"field_values\": null,\n            \"field_values_array\": null,\n            \"type\": \"text\",\n            \"required\": false,\n            \"created_at\": {\n                \"datetime\": \"2020-11-27 21:05:14\",\n                \"formatted\": \"Fri Nov 27, 2020 9:05PM\"\n            },\n            \"updated_at\": {\n                \"datetime\": \"2020-11-27 21:05:14\",\n                \"formatted\": \"Fri Nov 27, 2020 9:05PM\"\n            }\n        },\n        {\n            \"id\": 4,\n            \"name\": \"CPU\",\n            \"db_column_name\": \"_snipeit_cpu_4\",\n            \"format\": \"ANY\",\n            \"field_values\": null,\n            \"field_values_array\": null,\n            \"type\": \"text\",\n            \"required\": false,\n            \"created_at\": {\n                \"datetime\": \"2020-11-27 21:05:14\",\n                \"formatted\": \"Fri Nov 27, 2020 9:05PM\"\n            },\n            \"updated_at\": {\n                \"datetime\": \"2020-11-27 21:05:14\",\n                \"formatted\": \"Fri Nov 27, 2020 9:05PM\"\n            }\n        },\n        {\n            \"id\": 5,\n            \"name\": \"MAC Address\",\n            \"db_column_name\": \"_snipeit_mac_address_5\",\n            \"format\": \"regex:/^([0-9a-fA-F]{2}[:-]){5}[0-9a-fA-F]{2}$/\",\n            \"field_values\": null,\n            \"field_values_array\": null,\n            \"type\": \"text\",\n            \"required\": false,\n            \"created_at\": {\n                \"datetime\": \"2020-11-27 21:05:14\",\n                \"formatted\": \"Fri Nov 27, 2020 9:05PM\"\n            },\n            \"updated_at\": {\n                \"datetime\": \"2020-11-27 21:05:14\",\n                \"formatted\": \"Fri Nov 27, 2020 9:05PM\"\n            }\n        },\n        {\n            \"id\": 6,\n            \"name\": \"Test Checkbox Fields\",\n            \"db_column_name\": \"_snipeit_test_checkbox_fields_6\",\n            \"format\": \"ANY\",\n            \"field_values\": \"Foo\\r\\nBar\\r\\nBaz\",\n            \"field_values_array\": [\n                \"Foo\",\n                \"Bar\",\n                \"Baz\"\n            ],\n            \"type\": \"checkbox\",\n            \"required\": false,\n            \"created_at\": {\n                \"datetime\": \"2021-01-12 21:07:14\",\n                \"formatted\": \"Tue Jan 12, 2021 9:07PM\"\n            },\n            \"updated_at\": {\n                \"datetime\": \"2021-01-12 21:07:14\",\n                \"formatted\": \"Tue Jan 12, 2021 9:07PM\"\n            }\n        }\n    ]\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 6,
+                                            "default": 0
+                                        },
+                                        "rows": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1,
+                                                        "default": 0
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "IMEI"
+                                                    },
+                                                    "db_column_name": {
+                                                        "type": "string",
+                                                        "example": "_snipeit_imei_1"
+                                                    },
+                                                    "format": {
+                                                        "type": "string",
+                                                        "example": "regex:/^[0-9]{15}$/"
+                                                    },
+                                                    "field_values": {},
+                                                    "field_values_array": {},
+                                                    "type": {
+                                                        "type": "string",
+                                                        "example": "text"
+                                                    },
+                                                    "required": {
+                                                        "type": "boolean",
+                                                        "example": false,
+                                                        "default": true
+                                                    },
+                                                    "created_at": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "datetime": {
+                                                                "type": "string",
+                                                                "example": "2020-11-27 21:05:14"
+                                                            },
+                                                            "formatted": {
+                                                                "type": "string",
+                                                                "example": "Fri Nov 27, 2020 9:05PM"
+                                                            }
+                                                        }
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "datetime": {
+                                                                "type": "string",
+                                                                "example": "2020-11-27 21:05:14"
+                                                            },
+                                                            "formatted": {
+                                                                "type": "string",
+                                                                "example": "Fri Nov 27, 2020 9:05PM"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "400",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/fields/{id}/disassociate": {
+            "post": {
+                "summary": "/fields/:id/disassociate",
+                "description": "Removed the association of a custom field with a fieldset",
+                "operationId": "fieldsiddisassociate",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Custom field ID",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "fieldset_id"
+                                ],
+                                "properties": {
+                                    "fieldset_id": {
+                                        "type": "integer",
+                                        "description": "Fieldset ID",
+                                        "format": "int32"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": ""
+                                    },
+                                    "Not Found": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Fieldset not found\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "messages": {
+                                            "type": "string",
+                                            "example": "Fieldset not found"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "401",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"message\": \"Unauthorized.\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "405",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Method not allowed\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "messages": {
+                                            "type": "string",
+                                            "example": "Method not allowed"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/fields/{id}/associate": {
+            "post": {
+                "summary": "/fields/:id/associate",
+                "description": "Associate a custom field with a custom fieldset",
+                "operationId": "fieldsidassociate",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Custom field ID",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "fieldset_id"
+                                ],
+                                "properties": {
+                                    "fieldset_id": {
+                                        "type": "integer",
+                                        "description": "Fieldset ID",
+                                        "format": "int32"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "200",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": ""
+                                    },
+                                    "Not Found": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Fieldset not found\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "messages": {
+                                            "type": "string",
+                                            "example": "Fieldset not found"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "401",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"message\": \"Unauthorized.\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "405",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Result": {
+                                        "value": "{\n  \"status\": \"error\",\n  \"messages\": \"Method not allowed\"\n}"
+                                    }
+                                },
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "messages": {
+                                            "type": "string",
+                                            "example": "Method not allowed"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        }
+    }
+}
