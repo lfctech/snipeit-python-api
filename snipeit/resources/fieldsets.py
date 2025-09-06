@@ -13,21 +13,30 @@ class Fieldset(ApiObject):
 class FieldsetsManager(Manager):
     """Manager for all Fieldset-related API operations."""
 
-    def get(self, fieldset_id: Optional[int] = None, **kwargs: Any) -> Union['Fieldset', List['Fieldset']]:
+    def list(self, **kwargs: Any) -> List['Fieldset']:
         """
-        Gets one or more fieldsets.
+        Gets a list of fieldsets.
+
+        Args:
+            **kwargs: Optional search parameters.
+
+        Returns:
+            A list of Fieldsets.
+        """
+        return [Fieldset(self, f) for f in self._get("fieldsets", **kwargs)["rows"]]
+
+    def get(self, fieldset_id: int, **kwargs: Any) -> 'Fieldset':
+        """
+        Gets a single fieldset by its ID.
 
         Args:
             fieldset_id: If provided, retrieves a single fieldset by its ID.
             **kwargs: Optional search parameters.
 
         Returns:
-            A single Fieldset object or a list of Fieldsets.
+            A single Fieldset object.
         """
-        if fieldset_id:
-            return Fieldset(self, self._get(f"fieldsets/{fieldset_id}", **kwargs))
-        else:
-            return [Fieldset(self, f) for f in self._get("fieldsets", **kwargs)["rows"]]
+        return Fieldset(self, self._get(f"fieldsets/{fieldset_id}", **kwargs))
 
     def create(self, name: str, **kwargs: Any) -> 'Fieldset':
         """
@@ -43,27 +52,23 @@ class FieldsetsManager(Manager):
         data = {"name": name}
         data.update(kwargs)
         response = self._create("fieldsets", data)
-        if response.get("status") == "success":
-            return Fieldset(self, response["payload"])
-        return response
+        return Fieldset(self, response["payload"])
 
-    def update(self, fieldset_id: int, name: str, **kwargs: Any) -> Dict[str, Any]:
+    def update(self, fieldset_id: int, **kwargs: Any) -> 'Fieldset':
         """
         Updates an existing fieldset.
 
         Args:
             fieldset_id: The ID of the fieldset to update.
-            name: The new name of the fieldset.
             **kwargs: Additional optional fields.
 
         Returns:
-            The API response dictionary.
+            The updated Fieldset object.
         """
-        data = {"name": name}
-        data.update(kwargs)
-        return self._update(f"fieldsets/{fieldset_id}", data)
+        response = self._update(f"fieldsets/{fieldset_id}", kwargs)
+        return Fieldset(self, response["payload"])
 
-    def patch(self, fieldset_id: int, **kwargs: Any) -> Dict[str, Any]:
+    def patch(self, fieldset_id: int, **kwargs: Any) -> 'Fieldset':
         """
         Partially updates a fieldset.
 
@@ -72,9 +77,10 @@ class FieldsetsManager(Manager):
             **kwargs: The fields to update.
 
         Returns:
-            The API response dictionary.
+            The updated Fieldset object.
         """
-        return self._patch(f"fieldsets/{fieldset_id}", kwargs)
+        response = self._patch(f"fieldsets/{fieldset_id}", kwargs)
+        return Fieldset(self, response["payload"])
 
     def delete(self, fieldset_id: int) -> None:
         """
@@ -83,4 +89,4 @@ class FieldsetsManager(Manager):
         Args:
             fieldset_id: The ID of the fieldset to delete.
         """
-        return self._delete(f"fieldsets/{fieldset_id}")
+        self._delete(f"fieldsets/{fieldset_id}")

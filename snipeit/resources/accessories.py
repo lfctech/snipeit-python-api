@@ -13,21 +13,30 @@ class Accessory(ApiObject):
 class AccessoriesManager(Manager):
     """Manager for all Accessory-related API operations."""
 
-    def get(self, accessory_id: Optional[int] = None, **kwargs: Any) -> Union['Accessory', List['Accessory']]:
+    def list(self, **kwargs: Any) -> List['Accessory']:
         """
-        Gets one or more accessories.
+        Gets a list of accessories.
+
+        Args:
+            **kwargs: Optional search parameters.
+
+        Returns:
+            A list of Accessories.
+        """
+        return [Accessory(self, a) for a in self._get("accessories", **kwargs)["rows"]]
+
+    def get(self, accessory_id: int, **kwargs: Any) -> 'Accessory':
+        """
+        Gets a single accessory by its ID.
 
         Args:
             accessory_id: If provided, retrieves a single accessory by its ID.
             **kwargs: Optional search parameters.
 
         Returns:
-            A single Accessory object or a list of Accessories.
+            A single Accessory object.
         """
-        if accessory_id:
-            return Accessory(self, self._get(f"accessories/{accessory_id}", **kwargs))
-        else:
-            return [Accessory(self, a) for a in self._get("accessories", **kwargs)["rows"]]
+        return Accessory(self, self._get(f"accessories/{accessory_id}", **kwargs))
 
     def create(self, name: str, qty: int, category_id: int, **kwargs: Any) -> 'Accessory':
         """
@@ -49,33 +58,23 @@ class AccessoriesManager(Manager):
         }
         data.update(kwargs)
         response = self._create("accessories", data)
-        if response.get("status") == "success":
-            return Accessory(self, response["payload"])
-        return response
+        return Accessory(self, response["payload"])
 
-    def update(self, accessory_id: int, name: str, qty: int, category_id: int, **kwargs: Any) -> Dict[str, Any]:
+    def update(self, accessory_id: int, **kwargs: Any) -> 'Accessory':
         """
         Updates an existing accessory.
 
         Args:
             accessory_id: The ID of the accessory to update.
-            name: The new name of the accessory.
-            qty: The new quantity.
-            category_id: The new category ID.
             **kwargs: Additional optional fields.
 
         Returns:
-            The API response dictionary.
+            The updated Accessory object.
         """
-        data = {
-            "name": name,
-            "qty": qty,
-            "category_id": category_id,
-        }
-        data.update(kwargs)
-        return self._update(f"accessories/{accessory_id}", data)
+        response = self._update(f"accessories/{accessory_id}", kwargs)
+        return Accessory(self, response["payload"])
 
-    def patch(self, accessory_id: int, **kwargs: Any) -> Dict[str, Any]:
+    def patch(self, accessory_id: int, **kwargs: Any) -> 'Accessory':
         """
         Partially updates an accessory.
 
@@ -84,9 +83,10 @@ class AccessoriesManager(Manager):
             **kwargs: The fields to update.
 
         Returns:
-            The API response dictionary.
+            The updated Accessory object.
         """
-        return self._patch(f"accessories/{accessory_id}", kwargs)
+        response = self._patch(f"accessories/{accessory_id}", kwargs)
+        return Accessory(self, response["payload"])
 
     def delete(self, accessory_id: int) -> None:
         """
@@ -95,7 +95,7 @@ class AccessoriesManager(Manager):
         Args:
             accessory_id: The ID of the accessory to delete.
         """
-        return self._delete(f"accessories/{accessory_id}")
+        self._delete(f"accessories/{accessory_id}")
 
     def checkin_from_user(self, accessory_user_id: int) -> Dict[str, Any]:
         """
@@ -110,4 +110,6 @@ class AccessoriesManager(Manager):
         Returns:
             The API response dictionary.
         """
-        return self._post(f"accessories/{accessory_user_id}/checkin", {})
+        # POST to the checkin endpoint using the standard create helper
+        response = self._create(f"accessories/{accessory_user_id}/checkin", {})
+        return response["payload"]

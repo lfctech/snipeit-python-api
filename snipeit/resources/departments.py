@@ -13,21 +13,30 @@ class Department(ApiObject):
 class DepartmentsManager(Manager):
     """Manager for all Department-related API operations."""
 
-    def get(self, department_id: Optional[int] = None, **kwargs: Any) -> Union['Department', List['Department']]:
+    def list(self, **kwargs: Any) -> List['Department']:
         """
-        Gets one or more departments.
+        Gets a list of departments.
+
+        Args:
+            **kwargs: Optional search parameters.
+
+        Returns:
+            A list of Departments.
+        """
+        return [Department(self, d) for d in self._get("departments", **kwargs)["rows"]]
+
+    def get(self, department_id: int, **kwargs: Any) -> 'Department':
+        """
+        Gets a single department by its ID.
 
         Args:
             department_id: If provided, retrieves a single department by its ID.
             **kwargs: Optional search parameters.
 
         Returns:
-            A single Department object or a list of Departments.
+            A single Department object.
         """
-        if department_id:
-            return Department(self, self._get(f"departments/{department_id}", **kwargs))
-        else:
-            return [Department(self, d) for d in self._get("departments", **kwargs)["rows"]]
+        return Department(self, self._get(f"departments/{department_id}", **kwargs))
 
     def create(self, name: str, **kwargs: Any) -> 'Department':
         """
@@ -43,27 +52,23 @@ class DepartmentsManager(Manager):
         data = {"name": name}
         data.update(kwargs)
         response = self._create("departments", data)
-        if response.get("status") == "success":
-            return Department(self, response["payload"])
-        raise SnipeITApiError(response.get("messages", "Department creation failed."))
+        return Department(self, response["payload"])
 
-    def update(self, department_id: int, name: str, **kwargs: Any) -> Dict[str, Any]:
+    def update(self, department_id: int, **kwargs: Any) -> 'Department':
         """
         Updates an existing department.
 
         Args:
             department_id: The ID of the department to update.
-            name: The new name of the department.
             **kwargs: Additional optional fields.
 
         Returns:
-            The API response dictionary.
+            The updated Department object.
         """
-        data = {"name": name}
-        data.update(kwargs)
-        return self._update(f"departments/{department_id}", data)
+        response = self._update(f"departments/{department_id}", kwargs)
+        return Department(self, response["payload"])
 
-    def patch(self, department_id: int, **kwargs: Any) -> Dict[str, Any]:
+    def patch(self, department_id: int, **kwargs: Any) -> 'Department':
         """
         Partially updates a department.
 
@@ -72,9 +77,10 @@ class DepartmentsManager(Manager):
             **kwargs: The fields to update.
 
         Returns:
-            The API response dictionary.
+            The updated Department object.
         """
-        return self._patch(f"departments/{department_id}", kwargs)
+        response = self._patch(f"departments/{department_id}", kwargs)
+        return Department(self, response["payload"])
 
     def delete(self, department_id: int) -> None:
         """
@@ -83,4 +89,4 @@ class DepartmentsManager(Manager):
         Args:
             department_id: The ID of the department to delete.
         """
-        return self._delete(f"departments/{department_id}")
+        self._delete(f"departments/{department_id}")

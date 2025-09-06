@@ -14,21 +14,30 @@ class Component(ApiObject):
 class ComponentsManager(Manager):
     """Manager for all Component-related API operations."""
 
-    def get(self, component_id: Optional[int] = None, **kwargs: Any) -> Union['Component', List['Component']]:
+    def list(self, **kwargs: Any) -> List['Component']:
         """
-        Gets one or more components.
+        Gets a list of components.
+
+        Args:
+            **kwargs: Optional search parameters.
+
+        Returns:
+            A list of Components.
+        """
+        return [Component(self, c) for c in self._get("components", **kwargs)["rows"]]
+
+    def get(self, component_id: int, **kwargs: Any) -> 'Component':
+        """
+        Gets a single component by its ID.
 
         Args:
             component_id: If provided, retrieves a single component by its ID.
             **kwargs: Optional search parameters.
 
         Returns:
-            A single Component object or a list of Components.
+            A single Component object.
         """
-        if component_id:
-            return Component(self, self._get(f"components/{component_id}", **kwargs))
-        else:
-            return [Component(self, c) for c in self._get("components", **kwargs)["rows"]]
+        return Component(self, self._get(f"components/{component_id}", **kwargs))
 
     def create(self, name: str, qty: int, category_id: int, **kwargs: Any) -> 'Component':
         """
@@ -46,29 +55,23 @@ class ComponentsManager(Manager):
         data = {"name": name, "qty": qty, "category_id": category_id}
         data.update(kwargs)
         response = self._create("components", data)
-        if response.get("status") == "success":
-            return Component(self, response["payload"])
-        raise SnipeITApiError(response.get("messages", "Component creation failed."))
+        return Component(self, response["payload"])
 
-    def update(self, component_id: int, name: str, qty: int, category_id: int, **kwargs: Any) -> Dict[str, Any]:
+    def update(self, component_id: int, **kwargs: Any) -> 'Component':
         """
         Updates an existing component.
 
         Args:
             component_id: The ID of the component to update.
-            name: The new name of the component.
-            qty: The new quantity.
-            category_id: The new category ID.
             **kwargs: Additional optional fields.
 
         Returns:
-            The API response dictionary.
+            The updated Component object.
         """
-        data = {"name": name, "qty": qty, "category_id": category_id}
-        data.update(kwargs)
-        return self._update(f"components/{component_id}", data)
+        response = self._update(f"components/{component_id}", kwargs)
+        return Component(self, response["payload"])
 
-    def patch(self, component_id: int, **kwargs: Any) -> Dict[str, Any]:
+    def patch(self, component_id: int, **kwargs: Any) -> 'Component':
         """
         Partially updates a component.
 
@@ -77,9 +80,10 @@ class ComponentsManager(Manager):
             **kwargs: The fields to update.
 
         Returns:
-            The API response dictionary.
+            The updated Component object.
         """
-        return self._patch(f"components/{component_id}", kwargs)
+        response = self._patch(f"components/{component_id}", kwargs)
+        return Component(self, response["payload"])
 
     def delete(self, component_id: int) -> None:
         """
@@ -88,4 +92,4 @@ class ComponentsManager(Manager):
         Args:
             component_id: The ID of the component to delete.
         """
-        return self._delete(f"components/{component_id}")
+        self._delete(f"components/{component_id}")

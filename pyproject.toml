@@ -25,4 +25,7 @@ dependencies = [
 dev = [
     "requests-mock",
     "pytest",
+    "pytest-cov",
+    "coverage",
+    "hypothesis",
 ]

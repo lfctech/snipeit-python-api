@@ -13,21 +13,30 @@ class Category(ApiObject):
 class CategoriesManager(Manager):
     """Manager for all Category-related API operations."""
 
-    def get(self, category_id: Optional[int] = None, **kwargs: Any) -> Union['Category', List['Category']]:
+    def list(self, **kwargs: Any) -> List['Category']:
         """
-        Gets one or more categories.
+        Gets a list of categories.
+
+        Args:
+            **kwargs: Optional search parameters.
+
+        Returns:
+            A list of Categories.
+        """
+        return [Category(self, c) for c in self._get("categories", **kwargs)["rows"]]
+
+    def get(self, category_id: int, **kwargs: Any) -> 'Category':
+        """
+        Gets a single category by its ID.
 
         Args:
             category_id: If provided, retrieves a single category by its ID.
             **kwargs: Optional search parameters.
 
         Returns:
-            A single Category object or a list of Categories.
+            A single Category object.
         """
-        if category_id:
-            return Category(self, self._get(f"categories/{category_id}", **kwargs))
-        else:
-            return [Category(self, c) for c in self._get("categories", **kwargs)["rows"]]
+        return Category(self, self._get(f"categories/{category_id}", **kwargs))
 
     def create(self, name: str, category_type: str, **kwargs: Any) -> 'Category':
         """
@@ -44,28 +53,23 @@ class CategoriesManager(Manager):
         data = {"name": name, "category_type": category_type}
         data.update(kwargs)
         response = self._create("categories", data)
-        if response.get("status") == "success":
-            return Category(self, response["payload"])
-        return response
+        return Category(self, response["payload"])
 
-    def update(self, category_id: int, name: str, category_type: str, **kwargs: Any) -> Dict[str, Any]:
+    def update(self, category_id: int, **kwargs: Any) -> 'Category':
         """
         Updates an existing category.
 
         Args:
             category_id: The ID of the category to update.
-            name: The new name of the category.
-            category_type: The new type of the category.
             **kwargs: Additional optional fields.
 
         Returns:
-            The API response dictionary.
+            The updated Category object.
         """
-        data = {"name": name, "category_type": category_type}
-        data.update(kwargs)
-        return self._update(f"categories/{category_id}", data)
+        response = self._update(f"categories/{category_id}", kwargs)
+        return Category(self, response["payload"])
 
-    def patch(self, category_id: int, **kwargs: Any) -> Dict[str, Any]:
+    def patch(self, category_id: int, **kwargs: Any) -> 'Category':
         """
         Partially updates a category.
 
@@ -74,9 +78,10 @@ class CategoriesManager(Manager):
             **kwargs: The fields to update.
 
         Returns:
-            The API response dictionary.
+            The updated Category object.
         """
-        return self._patch(f"categories/{category_id}", kwargs)
+        response = self._patch(f"categories/{category_id}", kwargs)
+        return Category(self, response["payload"])
 
     def delete(self, category_id: int) -> None:
         """
@@ -85,4 +90,4 @@ class CategoriesManager(Manager):
         Args:
             category_id: The ID of the category to delete.
         """
-        return self._delete(f"categories/{category_id}")
+        self._delete(f"categories/{category_id}")

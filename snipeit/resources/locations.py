@@ -14,21 +14,30 @@ class Location(ApiObject):
 class LocationsManager(Manager):
     """Manager for all Location-related API operations."""
 
-    def get(self, location_id: Optional[int] = None, **kwargs: Any) -> Union['Location', List['Location']]:
+    def list(self, **kwargs: Any) -> List['Location']:
         """
-        Gets one or more locations.
+        Gets a list of locations.
+
+        Args:
+            **kwargs: Optional search parameters.
+
+        Returns:
+            A list of Locations.
+        """
+        return [Location(self, l) for l in self._get("locations", **kwargs)["rows"]]
+
+    def get(self, location_id: int, **kwargs: Any) -> 'Location':
+        """
+        Gets a single location by its ID.
 
         Args:
             location_id: If provided, retrieves a single location by its ID.
             **kwargs: Optional search parameters.
 
         Returns:
-            A single Location object or a list of Locations.
+            A single Location object.
         """
-        if location_id:
-            return Location(self, self._get(f"locations/{location_id}", **kwargs))
-        else:
-            return [Location(self, l) for l in self._get("locations", **kwargs)["rows"]]
+        return Location(self, self._get(f"locations/{location_id}", **kwargs))
 
     def create(self, name: str, **kwargs: Any) -> 'Location':
         """
@@ -44,27 +53,23 @@ class LocationsManager(Manager):
         data = {"name": name}
         data.update(kwargs)
         response = self._create("locations", data)
-        if response.get("status") == "success":
-            return Location(self, response["payload"])
-        raise SnipeITApiError(response.get("messages", "Location creation failed."))
+        return Location(self, response["payload"])
 
-    def update(self, location_id: int, name: str, **kwargs: Any) -> Dict[str, Any]:
+    def update(self, location_id: int, **kwargs: Any) -> 'Location':
         """
         Updates an existing location.
 
         Args:
             location_id: The ID of the location to update.
-            name: The new name of the location.
             **kwargs: Additional optional fields.
 
         Returns:
-            The API response dictionary.
+            The updated Location object.
         """
-        data = {"name": name}
-        data.update(kwargs)
-        return self._update(f"locations/{location_id}", data)
+        response = self._update(f"locations/{location_id}", kwargs)
+        return Location(self, response["payload"])
 
-    def patch(self, location_id: int, **kwargs: Any) -> Dict[str, Any]:
+    def patch(self, location_id: int, **kwargs: Any) -> 'Location':
         """
         Partially updates a location.
 
@@ -73,9 +78,10 @@ class LocationsManager(Manager):
             **kwargs: The fields to update.
 
         Returns:
-            The API response dictionary.
+            The updated Location object.
         """
-        return self._patch(f"locations/{location_id}", kwargs)
+        response = self._patch(f"locations/{location_id}", kwargs)
+        return Location(self, response["payload"])
 
     def delete(self, location_id: int) -> None:
         """
@@ -84,4 +90,4 @@ class LocationsManager(Manager):
         Args:
             location_id: The ID of the location to delete.
         """
-        return self._delete(f"locations/{location_id}")
+        self._delete(f"locations/{location_id}")

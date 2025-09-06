@@ -14,21 +14,30 @@ class Model(ApiObject):
 class ModelsManager(Manager):
     """Manager for all Asset Model-related API operations."""
 
-    def get(self, model_id: Optional[int] = None, **kwargs: Any) -> Union['Model', List['Model']]:
+    def list(self, **kwargs: Any) -> List['Model']:
         """
-        Gets one or more asset models.
+        Gets a list of asset models.
+
+        Args:
+            **kwargs: Optional search parameters.
+
+        Returns:
+            A list of Models.
+        """
+        return [Model(self, m) for m in self._get("models", **kwargs)["rows"]]
+
+    def get(self, model_id: int, **kwargs: Any) -> 'Model':
+        """
+        Gets a single asset model by its ID.
 
         Args:
             model_id: If provided, retrieves a single model by its ID.
             **kwargs: Optional search parameters.
 
         Returns:
-            A single Model object or a list of Models.
+            A single Model object.
         """
-        if model_id:
-            return Model(self, self._get(f"models/{model_id}", **kwargs))
-        else:
-            return [Model(self, m) for m in self._get("models", **kwargs)["rows"]]
+        return Model(self, self._get(f"models/{model_id}", **kwargs))
 
     def create(self, name: str, category_id: int, manufacturer_id: int, **kwargs: Any) -> 'Model':
         """
@@ -46,29 +55,23 @@ class ModelsManager(Manager):
         data = {"name": name, "category_id": category_id, "manufacturer_id": manufacturer_id}
         data.update(kwargs)
         response = self._create("models", data)
-        if response.get("status") == "success":
-            return Model(self, response["payload"])
-        raise SnipeITApiError(response.get("messages", "Model creation failed."))
+        return Model(self, response["payload"])
 
-    def update(self, model_id: int, name: str, category_id: int, manufacturer_id: int, **kwargs: Any) -> Dict[str, Any]:
+    def update(self, model_id: int, **kwargs: Any) -> 'Model':
         """
         Updates an existing asset model.
 
         Args:
             model_id: The ID of the model to update.
-            name: The new name of the model.
-            category_id: The new category ID.
-            manufacturer_id: The new manufacturer ID.
             **kwargs: Additional optional fields.
 
         Returns:
-            The API response dictionary.
+            The updated Model object.
         """
-        data = {"name": name, "category_id": category_id, "manufacturer_id": manufacturer_id}
-        data.update(kwargs)
-        return self._update(f"models/{model_id}", data)
+        response = self._update(f"models/{model_id}", kwargs)
+        return Model(self, response["payload"])
 
-    def patch(self, model_id: int, **kwargs: Any) -> Dict[str, Any]:
+    def patch(self, model_id: int, **kwargs: Any) -> 'Model':
         """
         Partially updates an asset model.
 
@@ -77,9 +80,10 @@ class ModelsManager(Manager):
             **kwargs: The fields to update.
 
         Returns:
-            The API response dictionary.
+            The updated Model object.
         """
-        return self._patch(f"models/{model_id}", kwargs)
+        response = self._patch(f"models/{model_id}", kwargs)
+        return Model(self, response["payload"])
 
     def delete(self, model_id: int) -> None:
         """
@@ -88,4 +92,4 @@ class ModelsManager(Manager):
         Args:
             model_id: The ID of the model to delete.
         """
-        return self._delete(f"models/{model_id}")
+        self._delete(f"models/{model_id}")
