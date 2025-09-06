@@ -14,21 +14,30 @@ class License(ApiObject):
 class LicensesManager(Manager):
     """Manager for all License-related API operations."""
 
-    def get(self, license_id: Optional[int] = None, **kwargs: Any) -> Union['License', List['License']]:
+    def list(self, **kwargs: Any) -> List['License']:
         """
-        Gets one or more licenses.
+        Gets a list of licenses.
+
+        Args:
+            **kwargs: Optional search parameters.
+
+        Returns:
+            A list of Licenses.
+        """
+        return [License(self, l) for l in self._get("licenses", **kwargs)["rows"]]
+
+    def get(self, license_id: int, **kwargs: Any) -> 'License':
+        """
+        Gets a single license by its ID.
 
         Args:
             license_id: If provided, retrieves a single license by its ID.
             **kwargs: Optional search parameters.
 
         Returns:
-            A single License object or a list of Licenses.
+            A single License object.
         """
-        if license_id:
-            return License(self, self._get(f"licenses/{license_id}", **kwargs))
-        else:
-            return [License(self, l) for l in self._get("licenses", **kwargs)["rows"]]
+        return License(self, self._get(f"licenses/{license_id}", **kwargs))
 
     def create(self, name: str, seats: int, category_id: int, **kwargs: Any) -> 'License':
         """
@@ -46,29 +55,23 @@ class LicensesManager(Manager):
         data = {"name": name, "seats": seats, "category_id": category_id}
         data.update(kwargs)
         response = self._create("licenses", data)
-        if response.get("status") == "success":
-            return License(self, response["payload"])
-        raise SnipeITApiError(response.get("messages", "License creation failed."))
+        return License(self, response["payload"])
 
-    def update(self, license_id: int, name: str, seats: int, category_id: int, **kwargs: Any) -> Dict[str, Any]:
+    def update(self, license_id: int, **kwargs: Any) -> 'License':
         """
         Updates an existing license.
 
         Args:
             license_id: The ID of the license to update.
-            name: The new name of the license.
-            seats: The new number of seats.
-            category_id: The new category ID.
             **kwargs: Additional optional fields.
 
         Returns:
-            The API response dictionary.
+            The updated License object.
         """
-        data = {"name": name, "seats": seats, "category_id": category_id}
-        data.update(kwargs)
-        return self._update(f"licenses/{license_id}", data)
+        response = self._update(f"licenses/{license_id}", kwargs)
+        return License(self, response["payload"])
 
-    def patch(self, license_id: int, **kwargs: Any) -> Dict[str, Any]:
+    def patch(self, license_id: int, **kwargs: Any) -> 'License':
         """
         Partially updates a license.
 
@@ -77,9 +80,10 @@ class LicensesManager(Manager):
             **kwargs: The fields to update.
 
         Returns:
-            The API response dictionary.
+            The updated License object.
         """
-        return self._patch(f"licenses/{license_id}", kwargs)
+        response = self._patch(f"licenses/{license_id}", kwargs)
+        return License(self, response["payload"])
 
     def delete(self, license_id: int) -> None:
         """
@@ -88,4 +92,4 @@ class LicensesManager(Manager):
         Args:
             license_id: The ID of the license to delete.
         """
-        return self._delete(f"licenses/{license_id}")
+        self._delete(f"licenses/{license_id}")

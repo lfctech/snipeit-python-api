@@ -14,21 +14,30 @@ class StatusLabel(ApiObject):
 class StatusLabelsManager(Manager):
     """Manager for all Status Label-related API operations."""
 
-    def get(self, status_label_id: Optional[int] = None, **kwargs: Any) -> Union['StatusLabel', List['StatusLabel']]:
+    def list(self, **kwargs: Any) -> List['StatusLabel']:
         """
-        Gets one or more status labels.
+        Gets a list of status labels.
+
+        Args:
+            **kwargs: Optional search parameters.
+
+        Returns:
+            A list of StatusLabels.
+        """
+        return [StatusLabel(self, s) for s in self._get("statuslabels", **kwargs)["rows"]]
+
+    def get(self, status_label_id: int, **kwargs: Any) -> 'StatusLabel':
+        """
+        Gets a single status label by its ID.
 
         Args:
             status_label_id: If provided, retrieves a single status label by its ID.
             **kwargs: Optional search parameters.
 
         Returns:
-            A single StatusLabel object or a list of StatusLabels.
+            A single StatusLabel object.
         """
-        if status_label_id:
-            return StatusLabel(self, self._get(f"statuslabels/{status_label_id}", **kwargs))
-        else:
-            return [StatusLabel(self, s) for s in self._get("statuslabels", **kwargs)["rows"]]
+        return StatusLabel(self, self._get(f"statuslabels/{status_label_id}", **kwargs))
 
     def create(self, name: str, type: str, **kwargs: Any) -> 'StatusLabel':
         """
@@ -45,28 +54,23 @@ class StatusLabelsManager(Manager):
         data = {"name": name, "type": type}
         data.update(kwargs)
         response = self._create("statuslabels", data)
-        if response.get("status") == "success":
-            return StatusLabel(self, response["payload"])
-        raise SnipeITApiError(response.get("messages", "Status Label creation failed."))
+        return StatusLabel(self, response["payload"])
 
-    def update(self, status_label_id: int, name: str, type: str, **kwargs: Any) -> Dict[str, Any]:
+    def update(self, status_label_id: int, **kwargs: Any) -> 'StatusLabel':
         """
         Updates an existing status label.
 
         Args:
             status_label_id: The ID of the status label to update.
-            name: The new name of the status label.
-            type: The new type of the status label.
             **kwargs: Additional optional fields.
 
         Returns:
-            The API response dictionary.
+            The updated StatusLabel object.
         """
-        data = {"name": name, "type": type}
-        data.update(kwargs)
-        return self._update(f"statuslabels/{status_label_id}", data)
+        response = self._update(f"statuslabels/{status_label_id}", kwargs)
+        return StatusLabel(self, response["payload"])
 
-    def patch(self, status_label_id: int, **kwargs: Any) -> Dict[str, Any]:
+    def patch(self, status_label_id: int, **kwargs: Any) -> 'StatusLabel':
         """
         Partially updates a status label.
 
@@ -75,9 +79,10 @@ class StatusLabelsManager(Manager):
             **kwargs: The fields to update.
 
         Returns:
-            The API response dictionary.
+            The updated StatusLabel object.
         """
-        return self._patch(f"statuslabels/{status_label_id}", kwargs)
+        response = self._patch(f"statuslabels/{status_label_id}", kwargs)
+        return StatusLabel(self, response["payload"])
 
     def delete(self, status_label_id: int) -> None:
         """
@@ -86,4 +91,4 @@ class StatusLabelsManager(Manager):
         Args:
             status_label_id: The ID of the status label to delete.
         """
-        return self._delete(f"statuslabels/{status_label_id}")
+        self._delete(f"statuslabels/{status_label_id}")

@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 from ..exceptions import SnipeITApiError, SnipeITNotFoundError
 from .base import ApiObject, Manager
 
@@ -40,7 +40,8 @@ class Asset(ApiObject):
             raise ValueError("checkout_to_type must be one of 'user', 'asset', or 'location'")
 
         data.update(kwargs)
-        return self._manager._create(path, data)
+        response = self._manager._create(path, data)
+        return response['payload']
 
     def checkin(self, **kwargs: Any) -> Dict[str, Any]:
         """
@@ -53,7 +54,8 @@ class Asset(ApiObject):
             The API response dictionary.
         """
         path = f"{self._path}/{self.id}/checkin"
-        return self._manager._create(path, kwargs)
+        response = self._manager._create(path, kwargs)
+        return response['payload']
 
     def audit(self, **kwargs: Any) -> Dict[str, Any]:
         """
@@ -66,27 +68,37 @@ class Asset(ApiObject):
             The API response dictionary.
         """
         path = f"{self._path}/{self.id}/audit"
-        return self._manager._create(path, kwargs)
+        response = self._manager._create(path, kwargs)
+        return response['payload']
 
 
 class AssetsManager(Manager):
     """Manager for all Asset-related API operations."""
 
-    def get(self, asset_id: Optional[int] = None, **kwargs: Any) -> Union['Asset', List['Asset']]:
+    def list(self, **kwargs: Any) -> List['Asset']:
         """
-        Gets one or more assets.
+        Gets a list of assets.
 
         Args:
-            asset_id: If provided, retrieves a single asset by its ID.
             **kwargs: Optional search parameters to filter the list of assets.
 
         Returns:
-            A single Asset object if asset_id is provided, otherwise a list of Assets.
+            A list of Assets.
         """
-        if asset_id:
-            return Asset(self, self._get(f"hardware/{asset_id}", **kwargs))
-        else:
-            return [Asset(self, a) for a in self._get("hardware", **kwargs)["rows"]]
+        return [Asset(self, a) for a in self._get("hardware", **kwargs)["rows"]]
+
+    def get(self, asset_id: int, **kwargs: Any) -> 'Asset':
+        """
+        Gets a single asset by its ID.
+
+        Args:
+            asset_id: The ID of the asset to retrieve.
+            **kwargs: Optional search parameters.
+
+        Returns:
+            A single Asset object.
+        """
+        return Asset(self, self._get(f"hardware/{asset_id}", **kwargs))
 
     def create(self, status_id: int, model_id: int, asset_tag: Optional[str] = None, **kwargs: Any) -> 'Asset':
         """
@@ -109,34 +121,23 @@ class AssetsManager(Manager):
             data['asset_tag'] = asset_tag
         data.update(kwargs)
         response = self._create("hardware", data)
-        if response.get("status") == "success":
-            return Asset(self, response["payload"])
-        # Non-successful response with 2xx/3xx status codes
-        raise SnipeITApiError(response.get("messages", "Asset creation failed."))
+        return Asset(self, response["payload"])
 
-    def update(self, asset_id: int, asset_tag: str, status_id: int, model_id: int, **kwargs: Any) -> Dict[str, Any]:
+    def update(self, asset_id: int, **kwargs: Any) -> 'Asset':
         """
         Updates an existing asset using a PUT request.
 
         Args:
             asset_id: The ID of the asset to update.
-            asset_tag: The unique asset tag.
-            status_id: The ID of the status label.
-            model_id: The ID of the asset model.
             **kwargs: Additional optional fields to update.
 
         Returns:
-            The API response dictionary.
+            The updated Asset object.
         """
-        data = {
-            "asset_tag": asset_tag,
-            "status_id": status_id,
-            "model_id": model_id,
-        }
-        data.update(kwargs)
-        return self._update(f"hardware/{asset_id}", data)
+        response = self._update(f"hardware/{asset_id}", kwargs)
+        return Asset(self, response["payload"])
 
-    def patch(self, asset_id: int, **kwargs: Any) -> Dict[str, Any]:
+    def patch(self, asset_id: int, **kwargs: Any) -> 'Asset':
         """
         Partially updates an existing asset using a PATCH request.
 
@@ -145,9 +146,10 @@ class AssetsManager(Manager):
             **kwargs: The fields to update.
 
         Returns:
-            The API response dictionary.
+            The updated Asset object.
         """
-        return self._patch(f"hardware/{asset_id}", kwargs)
+        response = self._patch(f"hardware/{asset_id}", kwargs)
+        return Asset(self, response["payload"])
 
     def delete(self, asset_id: int) -> None:
         """
@@ -156,7 +158,7 @@ class AssetsManager(Manager):
         Args:
             asset_id: The ID of the asset to delete.
         """
-        return self._delete(f"hardware/{asset_id}")
+        self._delete(f"hardware/{asset_id}")
 
     def get_by_tag(self, asset_tag: str, **kwargs: Any) -> 'Asset':
         """
@@ -170,11 +172,7 @@ class AssetsManager(Manager):
             An Asset object.
         """
         response = self._get(f"hardware/bytag/{asset_tag}", **kwargs)
-        if response.get("total", 0) == 1:
-            return Asset(self, response["rows"][0])
-        elif response.get("total", 0) > 1:
-            raise SnipeITApiError(f"Expected 1 asset with asset_tag {asset_tag}, but found {response['total']}.")
-        raise SnipeITNotFoundError(f"Asset with asset_tag {asset_tag} not found.")
+        return Asset(self, response)
 
     def get_by_serial(self, serial: str, **kwargs: Any) -> 'Asset':
         """
@@ -214,4 +212,5 @@ class AssetsManager(Manager):
             "title": title,
         }
         data.update(kwargs)
-        return self._create(f"hardware/{asset_id}/maintenances", data)
+        response = self._create(f"hardware/{asset_id}/maintenances", data)
+        return response['payload']

@@ -14,21 +14,30 @@ class Consumable(ApiObject):
 class ConsumablesManager(Manager):
     """Manager for all Consumable-related API operations."""
 
-    def get(self, consumable_id: Optional[int] = None, **kwargs: Any) -> Union['Consumable', List['Consumable']]:
+    def list(self, **kwargs: Any) -> List['Consumable']:
         """
-        Gets one or more consumables.
+        Gets a list of consumables.
+
+        Args:
+            **kwargs: Optional search parameters.
+
+        Returns:
+            A list of Consumables.
+        """
+        return [Consumable(self, c) for c in self._get("consumables", **kwargs)["rows"]]
+
+    def get(self, consumable_id: int, **kwargs: Any) -> 'Consumable':
+        """
+        Gets a single consumable by its ID.
 
         Args:
             consumable_id: If provided, retrieves a single consumable by its ID.
             **kwargs: Optional search parameters.
 
         Returns:
-            A single Consumable object or a list of Consumables.
+            A single Consumable object.
         """
-        if consumable_id:
-            return Consumable(self, self._get(f"consumables/{consumable_id}", **kwargs))
-        else:
-            return [Consumable(self, c) for c in self._get("consumables", **kwargs)["rows"]]
+        return Consumable(self, self._get(f"consumables/{consumable_id}", **kwargs))
 
     def create(self, name: str, qty: int, category_id: int, **kwargs: Any) -> 'Consumable':
         """
@@ -50,33 +59,23 @@ class ConsumablesManager(Manager):
         }
         data.update(kwargs)
         response = self._create("consumables", data)
-        if response.get("status") == "success":
-            return Consumable(self, response["payload"])
-        raise SnipeITApiError(response.get("messages", "Consumable creation failed."))
+        return Consumable(self, response["payload"])
 
-    def update(self, consumable_id: int, name: str, qty: int, category_id: int, **kwargs: Any) -> Dict[str, Any]:
+    def update(self, consumable_id: int, **kwargs: Any) -> 'Consumable':
         """
         Updates an existing consumable.
 
         Args:
             consumable_id: The ID of the consumable to update.
-            name: The new name of the consumable.
-            qty: The new quantity.
-            category_id: The new category ID.
             **kwargs: Additional optional fields.
 
         Returns:
-            The API response dictionary.
+            The updated Consumable object.
         """
-        data = {
-            "name": name,
-            "qty": qty,
-            "category_id": category_id,
-        }
-        data.update(kwargs)
-        return self._update(f"consumables/{consumable_id}", data)
+        response = self._update(f"consumables/{consumable_id}", kwargs)
+        return Consumable(self, response["payload"])
 
-    def patch(self, consumable_id: int, **kwargs: Any) -> Dict[str, Any]:
+    def patch(self, consumable_id: int, **kwargs: Any) -> 'Consumable':
         """
         Partially updates a consumable.
 
@@ -85,9 +84,10 @@ class ConsumablesManager(Manager):
             **kwargs: The fields to update.
 
         Returns:
-            The API response dictionary.
+            The updated Consumable object.
         """
-        return self._patch(f"consumables/{consumable_id}", kwargs)
+        response = self._patch(f"consumables/{consumable_id}", kwargs)
+        return Consumable(self, response["payload"])
 
     def delete(self, consumable_id: int) -> None:
         """
@@ -96,4 +96,4 @@ class ConsumablesManager(Manager):
         Args:
             consumable_id: The ID of the consumable to delete.
         """
-        return self._delete(f"consumables/{consumable_id}")
+        self._delete(f"consumables/{consumable_id}")

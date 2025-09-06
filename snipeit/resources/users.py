@@ -14,21 +14,30 @@ class User(ApiObject):
 class UsersManager(Manager):
     """Manager for all User-related API operations."""
 
-    def get(self, user_id: Optional[int] = None, **kwargs: Any) -> Union['User', List['User']]:
+    def list(self, **kwargs: Any) -> List['User']:
         """
-        Gets one or more users.
+        Gets a list of users.
 
         Args:
-            user_id: If provided, retrieves a single user by their ID.
             **kwargs: Optional search parameters.
 
         Returns:
-            A single User object or a list of Users.
+            A list of Users.
         """
-        if user_id:
-            return User(self, self._get(f"users/{user_id}", **kwargs))
-        else:
-            return [User(self, u) for u in self._get("users", **kwargs)["rows"]]
+        return [User(self, u) for u in self._get("users", **kwargs)["rows"]]
+
+    def get(self, user_id: int, **kwargs: Any) -> 'User':
+        """
+        Gets a single user by ID.
+
+        Args:
+            user_id: The ID of the user to retrieve.
+            **kwargs: Optional search parameters.
+
+        Returns:
+            A single User object.
+        """
+        return User(self, self._get(f"users/{user_id}", **kwargs))
 
     def create(self, username: str, **kwargs: Any) -> 'User':
         """
@@ -44,11 +53,9 @@ class UsersManager(Manager):
         data = {"username": username}
         data.update(kwargs)
         response = self._create("users", data)
-        if response.get("status") == "success":
-            return User(self, response["payload"])
-        raise SnipeITApiError(response.get("messages", "User creation failed."))
+        return User(self, response["payload"])
 
-    def update(self, user_id: int, **kwargs: Any) -> Dict[str, Any]:
+    def update(self, user_id: int, **kwargs: Any) -> 'User':
         """
         Updates an existing user.
 
@@ -57,11 +64,12 @@ class UsersManager(Manager):
             **kwargs: The fields to update.
 
         Returns:
-            The API response dictionary.
+            The updated User object.
         """
-        return self._update(f"users/{user_id}", kwargs)
+        response = self._update(f"users/{user_id}", kwargs)
+        return User(self, response["payload"])
 
-    def patch(self, user_id: int, **kwargs: Any) -> Dict[str, Any]:
+    def patch(self, user_id: int, **kwargs: Any) -> 'User':
         """
         Partially updates a user.
 
@@ -70,9 +78,10 @@ class UsersManager(Manager):
             **kwargs: The fields to update.
 
         Returns:
-            The API response dictionary.
+            The updated User object.
         """
-        return self._patch(f"users/{user_id}", kwargs)
+        response = self._patch(f"users/{user_id}", kwargs)
+        return User(self, response["payload"])
 
     def delete(self, user_id: int) -> None:
         """
@@ -81,7 +90,7 @@ class UsersManager(Manager):
         Args:
             user_id: The ID of the user to delete.
         """
-        return self._delete(f"users/{user_id}")
+        self._delete(f"users/{user_id}")
 
     def me(self) -> 'User':
         """

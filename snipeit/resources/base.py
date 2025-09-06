@@ -64,26 +64,6 @@ class ApiObject:
         
         return self
 
-    def update(self) -> 'ApiObject':
-        """
-        Updates the entire object by sending a PUT request.
-
-        Returns:
-            The updated object from the API.
-        """
-        path = f"{self._path}/{self.id}"
-        data = {key: value for key, value in self.__dict__.items() if not key.startswith("_")}
-        response = self._manager._update(path, data)
-
-        if response.get("status") == "success":
-            payload = response.get("payload", {})
-            for key, value in payload.items():
-                setattr(self, key, value)
-        else:
-            raise SnipeITApiError(response.get("messages", "Update failed."))
-        
-        return self
-
     def delete(self) -> None:
         """
         Deletes the object.
@@ -114,17 +94,11 @@ class Manager:
 
     def _update(self, path: str, data: Dict[str, Any]) -> Dict[str, Any]:
         """Internal method to perform a PUT request."""
-        response = self.api.put(path, data)
-        if response.get("status") != "success":
-            raise SnipeITApiError(response.get("messages", "Update failed."))
-        return response
+        return self.api.put(path, data)
 
     def _patch(self, path: str, data: Dict[str, Any]) -> Dict[str, Any]:
         """Internal method to perform a PATCH request."""
-        response = self.api.patch(path, data)
-        if response.get("status") != "success":
-            raise SnipeITApiError(response.get("messages", "Patch failed."))
-        return response
+        return self.api.patch(path, data)
 
     def _delete(self, path: str) -> None:
         """Internal method to perform a DELETE request."""

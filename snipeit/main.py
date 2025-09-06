@@ -2,20 +2,6 @@ from typing import Any, Dict, Optional, Set
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
-from .resources.assets import AssetsManager
-from .resources.accessories import AccessoriesManager
-from .resources.components import ComponentsManager
-from .resources.consumables import ConsumablesManager
-from .resources.licenses import LicensesManager
-from .resources.users import UsersManager
-from .resources.locations import LocationsManager
-from .resources.departments import DepartmentsManager
-from .resources.manufacturers import ManufacturersManager
-from .resources.models import ModelsManager
-from .resources.categories import CategoriesManager
-from .resources.status_labels import StatusLabelsManager
-from .resources.fields import FieldsManager
-from .resources.fieldsets import FieldsetsManager
 from .exceptions import (
     SnipeITApiError,
     SnipeITAuthenticationError,
@@ -66,20 +52,103 @@ class SnipeIT:
         self.session.mount("https://", adapter)
         self.session.mount("http://", adapter)
 
-        self.assets = AssetsManager(self)
-        self.accessories = AccessoriesManager(self)
-        self.components = ComponentsManager(self)
-        self.consumables = ConsumablesManager(self)
-        self.licenses = LicensesManager(self)
-        self.users = UsersManager(self)
-        self.locations = LocationsManager(self)
-        self.departments = DepartmentsManager(self)
-        self.manufacturers = ManufacturersManager(self)
-        self.models = ModelsManager(self)
-        self.categories = CategoriesManager(self)
-        self.status_labels = StatusLabelsManager(self)
-        self.fields = FieldsManager(self)
-        self.fieldsets = FieldsetsManager(self)
+    @property
+    def assets(self) -> "AssetsManager":
+        if not hasattr(self, "_assets"):
+            from .resources.assets import AssetsManager
+            self._assets = AssetsManager(self)
+        return self._assets
+
+    @property
+    def accessories(self) -> "AccessoriesManager":
+        if not hasattr(self, "_accessories"):
+            from .resources.accessories import AccessoriesManager
+            self._accessories = AccessoriesManager(self)
+        return self._accessories
+
+    @property
+    def components(self) -> "ComponentsManager":
+        if not hasattr(self, "_components"):
+            from .resources.components import ComponentsManager
+            self._components = ComponentsManager(self)
+        return self._components
+
+    @property
+    def consumables(self) -> "ConsumablesManager":
+        if not hasattr(self, "_consumables"):
+            from .resources.consumables import ConsumablesManager
+            self._consumables = ConsumablesManager(self)
+        return self._consumables
+
+    @property
+    def licenses(self) -> "LicensesManager":
+        if not hasattr(self, "_licenses"):
+            from .resources.licenses import LicensesManager
+            self._licenses = LicensesManager(self)
+        return self._licenses
+
+    @property
+    def users(self) -> "UsersManager":
+        if not hasattr(self, "_users"):
+            from .resources.users import UsersManager
+            self._users = UsersManager(self)
+        return self._users
+
+    @property
+    def locations(self) -> "LocationsManager":
+        if not hasattr(self, "_locations"):
+            from .resources.locations import LocationsManager
+            self._locations = LocationsManager(self)
+        return self._locations
+
+    @property
+    def departments(self) -> "DepartmentsManager":
+        if not hasattr(self, "_departments"):
+            from .resources.departments import DepartmentsManager
+            self._departments = DepartmentsManager(self)
+        return self._departments
+
+    @property
+    def manufacturers(self) -> "ManufacturersManager":
+        if not hasattr(self, "_manufacturers"):
+            from .resources.manufacturers import ManufacturersManager
+            self._manufacturers = ManufacturersManager(self)
+        return self._manufacturers
+
+    @property
+    def models(self) -> "ModelsManager":
+        if not hasattr(self, "_models"):
+            from .resources.models import ModelsManager
+            self._models = ModelsManager(self)
+        return self._models
+
+    @property
+    def categories(self) -> "CategoriesManager":
+        if not hasattr(self, "_categories"):
+            from .resources.categories import CategoriesManager
+            self._categories = CategoriesManager(self)
+        return self._categories
+
+    @property
+    def status_labels(self) -> "StatusLabelsManager":
+        if not hasattr(self, "_status_labels"):
+            from .resources.status_labels import StatusLabelsManager
+            self._status_labels = StatusLabelsManager(self)
+        return self._status_labels
+
+    @property
+    def fields(self) -> "FieldsManager":
+        if not hasattr(self, "_fields"):
+            from .resources.fields import FieldsManager
+            self._fields = FieldsManager(self)
+        return self._fields
+
+    @property
+    def fieldsets(self) -> "FieldsetsManager":
+        if not hasattr(self, "_fieldsets"):
+            from .resources.fieldsets import FieldsetsManager
+            self._fieldsets = FieldsetsManager(self)
+        return self._fieldsets
 
     def close(self) -> None:
         """Closes the underlying HTTP session."""
@@ -121,7 +190,10 @@ class SnipeIT:
 
             # Ensure we always return JSON for 2xx responses; otherwise raise a clear error
             try:
-                return response.json()
+                json_response = response.json()
+                if isinstance(json_response, dict) and json_response.get("status") == "error":
+                    raise SnipeITApiError(json_response.get("messages", "Unknown API error"))
+                return json_response
             except ValueError as e:
                 raise SnipeITException("Expected JSON response but received invalid or non-JSON content.") from e
 

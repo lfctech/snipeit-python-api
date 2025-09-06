@@ -13,21 +13,30 @@ class Field(ApiObject):
 class FieldsManager(Manager):
     """Manager for all Custom Field-related API operations."""
 
-    def get(self, field_id: Optional[int] = None, **kwargs: Any) -> Union['Field', List['Field']]:
+    def list(self, **kwargs: Any) -> List['Field']:
         """
-        Gets one or more custom fields.
+        Gets a list of custom fields.
+
+        Args:
+            **kwargs: Optional search parameters.
+
+        Returns:
+            A list of Fields.
+        """
+        return [Field(self, f) for f in self._get("fields", **kwargs)["rows"]]
+
+    def get(self, field_id: int, **kwargs: Any) -> 'Field':
+        """
+        Gets a single custom field by its ID.
 
         Args:
             field_id: If provided, retrieves a single field by its ID.
             **kwargs: Optional search parameters.
 
         Returns:
-            A single Field object or a list of Fields.
+            A single Field object.
         """
-        if field_id:
-            return Field(self, self._get(f"fields/{field_id}", **kwargs))
-        else:
-            return [Field(self, f) for f in self._get("fields", **kwargs)["rows"]]
+        return Field(self, self._get(f"fields/{field_id}", **kwargs))
 
     def create(self, name: str, element: str, **kwargs: Any) -> 'Field':
         """
@@ -44,28 +53,23 @@ class FieldsManager(Manager):
         data = {"name": name, "element": element}
         data.update(kwargs)
         response = self._create("fields", data)
-        if response.get("status") == "success":
-            return Field(self, response["payload"])
-        return response
+        return Field(self, response["payload"])
 
-    def update(self, field_id: int, name: str, element: str, **kwargs: Any) -> Dict[str, Any]:
+    def update(self, field_id: int, **kwargs: Any) -> 'Field':
         """
         Updates an existing custom field.
 
         Args:
             field_id: The ID of the field to update.
-            name: The new name of the field.
-            element: The new element type.
             **kwargs: Additional optional fields.
 
         Returns:
-            The API response dictionary.
+            The updated Field object.
         """
-        data = {"name": name, "element": element}
-        data.update(kwargs)
-        return self._update(f"fields/{field_id}", data)
+        response = self._update(f"fields/{field_id}", kwargs)
+        return Field(self, response["payload"])
 
-    def patch(self, field_id: int, **kwargs: Any) -> Dict[str, Any]:
+    def patch(self, field_id: int, **kwargs: Any) -> 'Field':
         """
         Partially updates a custom field.
 
@@ -74,9 +78,10 @@ class FieldsManager(Manager):
             **kwargs: The fields to update.
 
         Returns:
-            The API response dictionary.
+            The updated Field object.
         """
-        return self._patch(f"fields/{field_id}", kwargs)
+        response = self._patch(f"fields/{field_id}", kwargs)
+        return Field(self, response["payload"])
 
     def delete(self, field_id: int) -> None:
         """
@@ -85,4 +90,4 @@ class FieldsManager(Manager):
         Args:
             field_id: The ID of the field to delete.
         """
-        return self._delete(f"fields/{field_id}")
+        self._delete(f"fields/{field_id}")
