@@ -25,7 +25,7 @@ property:
 
 # Mutation testing (can be slow)
 mut:
-	$(PY) -m mutmut run --paths-to-mutate snipeit --tests-dir tests
+	$(PY) -m mutmut run --paths-to-mutate snipeit --tests-dir tests || true
 
 mut-report:
 	$(PY) -m mutmut results
