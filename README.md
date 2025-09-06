@@ -177,6 +177,28 @@ make cov-html
 make property
 ```
 
+### Mutation testing (optional)
+
+Mutation testing flips bits in your source to ensure your tests actually detect behavioral changes. It can be slow. We use mutmut and reuse coverage data to prioritize mutated lines.
+
+- Run mutation tests (may take time):
+
+```bash
+make mut
+```
+
+- See surviving mutants (things your tests didn’t catch):
+
+```bash
+make mut-report
+```
+
+- Reset mutation state:
+
+```bash
+make mut-reset
+```
+
 ## License
 
 Add your preferred license here.
