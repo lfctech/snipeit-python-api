@@ -62,5 +62,7 @@ env/
 
 # Local
 GEMINI.md
+.mutmut-cache
 .mutmut-cache/
+mutants/
 

@@ -261,7 +261,22 @@ def test_asset_repr_with_defaults(snipeit_client, requests_mock):
     )
     asset = snipeit_client.assets.get(10)
     rep = repr(asset)
-    assert "Asset" in rep and "N/A" in rep
+    assert rep == "<Asset N/A (N/A - N/A - N/A)>"
+
+
+def test_asset_repr_full_fields(snipeit_client, requests_mock):
+    requests_mock.get(
+        "https://test.snipeitapp.com/api/v1/hardware/11",
+        json={
+            "id": 11,
+            "name": "Foo",
+            "asset_tag": "12345",
+            "serial": "ABC",
+            "model": {"name": "Model"},
+        },
+    )
+    asset = snipeit_client.assets.get(11)
+    assert repr(asset) == "<Asset 12345 (Foo - ABC - Model)>"
 
 
 def test_asset_checkout_invalid_type_raises_valueerror(snipeit_client, requests_mock):

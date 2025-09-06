@@ -3,7 +3,8 @@ from snipeit.exceptions import (
     SnipeITAuthenticationError,
     SnipeITNotFoundError,
     SnipeITValidationError,
-    SnipeITServerError
+    SnipeITServerError,
+    SnipeITApiError,
 )
 
 
@@ -41,3 +42,12 @@ def test_500_raises_server_error(snipeit_client, requests_mock):
     with pytest.raises(SnipeITServerError) as excinfo:
         snipeit_client.assets.get(1)
     assert "Internal Server Error" in str(excinfo.value)
+
+
+def test_api_error_preserves_response_and_status_code():
+    import requests
+    r = requests.models.Response()
+    r.status_code = 418
+    exc = SnipeITApiError("I am a teapot", response=r)
+    assert exc.response is r
+    assert exc.status_code == 418

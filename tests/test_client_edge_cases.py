@@ -23,8 +23,9 @@ def test_status_error_in_json_raises_api_error(snipeit_client, requests_mock):
         json={"status": "error", "messages": "Something went wrong"},
         status_code=200,
     )
-    with pytest.raises(SnipeITApiError):
+    with pytest.raises(SnipeITApiError) as excinfo:
         snipeit_client.post("hardware", data={"foo": "bar"})
+    assert "Something went wrong" in str(excinfo.value)
 
 
 def test_non_json_2xx_raises_snipeit_exception(snipeit_client, requests_mock):
