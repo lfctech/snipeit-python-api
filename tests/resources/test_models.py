@@ -23,7 +23,7 @@ def test_create_model(snipeit_client, requests_mock):
     new_model = snipeit_client.models.create(name="New Model", category_id=1, manufacturer_id=1)
     assert isinstance(new_model, Model)
     assert new_model.name == "New Model"
-    assert requests_mock.last_request.json()["name"] == "New Model"
+    assert requests_mock.last_request.json() == {"name": "New Model", "category_id": 1, "manufacturer_id": 1}
 
 def test_update_model(snipeit_client, requests_mock):
     requests_mock.put("https://test.snipeitapp.com/api/v1/models/1", json={"status": "success", "payload": {"id": 1, "name": "Updated Model"}})

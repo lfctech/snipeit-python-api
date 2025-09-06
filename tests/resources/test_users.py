@@ -23,7 +23,7 @@ def test_create_user(snipeit_client, requests_mock):
     new_user = snipeit_client.users.create(username="newuser")
     assert isinstance(new_user, User)
     assert new_user.name == "New User"
-    assert requests_mock.last_request.json()["username"] == "newuser"
+    assert requests_mock.last_request.json() == {"username": "newuser"}
 
 def test_update_user(snipeit_client, requests_mock):
     requests_mock.put("https://test.snipeitapp.com/api/v1/users/1", json={"status": "success", "payload": {"id": 1, "name": "Updated User"}})

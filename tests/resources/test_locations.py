@@ -23,7 +23,7 @@ def test_create_location(snipeit_client, requests_mock):
     new_location = snipeit_client.locations.create(name="New Location")
     assert isinstance(new_location, Location)
     assert new_location.name == "New Location"
-    assert requests_mock.last_request.json()["name"] == "New Location"
+    assert requests_mock.last_request.json() == {"name": "New Location"}
 
 def test_update_location(snipeit_client, requests_mock):
     requests_mock.put("https://test.snipeitapp.com/api/v1/locations/1", json={"status": "success", "payload": {"id": 1, "name": "Updated Location"}})

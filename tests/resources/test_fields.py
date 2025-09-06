@@ -23,7 +23,7 @@ def test_create_field(snipeit_client, requests_mock):
     new_field = snipeit_client.fields.create(name="New Field", element="text")
     assert isinstance(new_field, Field)
     assert new_field.name == "New Field"
-    assert requests_mock.last_request.json()["name"] == "New Field"
+    assert requests_mock.last_request.json() == {"name": "New Field", "element": "text"}
 
 def test_update_field(snipeit_client, requests_mock):
     requests_mock.put("https://test.snipeitapp.com/api/v1/fields/1", json={"status": "success", "payload": {"id": 1, "name": "Updated Field"}})
