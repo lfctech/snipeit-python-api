@@ -6,7 +6,7 @@ A Python client library for the Snipe-IT API. It provides a simple, typed interf
 
 ### For Users (in another project)
 
-To use this library in another project, you can install it directly from its GitHub repository:
+To use this library in another project
 
 ```bash
 pip install /path/to/inventory-library
@@ -153,8 +153,28 @@ client = SnipeIT(
 
 ## Running tests
 
+- Quick run:
+
 ```bash
 pytest -q
+```
+
+- With coverage (enforces 100% and shows missing lines):
+
+```bash
+make cov
+```
+
+- HTML coverage report:
+
+```bash
+make cov-html
+```
+
+- Property-based tests only (Hypothesis):
+
+```bash
+make property
 ```
 
 ## License

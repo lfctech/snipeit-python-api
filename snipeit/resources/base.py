@@ -1,6 +1,9 @@
 from typing import Any, Dict, Set
 from ..exceptions import SnipeITApiError
 
+# Sentinel object to distinguish missing attributes from explicit None values
+_MISSING = object()
+
 
 class ApiObject:
     """Base class for all Snipe-IT API objects (Assets, Users, etc.)."""
@@ -30,7 +33,8 @@ class ApiObject:
         # Only track changes after the object has been fully initialized.
         if self._initialized and not name.startswith("_"):
             # To prevent flagging unchanged values as dirty
-            if getattr(self, name, None) != value:
+            current = getattr(self, name, _MISSING)
+            if current is _MISSING or current != value:
                 self._dirty_fields.add(name)
         super().__setattr__(name, value)
 

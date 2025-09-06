@@ -1,5 +1,6 @@
 import pytest
 from snipeit.resources.assets import Asset
+from snipeit.exceptions import SnipeITNotFoundError
 
 
 def test_list_assets(snipeit_client, requests_mock):
@@ -221,3 +222,72 @@ def test_asset_audit(snipeit_client, requests_mock):
     asset = snipeit_client.assets.get(1)
     asset.audit(note="Audited")
     assert requests_mock.last_request.json()["note"] == "Audited"
+
+
+def test_assets_update(snipeit_client, requests_mock):
+    requests_mock.put(
+        "https://test.snipeitapp.com/api/v1/hardware/1",
+        json={"status": "success", "payload": {"id": 1, "name": "Updated"}},
+    )
+    updated = snipeit_client.assets.update(1, name="Updated")
+    assert isinstance(updated, Asset)
+    assert updated.name == "Updated"
+
+
+def test_assets_patch(snipeit_client, requests_mock):
+    requests_mock.patch(
+        "https://test.snipeitapp.com/api/v1/hardware/1",
+        json={"status": "success", "payload": {"id": 1, "name": "Patched"}},
+    )
+    patched = snipeit_client.assets.patch(1, name="Patched")
+    assert isinstance(patched, Asset)
+    assert patched.name == "Patched"
+
+
+def test_assets_delete(snipeit_client, requests_mock):
+    requests_mock.delete(
+        "https://test.snipeitapp.com/api/v1/hardware/1",
+        status_code=204,
+    )
+    snipeit_client.assets.delete(1)
+    assert requests_mock.called
+
+
+def test_asset_repr_with_defaults(snipeit_client, requests_mock):
+    # Provide minimal fields to exercise default fallbacks in __repr__
+    requests_mock.get(
+        "https://test.snipeitapp.com/api/v1/hardware/10",
+        json={"id": 10},
+    )
+    asset = snipeit_client.assets.get(10)
+    rep = repr(asset)
+    assert "Asset" in rep and "N/A" in rep
+
+
+def test_asset_checkout_invalid_type_raises_valueerror(snipeit_client, requests_mock):
+    requests_mock.get(
+        "https://test.snipeitapp.com/api/v1/hardware/1", json={"id": 1}
+    )
+    asset = snipeit_client.assets.get(1)
+    with pytest.raises(ValueError):
+        asset.checkout(checkout_to_type="invalid", assigned_to_id=123)
+
+
+def test_get_by_serial_zero_total_raises_not_found(snipeit_client, requests_mock):
+    requests_mock.get(
+        "https://test.snipeitapp.com/api/v1/hardware/byserial/SN000",
+        json={"total": 0, "rows": []},
+    )
+    with pytest.raises(SnipeITNotFoundError):
+        snipeit_client.assets.get_by_serial("SN000")
+
+
+def test_create_maintenance_returns_payload(snipeit_client, requests_mock):
+    requests_mock.post(
+        "https://test.snipeitapp.com/api/v1/hardware/1/maintenances",
+        json={"status": "success", "payload": {"id": 99, "title": "Tune-up"}},
+    )
+    payload = snipeit_client.assets.create_maintenance(
+        asset_id=1, asset_improvement="repair", supplier_id=2, title="Tune-up"
+    )
+    assert payload == {"id": 99, "title": "Tune-up"}

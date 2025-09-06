@@ -110,5 +110,6 @@ class AccessoriesManager(Manager):
         Returns:
             The API response dictionary.
         """
-        response = self._post(f"accessories/{accessory_user_id}/checkin", {})
+        # POST to the checkin endpoint using the standard create helper
+        response = self._create(f"accessories/{accessory_user_id}/checkin", {})
         return response["payload"]

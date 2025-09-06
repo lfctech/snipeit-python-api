@@ -182,7 +182,8 @@ class SnipeIT:
                     raise SnipeITValidationError(messages, response)
                 if 400 <= response.status_code < 500:
                     raise SnipeITClientError(messages, response)
-                if 500 <= response.status_code < 600:
+                else:
+                    # Must be 5xx here since we are in the >=400 block and not <500
                     raise SnipeITServerError(messages, response)
 
             if response.status_code == 204:

@@ -49,3 +49,23 @@ def test_save_accessory(snipeit_client, requests_mock):
     accessory.name = "Saved Accessory"
     accessory.save()
     assert accessory.name == "Saved Accessory"
+
+
+def test_accessory_repr(snipeit_client, requests_mock):
+    requests_mock.get(
+        "https://test.snipeitapp.com/api/v1/accessories/1",
+        json={"id": 1, "name": "Test Accessory"},
+    )
+    accessory = snipeit_client.accessories.get(1)
+    rep = repr(accessory)
+    assert "Accessory" in rep and "1" in rep and "Test Accessory" in rep
+
+
+def test_checkin_from_user(snipeit_client, requests_mock):
+    requests_mock.post(
+        "https://test.snipeitapp.com/api/v1/accessories/42/checkin",
+        json={"status": "success", "payload": {"checked_in": True}},
+    )
+    payload = snipeit_client.accessories.checkin_from_user(42)
+    assert payload == {"checked_in": True}
+    assert requests_mock.last_request.method == "POST"
