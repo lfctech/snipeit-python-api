@@ -179,7 +179,7 @@ make property
 
 ### Mutation testing (optional)
 
-Mutation testing flips bits in your source to ensure your tests actually detect behavioral changes. It can be slow. We use mutmut and reuse coverage data to prioritize mutated lines.
+Mutation testing flips bits in your source to ensure your tests actually detect behavioral changes. It can be slow. We use mutmut configured via setup.cfg.
 
 - Run mutation tests (may take time):
 

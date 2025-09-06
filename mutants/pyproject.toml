@@ -28,5 +28,5 @@ dev = [
     "pytest-cov",
     "coverage",
     "hypothesis",
-    "mutmut<3",
+    "mutmut",
 ]

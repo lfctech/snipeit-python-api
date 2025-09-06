@@ -23,10 +23,9 @@ cov-html:
 property:
 	$(PY) -m pytest -q -k property
 
-# Mutation testing (can be slow). Uses coverage to focus mutations.
+# Mutation testing (can be slow)
 mut:
-	$(PY) -m coverage run -m pytest -q && \
-	$(PY) -m mutmut run --use-coverage --paths-to-mutate snipeit --tests-dir tests --CI -j auto
+	$(PY) -m mutmut run --paths-to-mutate snipeit --tests-dir tests
 
 mut-report:
 	$(PY) -m mutmut results
