@@ -305,6 +305,17 @@ def test_get_by_serial_zero_total_raises_not_found(snipeit_client, requests_mock
         snipeit_client.assets.get_by_serial("SN000")
 
 
+def test_get_by_serial_missing_total_treated_as_not_found(snipeit_client, requests_mock):
+    from snipeit.exceptions import SnipeITNotFoundError
+    # API returns rows but omits 'total' key
+    requests_mock.get(
+        "https://test.snipeitapp.com/api/v1/hardware/byserial/SN111",
+        json={"rows": [{"id": 1, "serial": "SN111"}]},
+    )
+    with pytest.raises(SnipeITNotFoundError):
+        snipeit_client.assets.get_by_serial("SN111")
+
+
 def test_create_maintenance_returns_payload(snipeit_client, requests_mock):
     requests_mock.post(
         "https://test.snipeitapp.com/api/v1/hardware/1/maintenances",

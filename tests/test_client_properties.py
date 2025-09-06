@@ -32,3 +32,9 @@ def test_session_headers_are_correct():
     assert headers["Accept"] == "application/json"
     assert headers["Content-Type"] == "application/json"
 
+
+def test_url_normalization_does_not_strip_non_slash_trailing_chars():
+    # Ensure trailing characters other than '/' are preserved
+    client = SnipeIT(url="https://test.snipeitapp.comX", token="fake")
+    assert client.url == "https://test.snipeitapp.comX"
+
