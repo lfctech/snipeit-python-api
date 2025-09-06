@@ -2,7 +2,7 @@
 
 PY ?= python3
 
-.PHONY: test cov cov-html property clean
+.PHONY: test cov cov-html property mut mut-report mut-reset clean
 
 # Run tests
 test:
@@ -23,6 +23,16 @@ cov-html:
 property:
 	$(PY) -m pytest -q -k property
 
+# Mutation testing (can be slow)
+mut:
+	$(PY) -m mutmut run --paths-to-mutate snipeit --tests-dir tests
+
+mut-report:
+	$(PY) -m mutmut results
+
+mut-reset:
+	$(PY) -m mutmut reset || true
+
 clean:
-	rm -rf .pytest_cache htmlcov .coverage
+	rm -rf .pytest_cache htmlcov .coverage .mutmut-cache
 

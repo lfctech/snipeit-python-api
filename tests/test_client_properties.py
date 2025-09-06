@@ -3,7 +3,10 @@ from snipeit import SnipeIT
 
 
 def test_manager_properties_are_cached():
-    client = SnipeIT(url="https://test.snipeitapp.com", token="fake")
+    client = SnipeIT(url="https://test.snipeitapp.com/", token="fake")
+
+    # url normalization trims trailing slash
+    assert client.url == "https://test.snipeitapp.com"
 
     # Each property should return the same object on subsequent access
     assert client.assets is client.assets
@@ -20,4 +23,18 @@ def test_manager_properties_are_cached():
     assert client.status_labels is client.status_labels
     assert client.fields is client.fields
     assert client.fieldsets is client.fieldsets
+
+
+def test_session_headers_are_correct():
+    client = SnipeIT(url="https://test.snipeitapp.com", token="fake-token")
+    headers = client.session.headers
+    assert headers["Authorization"] == "Bearer fake-token"
+    assert headers["Accept"] == "application/json"
+    assert headers["Content-Type"] == "application/json"
+
+
+def test_url_normalization_does_not_strip_non_slash_trailing_chars():
+    # Ensure trailing characters other than '/' are preserved
+    client = SnipeIT(url="https://test.snipeitapp.comX", token="fake")
+    assert client.url == "https://test.snipeitapp.comX"
 

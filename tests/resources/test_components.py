@@ -23,7 +23,7 @@ def test_create_component(snipeit_client, requests_mock):
     new_component = snipeit_client.components.create(name="New Component", qty=1, category_id=1)
     assert isinstance(new_component, Component)
     assert new_component.name == "New Component"
-    assert requests_mock.last_request.json()["name"] == "New Component"
+    assert requests_mock.last_request.json() == {"name": "New Component", "qty": 1, "category_id": 1}
 
 def test_update_component(snipeit_client, requests_mock):
     requests_mock.put("https://test.snipeitapp.com/api/v1/components/1", json={"status": "success", "payload": {"id": 1, "name": "Updated Component"}})

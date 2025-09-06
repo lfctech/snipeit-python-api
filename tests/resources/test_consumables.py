@@ -23,7 +23,7 @@ def test_create_consumable(snipeit_client, requests_mock):
     new_consumable = snipeit_client.consumables.create(name="New Consumable", qty=1, category_id=1)
     assert isinstance(new_consumable, Consumable)
     assert new_consumable.name == "New Consumable"
-    assert requests_mock.last_request.json()["name"] == "New Consumable"
+    assert requests_mock.last_request.json() == {"name": "New Consumable", "qty": 1, "category_id": 1}
 
 def test_update_consumable(snipeit_client, requests_mock):
     requests_mock.put("https://test.snipeitapp.com/api/v1/consumables/1", json={"status": "success", "payload": {"id": 1, "name": "Updated Consumable"}})

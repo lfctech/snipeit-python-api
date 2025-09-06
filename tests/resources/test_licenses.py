@@ -23,7 +23,7 @@ def test_create_license(snipeit_client, requests_mock):
     new_license = snipeit_client.licenses.create(name="New License", seats=10, category_id=1)
     assert isinstance(new_license, License)
     assert new_license.name == "New License"
-    assert requests_mock.last_request.json()["name"] == "New License"
+    assert requests_mock.last_request.json() == {"name": "New License", "seats": 10, "category_id": 1}
 
 def test_update_license(snipeit_client, requests_mock):
     requests_mock.put("https://test.snipeitapp.com/api/v1/licenses/1", json={"status": "success", "payload": {"id": 1, "name": "Updated License"}})

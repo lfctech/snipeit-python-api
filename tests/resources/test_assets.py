@@ -63,7 +63,13 @@ def test_create_asset(snipeit_client, requests_mock):
 
     assert isinstance(new_asset, Asset)
     assert new_asset.name == "New Asset"
-    assert requests_mock.last_request.json()["name"] == "New Asset"
+    # Full JSON body should be correct
+    assert requests_mock.last_request.json() == {
+        "status_id": 1,
+        "model_id": 1,
+        "asset_tag": "new-tag",
+        "name": "New Asset",
+    }
 
 
 def test_save_asset(snipeit_client, requests_mock):
@@ -163,8 +169,9 @@ def test_get_by_serial_multiple_found(snipeit_client, requests_mock):
         "total": 2,
         "rows": [{"id": 1, "name": "Test Asset 1"}, {"id": 2, "name": "Test Asset 2"}]
     })
-    with pytest.raises(SnipeITApiError):
+    with pytest.raises(SnipeITApiError) as excinfo:
         snipeit_client.assets.get_by_serial("SN789")
+    assert str(excinfo.value) == "Expected 1 asset with serial SN789, but found 2."
 
 
 def test_get_by_tag_found(snipeit_client, requests_mock):
@@ -261,7 +268,22 @@ def test_asset_repr_with_defaults(snipeit_client, requests_mock):
     )
     asset = snipeit_client.assets.get(10)
     rep = repr(asset)
-    assert "Asset" in rep and "N/A" in rep
+    assert rep == "<Asset N/A (N/A - N/A - N/A)>"
+
+
+def test_asset_repr_full_fields(snipeit_client, requests_mock):
+    requests_mock.get(
+        "https://test.snipeitapp.com/api/v1/hardware/11",
+        json={
+            "id": 11,
+            "name": "Foo",
+            "asset_tag": "12345",
+            "serial": "ABC",
+            "model": {"name": "Model"},
+        },
+    )
+    asset = snipeit_client.assets.get(11)
+    assert repr(asset) == "<Asset 12345 (Foo - ABC - Model)>"
 
 
 def test_asset_checkout_invalid_type_raises_valueerror(snipeit_client, requests_mock):
@@ -269,8 +291,9 @@ def test_asset_checkout_invalid_type_raises_valueerror(snipeit_client, requests_
         "https://test.snipeitapp.com/api/v1/hardware/1", json={"id": 1}
     )
     asset = snipeit_client.assets.get(1)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError) as excinfo:
         asset.checkout(checkout_to_type="invalid", assigned_to_id=123)
+    assert str(excinfo.value) == "checkout_to_type must be one of 'user', 'asset', or 'location'"
 
 
 def test_get_by_serial_zero_total_raises_not_found(snipeit_client, requests_mock):
@@ -280,6 +303,17 @@ def test_get_by_serial_zero_total_raises_not_found(snipeit_client, requests_mock
     )
     with pytest.raises(SnipeITNotFoundError):
         snipeit_client.assets.get_by_serial("SN000")
+
+
+def test_get_by_serial_missing_total_treated_as_not_found(snipeit_client, requests_mock):
+    from snipeit.exceptions import SnipeITNotFoundError
+    # API returns rows but omits 'total' key
+    requests_mock.get(
+        "https://test.snipeitapp.com/api/v1/hardware/byserial/SN111",
+        json={"rows": [{"id": 1, "serial": "SN111"}]},
+    )
+    with pytest.raises(SnipeITNotFoundError):
+        snipeit_client.assets.get_by_serial("SN111")
 
 
 def test_create_maintenance_returns_payload(snipeit_client, requests_mock):
