@@ -4,13 +4,27 @@ A Python client library for the Snipe-IT API. It provides a simple, typed interf
 
 ## Installation
 
+### For Users (in another project)
+
+To use this library in another project, you can install it directly from its GitHub repository:
+
 ```bash
-pip install -r requirements.txt
+pip install /path/to/inventory-library
 ```
+
+### For Developers (to work on this library)
+
+To set up a development environment to work on this library, clone the repository and then run the following command in the project's root directory:
+
+```bash
+pip install -e .[dev]
+```
+
+This will install the project in "editable" mode and include the development dependencies needed for testing.
 
 ## Usage
 
-### Manager-First Approach
+First, initialize the client with your Snipe-IT URL and API token:
 
 ```python
 from snipeit import SnipeIT
@@ -19,48 +33,93 @@ client = SnipeIT(
     url="https://your.snipeitapp.com",
     token="{{SNIPE_IT_API_TOKEN}}",
 )
-
-# List assets
-assets = client.assets.get()
-
-# Get a single asset
-asset = client.assets.get(1)
-
-# Create an asset
-new_asset = client.assets.create(status_id=1, model_id=1, name="Laptop")
-
-# Delete an asset by ID
-client.assets.delete(1)
 ```
 
-### Object-Oriented Approach
+### Finding Resources
 
-This library also allows for a more object-oriented approach, where you can call methods directly on the resource objects.
+**List all resources of a type:**
+
+Use the `list()` method on a manager to get a list of all items.
 
 ```python
-# Get a single asset
+# Get a list of all assets
+assets = client.assets.list()
+
+# Get a list of all users
+users = client.users.list()
+```
+
+**Get a specific resource by ID:**
+
+Use the `get()` method with an ID to retrieve a single item.
+
+```python
+# Get the asset with ID 1
+asset = client.assets.get(1)
+```
+
+### Creating, Updating, and Deleting
+
+**Create a resource:**
+
+Use the `create()` method on the appropriate manager.
+
+```python
+new_asset = client.assets.create(
+    name="New Laptop",
+    status_id=1, 
+    model_id=1,
+    asset_tag="54321"
+)
+```
+
+**Update a resource (Recommended Approach):**
+
+The easiest and safest way to update a resource is to get the object, change its attributes, and call the `save()` method. This efficiently sends only the changed fields to the API.
+
+```python
+# Get an asset
 asset = client.assets.get(1)
 
-# Update fields and save only changed fields (PATCH)
-asset.name = "Updated Name"
+# Update its attributes
+asset.name = "Updated Laptop Name"
+asset.notes = "Added more RAM."
+
+# Save the changes
 asset.save()
+```
 
-# Update the entire object (PUT)
-asset.notes = "New notes"
-asset.update()
+**Delete a resource:**
 
-# Delete the asset
-asset.delete()
+You can delete a resource using the manager's `delete()` method or by calling `delete()` on the object itself.
 
-# Asset-specific actions
-asset.checkout(user_id=123)
-asset.checkin()
-asset.audit()
+```python
+# Using the manager
+client.assets.delete(2)
+
+# Or, on the object
+asset_to_delete = client.assets.get(3)
+asset_to_delete.delete()
+```
+
+### Object-Specific Actions
+
+Some resources have unique actions you can perform on the object.
+
+```python
+# Get an asset
+asset = client.assets.get(1)
+
+# Checkout the asset to a user
+asset.checkout(checkout_to_type='user', assigned_to_id=123)
+
+# Check the asset back in
+asset.checkin(note="Returned to inventory")
 ```
 
 ### Available Resources
 
-The following resources are available:
+The following resource managers are available on the `client` object:
 
 *   `client.accessories`
 *   `client.assets`
@@ -77,9 +136,9 @@ The following resources are available:
 *   `client.status_labels`
 *   `client.users`
 
-Each resource has the following manager methods: `get()`, `create()`, `update()`, `patch()`, and `delete()`.
+Each manager generally provides `list()`, `get(id)`, `create()`, `update(id)`, `patch(id)`, and `delete(id)` methods.
 
-Resource objects also have `save()`, `update()`, and `delete()` methods.
+Each resource object provides `save()` and `delete()` methods.
 
 ### Retry behavior
 By default, retries are enabled for idempotent methods only (HEAD, GET, OPTIONS). You can override this using `retry_allowed_methods` when constructing the client, but retrying write methods (POST/PUT/PATCH/DELETE) is generally discouraged unless your server guarantees idempotency.
