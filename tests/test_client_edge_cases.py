@@ -34,8 +34,9 @@ def test_non_json_2xx_raises_snipeit_exception(snipeit_client, requests_mock):
         text="this is not json",
         status_code=200,
     )
-    with pytest.raises(SnipeITException):
+    with pytest.raises(SnipeITException) as excinfo:
         snipeit_client.get("hardware/1")
+    assert str(excinfo.value) == "Expected JSON response but received invalid or non-JSON content."
 
 
 def test_400_client_error_raises_SnipeITClientError(snipeit_client, requests_mock):
@@ -53,8 +54,9 @@ def test_timeout_raises_SnipeITTimeoutError(snipeit_client, requests_mock):
         "https://test.snipeitapp.com/api/v1/hardware/1",
         exc=requests.exceptions.Timeout(),
     )
-    with pytest.raises(SnipeITTimeoutError):
+    with pytest.raises(SnipeITTimeoutError) as excinfo:
         snipeit_client.get("hardware/1")
+    assert str(excinfo.value) == "Request timed out after 10 seconds."
 
 
 def test_generic_request_exception_raises_SnipeITException(
@@ -64,8 +66,20 @@ def test_generic_request_exception_raises_SnipeITException(
         "https://test.snipeitapp.com/api/v1/hardware/1",
         exc=requests.exceptions.RequestException("boom"),
     )
-    with pytest.raises(SnipeITException):
+    with pytest.raises(SnipeITException) as excinfo:
         snipeit_client.get("hardware/1")
+    assert str(excinfo.value) == "An unexpected error occurred: boom"
+
+
+def test_status_error_default_message(snipeit_client, requests_mock):
+    requests_mock.post(
+        "https://test.snipeitapp.com/api/v1/hardware",
+        json={"status": "error"},
+        status_code=200,
+    )
+    with pytest.raises(SnipeITApiError) as excinfo:
+        snipeit_client.post("hardware", data={})
+    assert str(excinfo.value) == "Unknown API error"
 
 
 def test_context_manager_calls_close_on_exit():

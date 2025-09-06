@@ -59,7 +59,7 @@ def test_accessory_repr(snipeit_client, requests_mock):
     )
     accessory = snipeit_client.accessories.get(1)
     rep = repr(accessory)
-    assert "Accessory" in rep and "1" in rep and "Test Accessory" in rep
+    assert rep == "<Accessory 1: Test Accessory>"
 
 
 def test_checkin_from_user(snipeit_client, requests_mock):
