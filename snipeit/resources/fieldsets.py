@@ -17,6 +17,16 @@ class FieldsetsManager(BaseResourceManager[Fieldset]):
     path = Fieldset._path
 
     def create(self, name: str, **kwargs: Any) -> 'Fieldset':
+        """
+        Create a new Fieldset.
+
+        Args:
+            name (str): The name of the fieldset.
+            **kwargs: Additional fieldset attributes.
+
+        Returns:
+            Fieldset: The created Fieldset object.
+        """
         data = {"name": name}
         data.update(kwargs)
         return super().create(**data)

@@ -17,6 +17,17 @@ class FieldsManager(BaseResourceManager[Field]):
     path = Field._path
 
     def create(self, name: str, element: str, **kwargs: Any) -> 'Field':
+        """
+        Create a new custom field.
+
+        Args:
+            name (str): The name of the custom field.
+            element (str): The element type for the custom field.
+            **kwargs: Additional field attributes.
+
+        Returns:
+            Field: The created Field object.
+        """
         data = {"name": name, "element": element}
         data.update(kwargs)
         return super().create(**data)
