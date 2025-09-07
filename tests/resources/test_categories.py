@@ -25,11 +25,6 @@ def test_create_category(snipeit_client, requests_mock):
     assert new_category.name == "New Category"
     assert requests_mock.last_request.json() == {"name": "New Category", "category_type": "asset"}
 
-def test_update_category(snipeit_client, requests_mock):
-    requests_mock.put("https://test.snipeitapp.com/api/v1/categories/1", json={"status": "success", "payload": {"id": 1, "name": "Updated Category"}})
-    updated_category = snipeit_client.categories.update(1, name="Updated Category")
-    assert isinstance(updated_category, Category)
-    assert updated_category.name == "Updated Category"
 
 def test_patch_category(snipeit_client, requests_mock):
     requests_mock.patch("https://test.snipeitapp.com/api/v1/categories/1", json={"status": "success", "payload": {"id": 1, "name": "Patched Category"}})

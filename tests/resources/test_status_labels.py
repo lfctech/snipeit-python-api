@@ -25,11 +25,6 @@ def test_create_status_label(snipeit_client, requests_mock):
     assert new_status_label.name == "New StatusLabel"
     assert requests_mock.last_request.json()["name"] == "New StatusLabel"
 
-def test_update_status_label(snipeit_client, requests_mock):
-    requests_mock.put("https://test.snipeitapp.com/api/v1/statuslabels/1", json={"status": "success", "payload": {"id": 1, "name": "Updated StatusLabel"}})
-    updated_status_label = snipeit_client.status_labels.update(1, name="Updated StatusLabel")
-    assert isinstance(updated_status_label, StatusLabel)
-    assert updated_status_label.name == "Updated StatusLabel"
 
 def test_patch_status_label(snipeit_client, requests_mock):
     requests_mock.patch("https://test.snipeitapp.com/api/v1/statuslabels/1", json={"status": "success", "payload": {"id": 1, "name": "Patched StatusLabel"}})

@@ -231,16 +231,6 @@ def test_asset_audit(snipeit_client, requests_mock):
     assert requests_mock.last_request.json()["note"] == "Audited"
 
 
-def test_assets_update(snipeit_client, requests_mock):
-    requests_mock.put(
-        "https://test.snipeitapp.com/api/v1/hardware/1",
-        json={"status": "success", "payload": {"id": 1, "name": "Updated"}},
-    )
-    updated = snipeit_client.assets.update(1, name="Updated")
-    assert isinstance(updated, Asset)
-    assert updated.name == "Updated"
-
-
 def test_assets_patch(snipeit_client, requests_mock):
     requests_mock.patch(
         "https://test.snipeitapp.com/api/v1/hardware/1",

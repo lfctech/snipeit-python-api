@@ -1,5 +1,5 @@
-from typing import Any, Dict, List, Optional, Union
-from .base import ApiObject, Manager
+from typing import Any, Dict, List
+from .base import ApiObject, BaseResourceManager
 
 
 class Accessory(ApiObject):
@@ -10,33 +10,11 @@ class Accessory(ApiObject):
         return f"<Accessory {getattr(self, 'id', 'N/A')}: {getattr(self, 'name', 'N/A')}>"
 
 
-class AccessoriesManager(Manager):
+class AccessoriesManager(BaseResourceManager[Accessory]):
     """Manager for all Accessory-related API operations."""
 
-    def list(self, **kwargs: Any) -> List['Accessory']:
-        """
-        Gets a list of accessories.
-
-        Args:
-            **kwargs: Optional search parameters.
-
-        Returns:
-            A list of Accessories.
-        """
-        return [Accessory(self, a) for a in self._get("accessories", **kwargs)["rows"]]
-
-    def get(self, accessory_id: int, **kwargs: Any) -> 'Accessory':
-        """
-        Gets a single accessory by its ID.
-
-        Args:
-            accessory_id: If provided, retrieves a single accessory by its ID.
-            **kwargs: Optional search parameters.
-
-        Returns:
-            A single Accessory object.
-        """
-        return Accessory(self, self._get(f"accessories/{accessory_id}", **kwargs))
+    resource_cls = Accessory
+    path = Accessory._path
 
     def create(self, name: str, qty: int, category_id: int, **kwargs: Any) -> 'Accessory':
         """
@@ -57,45 +35,7 @@ class AccessoriesManager(Manager):
             "category_id": category_id,
         }
         data.update(kwargs)
-        response = self._create("accessories", data)
-        return Accessory(self, response["payload"])
-
-    def update(self, accessory_id: int, **kwargs: Any) -> 'Accessory':
-        """
-        Updates an existing accessory.
-
-        Args:
-            accessory_id: The ID of the accessory to update.
-            **kwargs: Additional optional fields.
-
-        Returns:
-            The updated Accessory object.
-        """
-        response = self._update(f"accessories/{accessory_id}", kwargs)
-        return Accessory(self, response["payload"])
-
-    def patch(self, accessory_id: int, **kwargs: Any) -> 'Accessory':
-        """
-        Partially updates an accessory.
-
-        Args:
-            accessory_id: The ID of the accessory to update.
-            **kwargs: The fields to update.
-
-        Returns:
-            The updated Accessory object.
-        """
-        response = self._patch(f"accessories/{accessory_id}", kwargs)
-        return Accessory(self, response["payload"])
-
-    def delete(self, accessory_id: int) -> None:
-        """
-        Deletes an accessory.
-
-        Args:
-            accessory_id: The ID of the accessory to delete.
-        """
-        self._delete(f"accessories/{accessory_id}")
+        return super().create(**data)
 
     def checkin_from_user(self, accessory_user_id: int) -> Dict[str, Any]:
         """

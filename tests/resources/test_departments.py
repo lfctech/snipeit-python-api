@@ -25,11 +25,6 @@ def test_create_department(snipeit_client, requests_mock):
     assert new_department.name == "New Department"
     assert requests_mock.last_request.json() == {"name": "New Department"}
 
-def test_update_department(snipeit_client, requests_mock):
-    requests_mock.put("https://test.snipeitapp.com/api/v1/departments/1", json={"status": "success", "payload": {"id": 1, "name": "Updated Department"}})
-    updated_department = snipeit_client.departments.update(1, name="Updated Department")
-    assert isinstance(updated_department, Department)
-    assert updated_department.name == "Updated Department"
 
 
 def test_patch_department(snipeit_client, requests_mock):

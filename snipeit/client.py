@@ -1,4 +1,5 @@
-from typing import Any, Dict, Optional, Set
+from typing import Any, Dict, Set
+import importlib
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
@@ -17,7 +18,25 @@ from .exceptions import (
 class SnipeIT:
     """A client for interacting with the Snipe-IT API."""
 
-    def __init__(self, url: str, token: str, timeout: int = 10, max_retries: int = 3, backoff_factor: float = 0.3, retry_allowed_methods: Optional[Set[str]] = None) -> None:
+    # Registry of manager attributes -> (module_path, class_name)
+    _manager_registry: Dict[str, tuple[str, str]] = {
+        "assets": (".resources.assets", "AssetsManager"),
+        "accessories": (".resources.accessories", "AccessoriesManager"),
+        "components": (".resources.components", "ComponentsManager"),
+        "consumables": (".resources.consumables", "ConsumablesManager"),
+        "licenses": (".resources.licenses", "LicensesManager"),
+        "users": (".resources.users", "UsersManager"),
+        "locations": (".resources.locations", "LocationsManager"),
+        "departments": (".resources.departments", "DepartmentsManager"),
+        "manufacturers": (".resources.manufacturers", "ManufacturersManager"),
+        "models": (".resources.models", "ModelsManager"),
+        "categories": (".resources.categories", "CategoriesManager"),
+        "status_labels": (".resources.status_labels", "StatusLabelsManager"),
+        "fields": (".resources.fields", "FieldsManager"),
+        "fieldsets": (".resources.fieldsets", "FieldsetsManager"),
+    }
+
+    def __init__(self, url: str, token: str, timeout: int = 10, max_retries: int = 3, backoff_factor: float = 0.3, retry_allowed_methods: Set[str] | None = None) -> None:
         """
         Initializes the Snipe-IT API client.
 
@@ -52,103 +71,22 @@ class SnipeIT:
         self.session.mount("https://", adapter)
         self.session.mount("http://", adapter)
 
-    @property
-    def assets(self) -> "AssetsManager":
-        if not hasattr(self, "_assets"):
-            from .resources.assets import AssetsManager
-            self._assets = AssetsManager(self)
-        return self._assets
+    def __getattr__(self, name: str):
+        # Dynamic manager factory with caching
+        registry = type(self)._manager_registry
+        if name in registry:
+            module_path, class_name = registry[name]
+            module = importlib.import_module(module_path, package=__package__)
+            manager_cls = getattr(module, class_name)
+            instance = manager_cls(self)
+            setattr(self, name, instance)  # cache on instance
+            return instance
+        raise AttributeError(f"{type(self).__name__!s} object has no attribute {name!r}")
 
-    @property
-    def accessories(self) -> "AccessoriesManager":
-        if not hasattr(self, "_accessories"):
-            from .resources.accessories import AccessoriesManager
-            self._accessories = AccessoriesManager(self)
-        return self._accessories
-
-    @property
-    def components(self) -> "ComponentsManager":
-        if not hasattr(self, "_components"):
-            from .resources.components import ComponentsManager
-            self._components = ComponentsManager(self)
-        return self._components
-
-    @property
-    def consumables(self) -> "ConsumablesManager":
-        if not hasattr(self, "_consumables"):
-            from .resources.consumables import ConsumablesManager
-            self._consumables = ConsumablesManager(self)
-        return self._consumables
-
-    @property
-    def licenses(self) -> "LicensesManager":
-        if not hasattr(self, "_licenses"):
-            from .resources.licenses import LicensesManager
-            self._licenses = LicensesManager(self)
-        return self._licenses
-
-    @property
-    def users(self) -> "UsersManager":
-        if not hasattr(self, "_users"):
-            from .resources.users import UsersManager
-            self._users = UsersManager(self)
-        return self._users
-
-    @property
-    def locations(self) -> "LocationsManager":
-        if not hasattr(self, "_locations"):
-            from .resources.locations import LocationsManager
-            self._locations = LocationsManager(self)
-        return self._locations
-
-    @property
-    def departments(self) -> "DepartmentsManager":
-        if not hasattr(self, "_departments"):
-            from .resources.departments import DepartmentsManager
-            self._departments = DepartmentsManager(self)
-        return self._departments
-
-    @property
-    def manufacturers(self) -> "ManufacturersManager":
-        if not hasattr(self, "_manufacturers"):
-            from .resources.manufacturers import ManufacturersManager
-            self._manufacturers = ManufacturersManager(self)
-        return self._manufacturers
-
-    @property
-    def models(self) -> "ModelsManager":
-        if not hasattr(self, "_models"):
-            from .resources.models import ModelsManager
-            self._models = ModelsManager(self)
-        return self._models
-
-    @property
-    def categories(self) -> "CategoriesManager":
-        if not hasattr(self, "_categories"):
-            from .resources.categories import CategoriesManager
-            self._categories = CategoriesManager(self)
-        return self._categories
-
-    @property
-    def status_labels(self) -> "StatusLabelsManager":
-        if not hasattr(self, "_status_labels"):
-            from .resources.status_labels import StatusLabelsManager
-            self._status_labels = StatusLabelsManager(self)
-        return self._status_labels
-
-    @property
-    def fields(self) -> "FieldsManager":
-        if not hasattr(self, "_fields"):
-            from .resources.fields import FieldsManager
-            self._fields = FieldsManager(self)
-        return self._fields
-
-    @property
-    def fieldsets(self) -> "FieldsetsManager":
-        if not hasattr(self, "_fieldsets"):
-            from .resources.fieldsets import FieldsetsManager
-            self._fieldsets = FieldsetsManager(self)
-        return self._fieldsets
+    def __dir__(self) -> list[str]:
+        # Improve IDE/repl discovery
+        base = set(super().__dir__())
+        return sorted(base | set(type(self)._manager_registry.keys()))
 
     def close(self) -> None:
         """Closes the underlying HTTP session."""
@@ -157,21 +95,24 @@ class SnipeIT:
     def __enter__(self) -> "SnipeIT":
         return self
 
-    def __exit__(self, exc_type, exc, tb) -> Optional[bool]:
+    def __exit__(self, exc_type, exc, tb) -> bool | None:
         self.close()
         # Do not suppress exceptions
         return False
 
-    def _request(self, method: str, path: str, **kwargs: Any) -> Optional[Dict[str, Any]]:
+    def _request(self, method: str, path: str, **kwargs: Any) -> Dict[str, Any] | None:
         """Internal method to construct and send an API request."""
         url = f"{self.url}/api/v1/{path}"
         try:
             response = self.session.request(method, url, timeout=self.timeout, **kwargs)
 
             if response.status_code >= 400:
+                messages: str
                 try:
-                    messages = response.json().get("messages", response.reason)
+                    body = response.json()
+                    messages = body.get("messages", response.reason)
                 except ValueError:
+                    body = None
                     messages = response.text or response.reason
 
                 if response.status_code == 401:
@@ -219,7 +160,7 @@ class SnipeIT:
         """Performs a PATCH request."""
         return self._request("PATCH", path, json=data)  # type: ignore[return-value]
 
-    def delete(self, path: str) -> Optional[Dict[str, Any]]:
+    def delete(self, path: str) -> Dict[str, Any] | None:
         """Performs a DELETE request.
 
         Returns None when the server responds with 204 No Content; otherwise returns the JSON body.

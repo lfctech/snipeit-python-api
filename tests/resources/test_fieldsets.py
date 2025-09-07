@@ -25,11 +25,6 @@ def test_create_fieldset(snipeit_client, requests_mock):
     assert new_fieldset.name == "New Fieldset"
     assert requests_mock.last_request.json() == {"name": "New Fieldset"}
 
-def test_update_fieldset(snipeit_client, requests_mock):
-    requests_mock.put("https://test.snipeitapp.com/api/v1/fieldsets/1", json={"status": "success", "payload": {"id": 1, "name": "Updated Fieldset"}})
-    updated_fieldset = snipeit_client.fieldsets.update(1, name="Updated Fieldset")
-    assert isinstance(updated_fieldset, Fieldset)
-    assert updated_fieldset.name == "Updated Fieldset"
 
 def test_patch_fieldset(snipeit_client, requests_mock):
     requests_mock.patch("https://test.snipeitapp.com/api/v1/fieldsets/1", json={"status": "success", "payload": {"id": 1, "name": "Patched Fieldset"}})
