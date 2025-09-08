@@ -50,8 +50,7 @@ class SnipeIT:
         """
         # Normalize the base URL to avoid double slashes and support trailing slashes
         self.url = url.rstrip("/")
-        if not self.url.startswith("https://"):
-            raise ValueError("URL must start with https://")
+        
         self.token = token
         self.session = requests.Session()
         self.session.headers.update({

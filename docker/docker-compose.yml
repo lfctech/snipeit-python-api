@@ -1,0 +1,51 @@
+# Compose file for production.
+
+services:
+  app:
+    image: snipe/snipe-it:latest-alpine
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8000}:80"
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+    env_file:
+      - .env
+    
+
+  seeder:
+    image: snipe/snipe-it:latest-alpine
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    command: >
+      sh -c "
+      sleep 10 &&
+      php artisan db:seed --force &&
+      php artisan passport:install < /dev/null &&
+      php artisan snipeit:make-api-key --user_id 1 | grep 'API Token:' > /api_key.txt
+      "
+    restart: "no"
+    volumes:
+      - ./api_key.txt:/api_key.txt
+    
+  db:
+    image: mariadb:11.4.7
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    healthcheck:
+      # https://mariadb.com/kb/en/using-healthcheck-sh/#compose-file-example
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 1s
+      retries: 5
+
+volumes:
+  snipeit_storage:

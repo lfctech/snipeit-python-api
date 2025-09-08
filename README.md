@@ -202,3 +202,32 @@ make mut-reset
 ## License
 
 Add your preferred license here.
+
+## Local Docker Environment for Testing
+
+This project includes a `docker-compose.yml` and `.env` file in the `docker` directory to run a local Snipe-IT instance for testing purposes.
+
+### First-time Setup
+
+1.  Navigate to the `docker` directory:
+    ```bash
+    cd docker
+    ```
+2.  Generate a new `APP_KEY` for the Snipe-IT instance. Run the following command and copy the output:
+    ```bash
+    docker compose run --rm app php artisan key:generate --show
+    ```
+3.  Open the `.env` file and paste the generated key as the value for the `APP_KEY` variable.
+
+### Starting and Stopping the Environment
+
+*   **To start the environment**, run the following command from the `docker` directory:
+    ```bash
+    docker compose up -d
+    ```
+    The application will be available at [http://localhost:8000](http://localhost:8000).
+
+*   **To stop the environment**, run the following command from the `docker` directory:
+    ```bash
+    docker compose down
+    ```
