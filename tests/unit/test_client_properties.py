@@ -2,6 +2,7 @@ import pytest
 from snipeit import SnipeIT
 
 
+@pytest.mark.unit
 def test_manager_properties_are_cached():
     client = SnipeIT(url="https://test.snipeitapp.com/", token="fake")
 
@@ -25,6 +26,7 @@ def test_manager_properties_are_cached():
     assert client.fieldsets is client.fieldsets
 
 
+@pytest.mark.unit
 def test_session_headers_are_correct():
     client = SnipeIT(url="https://test.snipeitapp.com", token="fake-token")
     headers = client.session.headers
@@ -33,8 +35,8 @@ def test_session_headers_are_correct():
     assert headers["Content-Type"] == "application/json"
 
 
+@pytest.mark.unit
 def test_url_normalization_does_not_strip_non_slash_trailing_chars():
     # Ensure trailing characters other than '/' are preserved
     client = SnipeIT(url="https://test.snipeitapp.comX", token="fake")
     assert client.url == "https://test.snipeitapp.comX"
-

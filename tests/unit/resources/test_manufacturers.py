@@ -25,11 +25,6 @@ def test_create_manufacturer(snipeit_client, requests_mock):
     assert new_manufacturer.name == "New Manufacturer"
     assert requests_mock.last_request.json() == {"name": "New Manufacturer"}
 
-def test_update_manufacturer(snipeit_client, requests_mock):
-    requests_mock.put("https://test.snipeitapp.com/api/v1/manufacturers/1", json={"status": "success", "payload": {"id": 1, "name": "Updated Manufacturer"}})
-    updated_manufacturer = snipeit_client.manufacturers.update(1, name="Updated Manufacturer")
-    assert isinstance(updated_manufacturer, Manufacturer)
-    assert updated_manufacturer.name == "Updated Manufacturer"
 
 def test_patch_manufacturer(snipeit_client, requests_mock):
     requests_mock.patch("https://test.snipeitapp.com/api/v1/manufacturers/1", json={"status": "success", "payload": {"id": 1, "name": "Patched Manufacturer"}})

@@ -65,4 +65,5 @@ GEMINI.md
 .mutmut-cache
 .mutmut-cache/
 mutants/
+*.bak
 

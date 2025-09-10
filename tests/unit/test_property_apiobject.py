@@ -25,6 +25,7 @@ _simple_vals = st.one_of(
 _key = st.text(min_size=1, max_size=8).filter(lambda s: s != "id" and not s.startswith("_"))
 
 
+@pytest.mark.unit
 @given(
     initial=st.dictionaries(_key, _simple_vals, min_size=0, max_size=5),
     updates=st.dictionaries(_key, _simple_vals, min_size=1, max_size=5),
@@ -58,4 +59,3 @@ def test_apiobject_property_only_sends_changed_fields(initial, updates):
     assert mgr._patched_data == changed
     # Dirty fields cleared
     assert not getattr(obj, "_dirty_fields")
-

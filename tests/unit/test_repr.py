@@ -19,6 +19,7 @@ class _MockManager:
     pass
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "cls,data,expected_parts",
     [
@@ -42,3 +43,20 @@ def test_repr_for_resources(cls, data, expected_parts):
     rep = repr(obj)
     assert all(part in rep for part in expected_parts)
 
+
+@pytest.mark.unit
+def test_repr_fallbacks_exact_strings():
+    # Objects with no data should fall back to 'N/A' placeholders in __repr__
+    assert repr(Accessory(_MockManager(), {})) == "<Accessory N/A: N/A>"
+    assert repr(Category(_MockManager(), {})) == "<Category N/A: N/A (Type: N/A)>"
+    assert repr(Component(_MockManager(), {})) == "<Component N/A: N/A (Qty: N/A)>"
+    assert repr(Consumable(_MockManager(), {})) == "<Consumable N/A: N/A (Qty: N/A)>"
+    assert repr(Department(_MockManager(), {})) == "<Department N/A: N/A>"
+    assert repr(Field(_MockManager(), {})) == "<Field N/A: N/A (Element: N/A)>"
+    assert repr(Fieldset(_MockManager(), {})) == "<Fieldset N/A: N/A>"
+    assert repr(License(_MockManager(), {})) == "<License N/A: N/A (Seats: N/A)>"
+    assert repr(Location(_MockManager(), {})) == "<Location N/A: N/A>"
+    assert repr(Manufacturer(_MockManager(), {})) == "<Manufacturer N/A: N/A>"
+    assert repr(Model(_MockManager(), {})) == "<Model N/A: N/A (N/A)>"
+    assert repr(User(_MockManager(), {})) == "<User N/A: N/A (N/A)>"
+    assert repr(StatusLabel(_MockManager(), {})) == "<StatusLabel N/A: N/A (Type: N/A)>"

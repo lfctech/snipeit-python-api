@@ -1,8 +1,11 @@
-from typing import Any, Dict, Set
+from typing import Any, Dict, Generic, Iterable, List, Set, Type, TypeVar
 from ..exceptions import SnipeITApiError
 
 # Sentinel object to distinguish missing attributes from explicit None values
 _MISSING = object()
+
+
+T = TypeVar("T", bound="ApiObject")
 
 
 class ApiObject:
@@ -31,7 +34,7 @@ class ApiObject:
         Sets an attribute on the object, tracking changes if it's a public field.
         """
         # Only track changes after the object has been fully initialized.
-        if self._initialized and not name.startswith("_"):
+        if getattr(self, "_initialized", False) and not name.startswith("_"):
             # To prevent flagging unchanged values as dirty
             current = getattr(self, name, _MISSING)
             if current is _MISSING or current != value:
@@ -68,6 +71,16 @@ class ApiObject:
         
         return self
 
+    def refresh(self) -> 'ApiObject':
+        """Refetch the latest state from the API and update this object in-place."""
+        path = f"{self._path}/{self.id}"
+        data = self._manager._get(path)
+        for key, value in data.items():
+            setattr(self, key, value)
+        # After a refresh, there are no local changes
+        self._dirty_fields.clear()
+        return self
+
     def delete(self) -> None:
         """
         Deletes the object.
@@ -96,10 +109,6 @@ class Manager:
         """Internal method to perform a POST request."""
         return self.api.post(path, data)
 
-    def _update(self, path: str, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Internal method to perform a PUT request."""
-        return self.api.put(path, data)
-
     def _patch(self, path: str, data: Dict[str, Any]) -> Dict[str, Any]:
         """Internal method to perform a PATCH request."""
         return self.api.patch(path, data)
@@ -107,3 +116,66 @@ class Manager:
     def _delete(self, path: str) -> None:
         """Internal method to perform a DELETE request."""
         return self.api.delete(path)
+
+
+class BaseResourceManager(Manager, Generic[T]):
+    """
+    Generic resource manager that implements common CRUD operations for ApiObject subclasses.
+
+    Subclasses should provide `resource_cls` and optionally override `path`.
+    """
+
+    resource_cls: Type[T]
+    path: str | None = None  # default to resource_cls._path if not set
+
+    def __init__(self, api: 'SnipeIT') -> None:
+        super().__init__(api)
+        # Resolve path from resource class if not provided
+        if self.path is None:
+            self.path = getattr(self.resource_cls, "_path")  # type: ignore[assignment]
+
+    # Construction helper
+    def _make(self, data: Dict[str, Any]) -> T:
+        return self.resource_cls(self, data)
+
+    # CRUD
+    def list(self, **params: Any) -> List[T]:
+        data = self._get(f"{self.path}", **params)
+        rows = data["rows"] if isinstance(data, dict) and "rows" in data else []
+        return [self._make(item) for item in rows]
+
+    def list_all(self, *, limit: int | None = None, page_size: int = 50, **params: Any) -> Iterable[T]:
+        """Iterate all items across pages. Yield items lazily."""
+        page = 1
+        yielded = 0
+        while True:
+            resp = self._get(f"{self.path}", **{**params, "limit": page_size, "offset": (page - 1) * page_size})
+            rows = resp.get("rows", []) if isinstance(resp, dict) else []
+            if not rows:
+                break
+            for item in rows:
+                yield self._make(item)
+                yielded += 1
+                if limit is not None and yielded >= limit:
+                    return
+            total = resp.get("total") if isinstance(resp, dict) else None
+            if total is not None and yielded >= total:
+                break
+            page += 1
+
+    def get(self, obj_id: int, **params: Any) -> T:
+        data = self._get(f"{self.path}/{obj_id}", **params)
+        return self._make(data)
+
+    def create(self, **data: Any) -> T:
+        resp = self._create(f"{self.path}", data)
+        payload = resp.get("payload", resp)
+        return self._make(payload)
+
+    def patch(self, obj_id: int, **data: Any) -> T:
+        resp = self._patch(f"{self.path}/{obj_id}", data)
+        payload = resp.get("payload", resp)
+        return self._make(payload)
+
+    def delete(self, obj_id: int) -> None:
+        self._delete(f"{self.path}/{obj_id}")

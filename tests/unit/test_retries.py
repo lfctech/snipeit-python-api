@@ -3,6 +3,7 @@ from snipeit import SnipeIT
 from snipeit.exceptions import SnipeITServerError
 
 
+@pytest.mark.unit
 def test_retry_defaults_configured():
     # Do not override defaults so we can detect mutations of default values
     client = SnipeIT(
@@ -20,6 +21,7 @@ def test_retry_defaults_configured():
     assert set(retries.status_forcelist) == {429, 500, 502, 503, 504}
 
 
+@pytest.mark.unit
 def test_post_503_does_not_retry_by_default(requests_mock):
     client = SnipeIT(
         url="https://test.snipeitapp.com",
@@ -36,6 +38,7 @@ def test_post_503_does_not_retry_by_default(requests_mock):
     assert requests_mock.call_count == 1
 
 
+@pytest.mark.unit
 def test_retry_allows_post_when_configured():
     client = SnipeIT(
         url="https://test.snipeitapp.com",
@@ -46,9 +49,9 @@ def test_retry_allows_post_when_configured():
     assert "POST" in retries.allowed_methods
 
 
+@pytest.mark.unit
 def test_http_and_https_adapters_mounted():
     client = SnipeIT(url="https://test.snipeitapp.com", token="fake")
     adapters = client.session.adapters
     assert "https://" in adapters
     assert "http://" in adapters
-

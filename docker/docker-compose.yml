@@ -1,0 +1,53 @@
+# Compose file for production.
+
+services:
+  app:
+    image: snipe/snipe-it:latest-alpine
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8000}:80"
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+      seeder:
+        condition: service_completed_successfully
+    env_file:
+      - .env
+    volumes:
+      - storage:/var/lib/snipeit
+    
+
+  seeder:
+    image: snipe/snipe-it:latest-alpine
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    command: ["sh", "-c", "if [ ! -f /var/lib/snipeit/seeded.txt ]; then php artisan migrate --force && php artisan db:seed --force && touch /var/lib/snipeit/seeded.txt && php artisan passport:install -n && php artisan snipeit:make-api-key --user_id 1 --name testing -n --key-only > /api_key.txt; fi"]
+    restart: "no"
+    volumes:
+      - storage:/var/lib/snipeit
+      - ./api_key.txt:/api_key.txt
+    
+  db:
+    image: mariadb:11.4.7
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    healthcheck:
+      # https://mariadb.com/kb/en/using-healthcheck-sh/#compose-file-example
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 1s
+      retries: 5
+    volumes:
+      - db-data:/var/lib/mysql
+
+volumes:
+  db-data:
+  storage:

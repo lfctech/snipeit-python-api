@@ -1,1 +1,1 @@
-from .main import SnipeIT
+from .client import SnipeIT

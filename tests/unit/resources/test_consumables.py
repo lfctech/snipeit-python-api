@@ -2,6 +2,7 @@ import pytest
 from snipeit.resources.consumables import Consumable
 
 
+@pytest.mark.unit
 def test_list_consumables(snipeit_client, requests_mock):
     requests_mock.get("https://test.snipeitapp.com/api/v1/consumables", json={
         "total": 1,
@@ -12,12 +13,14 @@ def test_list_consumables(snipeit_client, requests_mock):
     assert isinstance(consumables[0], Consumable)
     assert consumables[0].name == "Test Consumable"
 
+@pytest.mark.unit
 def test_get_consumable(snipeit_client, requests_mock):
     requests_mock.get("https://test.snipeitapp.com/api/v1/consumables/1", json={"id": 1, "name": "Test Consumable"})
     consumable = snipeit_client.consumables.get(1)
     assert isinstance(consumable, Consumable)
     assert consumable.name == "Test Consumable"
 
+@pytest.mark.unit
 def test_create_consumable(snipeit_client, requests_mock):
     requests_mock.post("https://test.snipeitapp.com/api/v1/consumables", json={"status": "success", "payload": {"id": 2, "name": "New Consumable"}})
     new_consumable = snipeit_client.consumables.create(name="New Consumable", qty=1, category_id=1)
@@ -25,23 +28,21 @@ def test_create_consumable(snipeit_client, requests_mock):
     assert new_consumable.name == "New Consumable"
     assert requests_mock.last_request.json() == {"name": "New Consumable", "qty": 1, "category_id": 1}
 
-def test_update_consumable(snipeit_client, requests_mock):
-    requests_mock.put("https://test.snipeitapp.com/api/v1/consumables/1", json={"status": "success", "payload": {"id": 1, "name": "Updated Consumable"}})
-    updated_consumable = snipeit_client.consumables.update(1, name="Updated Consumable")
-    assert isinstance(updated_consumable, Consumable)
-    assert updated_consumable.name == "Updated Consumable"
 
+@pytest.mark.unit
 def test_patch_consumable(snipeit_client, requests_mock):
     requests_mock.patch("https://test.snipeitapp.com/api/v1/consumables/1", json={"status": "success", "payload": {"id": 1, "name": "Patched Consumable"}})
     patched_consumable = snipeit_client.consumables.patch(1, name="Patched Consumable")
     assert isinstance(patched_consumable, Consumable)
     assert patched_consumable.name == "Patched Consumable"
 
+@pytest.mark.unit
 def test_delete_consumable(snipeit_client, requests_mock):
     requests_mock.delete("https://test.snipeitapp.com/api/v1/consumables/1", json={"status": "success", "messages": "Consumable deleted"})
     snipeit_client.consumables.delete(1)
     assert requests_mock.called
 
+@pytest.mark.unit
 def test_save_consumable(snipeit_client, requests_mock):
     requests_mock.get("https://test.snipeitapp.com/api/v1/consumables/1", json={"id": 1, "name": "Test Consumable"})
     requests_mock.patch("https://test.snipeitapp.com/api/v1/consumables/1", json={"status": "success", "payload": {"id": 1, "name": "Saved Consumable"}})
