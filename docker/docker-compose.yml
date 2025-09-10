@@ -10,8 +10,12 @@ services:
       db:
         condition: service_healthy
         restart: true
+      seeder:
+        condition: service_completed_successfully
     env_file:
       - .env
+    volumes:
+      - storage:/var/lib/snipeit
     
 
   seeder:
@@ -21,15 +25,10 @@ services:
         condition: service_healthy
     env_file:
       - .env
-    command: >
-      sh -c "
-      sleep 10 &&
-      php artisan db:seed --force &&
-      php artisan passport:install < /dev/null &&
-      php artisan snipeit:make-api-key --user_id 1 | grep 'API Token:' > /api_key.txt
-      "
+    command: ["sh", "-c", "if [ ! -f /var/lib/snipeit/seeded.txt ]; then php artisan migrate --force && php artisan db:seed --force && touch /var/lib/snipeit/seeded.txt && php artisan passport:install -n && php artisan snipeit:make-api-key --user_id 1 --name testing -n --key-only > /api_key.txt; fi"]
     restart: "no"
     volumes:
+      - storage:/var/lib/snipeit
       - ./api_key.txt:/api_key.txt
     
   db:
@@ -46,6 +45,9 @@ services:
       interval: 5s
       timeout: 1s
       retries: 5
+    volumes:
+      - db-data:/var/lib/mysql
 
 volumes:
-  snipeit_storage:
+  db-data:
+  storage:
