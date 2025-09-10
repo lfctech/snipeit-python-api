@@ -1,272 +1,113 @@
-# Python Snipe-IT API Client
+# Snipe-IT Python API Client
 
-A Python client library for the Snipe-IT API. It provides a simple, typed interface to common resources (assets, models, users, etc.) with request retries, error handling, and a convenient change-tracking model for patch updates.
+A Python client for the [Snipe-IT](https://snipeitapp.com/) API. This library provides a convenient way to interact with a Snipe-IT instance, manage assets, users, and other resources.
 
-### Installation For Users (in another project)
+## Features
 
-To use this library in another project, install it from the local path. Note that the package name is `snipeit-api`.
+*   Object-oriented interface for Snipe-IT resources.
+*   Handles API authentication, request signing, and response parsing.
+*   Support for CRUD operations (Create, Read, Update, Delete) on various resources.
+*   Automatic retry mechanism for transient server errors.
+*   Integration with a local Dockerized Snipe-IT for development and testing.
+
+### Supported Resources
+
+*   Accessories
+*   Assets
+*   Categories
+*   Components
+*   Consumables
+*   Departments
+*   Fields
+*   Fieldsets
+*   Licenses
+*   Locations
+*   Manufacturers
+*   Models
+*   Status Labels
+*   Users
+
+## Getting Started
+
+### Installation
+
+To install the library, you can use `pip`:
 
 ```bash
-pip install /path/to/library
+pip install .
 ```
 
-### For Developers (to work on this library)
+### Development Setup
 
-To set up a development environment to work on this library, clone the repository and then run the following command in the project's root directory:
+A Docker environment is provided for local development and testing. This will spin up a Snipe-IT instance with all necessary dependencies.
 
-```bash
-pip install -e .[dev]
-```
+1.  **Start the Docker containers:**
 
-This will install the project in "editable" mode and include the development dependencies needed for testing.
+    ```bash
+    cd docker
+    docker-compose up -d
+    ```
+
+2.  **API Key:**
+
+    The first time you start the containers, an API key will be generated and saved to `docker/api_key.txt`. This key is used by the integration tests to communicate with the local Snipe-IT instance.
 
 ## Usage
 
-First, initialize the client with your Snipe-IT URL and API token:
+Here is a basic example of how to use the client to fetch assets:
 
 ```python
 from snipeit import SnipeIT
 
-client = SnipeIT(
-    url="https://your.snipeitapp.com",
-    token="{{SNIPE_IT_API_TOKEN}}",
-)
+# Initialize the client with your Snipe-IT URL and API token
+with SnipeIT(url="http://localhost:8000", token="your-api-token") as client:
+    # List all assets
+    try:
+        assets = client.assets.list()
+        for asset in assets:
+            print(f"Asset Name: {asset.name}, Tag: {asset.asset_tag}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    # ...
 ```
 
-### Finding Resources
+## Testing
 
-**List all resources of a type:**
+The project uses `pytest` for testing and provides `make` commands for convenience. Tests are separated into `unit` and `integration` tests.
 
-Use the `list()` method on a manager to get a list of all items.
+### Running Unit Tests
 
-```python
-# Get a list of all assets
-assets = client.assets.list()
-
-# Get a list of all users
-users = client.users.list()
-```
-
-**Get a specific resource by ID:**
-
-Use the `get()` method with an ID to retrieve a single item.
-
-```python
-# Get the asset with ID 1
-asset = client.assets.get(1)
-```
-
-### Creating, Updating, and Deleting
-
-**Create a resource:**
-
-Use the `create()` method on the appropriate manager.
-
-```python
-new_asset = client.assets.create(
-    name="New Laptop",
-    status_id=1, 
-    model_id=1,
-    asset_tag="54321"
-)
-```
-
-**Update a resource (Recommended Approach):**
-
-The easiest and safest way to update a resource is to get the object, change its attributes, and call the `save()` method. This efficiently sends only the changed fields to the API.
-
-```python
-# Get an asset
-asset = client.assets.get(1)
-
-# Update its attributes
-asset.name = "Updated Laptop Name"
-asset.notes = "Added more RAM."
-
-# Save the changes
-asset.save()
-```
-
-**Delete a resource:**
-
-You can delete a resource using the manager's `delete()` method or by calling `delete()` on the object itself.
-
-```python
-# Using the manager
-client.assets.delete(2)
-
-# Or, on the object
-asset_to_delete = client.assets.get(3)
-asset_to_delete.delete()
-```
-
-### Object-Specific Actions
-
-Some resources have unique actions you can perform on the object.
-
-```python
-# Get an asset
-asset = client.assets.get(1)
-
-# Checkout the asset to a user
-asset.checkout(checkout_to_type='user', assigned_to_id=123)
-
-# Check the asset back in
-asset.checkin(note="Returned to inventory")
-```
-
-### Available Resources
-
-The following resource managers are available on the `client` object:
-
-*   `client.accessories`
-*   `client.assets`
-*   `client.categories`
-*   `client.components`
-*   `client.consumables`
-*   `client.departments`
-*   `client.fields`
-*   `client.fieldsets`
-*   `client.licenses`
-*   `client.locations`
-*   `client.manufacturers`
-*   `client.models`
-*   `client.status_labels`
-*   `client.users`
-
-Each manager generally provides `list()`, `get(id)`, `create()`, `update(id)`, `patch(id)`, and `delete(id)` methods.
-
-Each resource object provides `save()` and `delete()` methods.
-
-### Retry behavior
-By default, retries are enabled for idempotent methods only (HEAD, GET, OPTIONS). You can override this using `retry_allowed_methods` when constructing the client, but retrying write methods (POST/PUT/PATCH/DELETE) is generally discouraged unless your server guarantees idempotency.
-
-```python
-client = SnipeIT(
-    url="https://your.snipeitapp.com",
-    token="{{SNIPE_IT_API_TOKEN}}",
-    retry_allowed_methods={"HEAD", "GET", "OPTIONS"},
-)
-```
-
-## Running tests
-
-The test suite is organized into unit tests (mocked, fast) in `tests/unit/` and future integration tests (real API calls) in `tests/integration/`. All unit tests are marked with `@pytest.mark.unit`. Use the Makefile targets for streamlined execution.
-
-- Quick run (all tests):
-
-```bash
-make test
-```
-
-- Run unit tests only (recommended for development):
+Unit tests are self-contained and do not require a running Snipe-IT instance.
 
 ```bash
 make test-unit
 ```
 
-- Run integration tests only (requires `SNIPEIT_TEST_URL` and `SNIPEIT_TEST_TOKEN` env vars set; skips if not):
+### Running Integration Tests
 
-```bash
-make test-integration
-```
+Integration tests run against a real Snipe-IT instance and require the Docker environment to be running.
 
-- Run all tests:
+1.  **Start the Docker environment:**
+
+    ```bash
+    cd docker
+    docker-compose up -d
+    ```
+
+2.  **Run the integration tests:**
+
+    ```bash
+    make test-integration
+    ```
+
+### Running All Tests
+
+To run all tests (both unit and integration), use:
 
 ```bash
 make test-all
 ```
 
-- With coverage (enforces 100% and shows missing lines; runs all):
-
-```bash
-make cov
-```
-
-- Unit tests with coverage:
-
-```bash
-make cov-unit
-```
-
-- HTML coverage report:
-
-```bash
-make cov-html
-```
-
-- Property-based tests only (Hypothesis; unit only):
-
-```bash
-make property
-```
-
-### Integration Tests
-
-Integration tests use real API calls. Set these environment variables:
-
-- `SNIPEIT_TEST_URL`: URL of a test Snipe-IT instance (e.g., `http://localhost:8000` from Docker setup)
-- `SNIPEIT_TEST_TOKEN`: API token for the test instance
-
-Then run `make test-integration`. Tests will skip if vars are not set.
-
-### Mutation testing (optional)
-
-Mutation testing flips bits in your source to ensure your tests actually detect behavioral changes. It can be slow. We use mutmut configured via setup.cfg.
-
-- Run mutation tests (may take time; all tests):
-
-```bash
-make mut
-```
-
-- Run mutation testing on unit tests only (faster):
-
-```bash
-make mut-unit
-```
-
-- See surviving mutants (things your tests didn’t catch):
-
-```bash
-make mut-report
-```
-
-- Reset mutation state:
-
-```bash
-make mut-reset
-```
-
 ## License
 
-Add your preferred license here.
-
-## Local Docker Environment for Testing
-
-This project includes a `docker-compose.yml` and `.env` file in the `docker` directory to run a local Snipe-IT instance for testing purposes.
-
-### First-time Setup
-
-1.  Navigate to the `docker` directory:
-    ```bash
-    cd docker
-    ```
-2.  Generate a new `APP_KEY` for the Snipe-IT instance. Run the following command and copy the output:
-    ```bash
-    docker compose run --rm app php artisan key:generate --show
-    ```
-3.  Open the `.env` file and paste the generated key as the value for the `APP_KEY` variable.
-
-### Starting and Stopping the Environment
-
-*   **To start the environment**, run the following command from the `docker` directory:
-    ```bash
-    docker compose up -d
-    ```
-    The application will be available at [http://localhost:8000](http://localhost:8000).
-
-*   **To stop the environment**, run the following command from the `docker` directory:
-    ```bash
-    docker compose down
-    ```
+This project is licensed under the MIT License.
