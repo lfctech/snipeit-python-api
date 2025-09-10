@@ -26,10 +26,12 @@ def api_object(mock_manager):
     obj._path = "test_objects"
     return obj
 
+@pytest.mark.unit
 def test_delete_object(api_object, mock_manager):
     api_object.delete()
     assert mock_manager._deleted_path == "test_objects/1"
 
+@pytest.mark.unit
 def test_save_object(api_object, mock_manager):
     api_object.name = "Updated Name"
     api_object.new_field = "New Value"
@@ -40,6 +42,7 @@ def test_save_object(api_object, mock_manager):
     assert not api_object._dirty_fields
 
 
+@pytest.mark.unit
 def test_repr_uses_id(api_object):
     # __repr__ should include the class name and id
     rep = repr(api_object)
@@ -47,6 +50,7 @@ def test_repr_uses_id(api_object):
     assert "1" in rep
 
 
+@pytest.mark.unit
 def test_save_no_changes_returns_self_and_no_patch(api_object, mock_manager):
     # Saving without modifying fields should be a no-op and return self
     saved = api_object.save()
@@ -55,6 +59,7 @@ def test_save_no_changes_returns_self_and_no_patch(api_object, mock_manager):
     assert mock_manager._patched_data is None
 
 
+@pytest.mark.unit
 def test_save_unsuccessful_does_not_clear_dirty_fields():
     class FailingManager:
         def __init__(self):

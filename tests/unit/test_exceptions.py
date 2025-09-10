@@ -8,6 +8,7 @@ from snipeit.exceptions import (
 )
 
 
+@pytest.mark.unit
 def test_401_raises_auth_error(snipeit_client, requests_mock):
     """Tests that a 401 response raises SnipeITAuthenticationError."""
     requests_mock.get("https://test.snipeitapp.com/api/v1/hardware/1", status_code=401, json={"messages": "Unauthenticated."})
@@ -16,6 +17,7 @@ def test_401_raises_auth_error(snipeit_client, requests_mock):
     assert "Unauthenticated." in str(excinfo.value)
 
 
+@pytest.mark.unit
 def test_404_raises_not_found_error(snipeit_client, requests_mock):
     """Tests that a 404 response raises SnipeITNotFoundError."""
     requests_mock.get("https://test.snipeitapp.com/api/v1/hardware/9999", status_code=404, json={"messages": "Asset not found"})
@@ -24,6 +26,7 @@ def test_404_raises_not_found_error(snipeit_client, requests_mock):
     assert "Asset not found" in str(excinfo.value)
 
 
+@pytest.mark.unit
 def test_422_raises_validation_error(snipeit_client, requests_mock):
     """Tests that a 422 response raises SnipeITValidationError."""
     error_payload = {
@@ -36,6 +39,7 @@ def test_422_raises_validation_error(snipeit_client, requests_mock):
     assert "The given data was invalid." in str(excinfo.value)
 
 
+@pytest.mark.unit
 def test_500_raises_server_error(snipeit_client, requests_mock):
     """Tests that a 500 response raises SnipeITServerError."""
     requests_mock.get("https://test.snipeitapp.com/api/v1/hardware/1", status_code=500, reason="Internal Server Error")
@@ -44,6 +48,7 @@ def test_500_raises_server_error(snipeit_client, requests_mock):
     assert "Internal Server Error" in str(excinfo.value)
 
 
+@pytest.mark.unit
 def test_api_error_preserves_response_and_status_code():
     import requests
     r = requests.models.Response()

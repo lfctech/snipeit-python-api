@@ -2,6 +2,7 @@ import pytest
 from snipeit.resources.departments import Department
 
 
+@pytest.mark.unit
 def test_list_departments(snipeit_client, requests_mock):
     requests_mock.get("https://test.snipeitapp.com/api/v1/departments", json={
         "total": 1,
@@ -12,12 +13,14 @@ def test_list_departments(snipeit_client, requests_mock):
     assert isinstance(departments[0], Department)
     assert departments[0].name == "Test Department"
 
+@pytest.mark.unit
 def test_get_department(snipeit_client, requests_mock):
     requests_mock.get("https://test.snipeitapp.com/api/v1/departments/1", json={"id": 1, "name": "Test Department"})
     department = snipeit_client.departments.get(1)
     assert isinstance(department, Department)
     assert department.name == "Test Department"
 
+@pytest.mark.unit
 def test_create_department(snipeit_client, requests_mock):
     requests_mock.post("https://test.snipeitapp.com/api/v1/departments", json={"status": "success", "payload": {"id": 2, "name": "New Department"}})
     new_department = snipeit_client.departments.create(name="New Department")
@@ -27,6 +30,7 @@ def test_create_department(snipeit_client, requests_mock):
 
 
 
+@pytest.mark.unit
 def test_patch_department(snipeit_client, requests_mock):
     requests_mock.patch("https://test.snipeitapp.com/api/v1/departments/1", json={"status": "success", "payload": {"id": 1, "name": "Patched Department"}})
     patched_department = snipeit_client.departments.patch(1, name="Patched Department")
@@ -34,11 +38,13 @@ def test_patch_department(snipeit_client, requests_mock):
     assert patched_department.name == "Patched Department"
 
 
+@pytest.mark.unit
 def test_delete_department(snipeit_client, requests_mock):
     requests_mock.delete("https://test.snipeitapp.com/api/v1/departments/1", json={"status": "success", "messages": "Department deleted"})
     snipeit_client.departments.delete(1)
     assert requests_mock.called
 
+@pytest.mark.unit
 def test_save_department(snipeit_client, requests_mock):
     requests_mock.get("https://test.snipeitapp.com/api/v1/departments/1", json={"id": 1, "name": "Test Department"})
     requests_mock.patch("https://test.snipeitapp.com/api/v1/departments/1", json={"status": "success", "payload": {"id": 1, "name": "Saved Department"}})

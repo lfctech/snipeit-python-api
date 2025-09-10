@@ -1,15 +1,13 @@
-# Inventory-library
+# Python Snipe-IT API Client
 
 A Python client library for the Snipe-IT API. It provides a simple, typed interface to common resources (assets, models, users, etc.) with request retries, error handling, and a convenient change-tracking model for patch updates.
 
-## Installation
+### Installation For Users (in another project)
 
-### For Users (in another project)
-
-To use this library in another project
+To use this library in another project, install it from the local path. Note that the package name is `snipeit-api`.
 
 ```bash
-pip install /path/to/inventory-library
+pip install /path/to/library
 ```
 
 ### For Developers (to work on this library)
@@ -153,16 +151,42 @@ client = SnipeIT(
 
 ## Running tests
 
-- Quick run:
+The test suite is organized into unit tests (mocked, fast) in `tests/unit/` and future integration tests (real API calls) in `tests/integration/`. All unit tests are marked with `@pytest.mark.unit`. Use the Makefile targets for streamlined execution.
+
+- Quick run (all tests):
 
 ```bash
-pytest -q
+make test
 ```
 
-- With coverage (enforces 100% and shows missing lines):
+- Run unit tests only (recommended for development):
+
+```bash
+make test-unit
+```
+
+- Run integration tests only (requires `SNIPEIT_TEST_URL` and `SNIPEIT_TEST_TOKEN` env vars set; skips if not):
+
+```bash
+make test-integration
+```
+
+- Run all tests:
+
+```bash
+make test-all
+```
+
+- With coverage (enforces 100% and shows missing lines; runs all):
 
 ```bash
 make cov
+```
+
+- Unit tests with coverage:
+
+```bash
+make cov-unit
 ```
 
 - HTML coverage report:
@@ -171,20 +195,35 @@ make cov
 make cov-html
 ```
 
-- Property-based tests only (Hypothesis):
+- Property-based tests only (Hypothesis; unit only):
 
 ```bash
 make property
 ```
 
+### Integration Tests
+
+Integration tests use real API calls. Set these environment variables:
+
+- `SNIPEIT_TEST_URL`: URL of a test Snipe-IT instance (e.g., `http://localhost:8000` from Docker setup)
+- `SNIPEIT_TEST_TOKEN`: API token for the test instance
+
+Then run `make test-integration`. Tests will skip if vars are not set.
+
 ### Mutation testing (optional)
 
 Mutation testing flips bits in your source to ensure your tests actually detect behavioral changes. It can be slow. We use mutmut configured via setup.cfg.
 
-- Run mutation tests (may take time):
+- Run mutation tests (may take time; all tests):
 
 ```bash
 make mut
+```
+
+- Run mutation testing on unit tests only (faster):
+
+```bash
+make mut-unit
 ```
 
 - See surviving mutants (things your tests didn’t catch):

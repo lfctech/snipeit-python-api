@@ -2,6 +2,7 @@ import pytest
 from snipeit.resources.accessories import Accessory
 
 
+@pytest.mark.unit
 def test_list_accessories(snipeit_client, requests_mock):
     requests_mock.get("https://test.snipeitapp.com/api/v1/accessories", json={
         "total": 1,
@@ -12,12 +13,14 @@ def test_list_accessories(snipeit_client, requests_mock):
     assert isinstance(accessories[0], Accessory)
     assert accessories[0].name == "Test Accessory"
 
+@pytest.mark.unit
 def test_get_accessory(snipeit_client, requests_mock):
     requests_mock.get("https://test.snipeitapp.com/api/v1/accessories/1", json={"id": 1, "name": "Test Accessory"})
     accessory = snipeit_client.accessories.get(1)
     assert isinstance(accessory, Accessory)
     assert accessory.name == "Test Accessory"
 
+@pytest.mark.unit
 def test_create_accessory(snipeit_client, requests_mock):
     requests_mock.post("https://test.snipeitapp.com/api/v1/accessories", json={"status": "success", "payload": {"id": 2, "name": "New Accessory"}})
     new_accessory = snipeit_client.accessories.create(name="New Accessory", qty=1, category_id=1)
@@ -27,17 +30,20 @@ def test_create_accessory(snipeit_client, requests_mock):
     assert body == {"name": "New Accessory", "qty": 1, "category_id": 1}
 
 
+@pytest.mark.unit
 def test_patch_accessory(snipeit_client, requests_mock):
     requests_mock.patch("https://test.snipeitapp.com/api/v1/accessories/1", json={"status": "success", "payload": {"id": 1, "name": "Patched Accessory"}})
     patched_accessory = snipeit_client.accessories.patch(1, name="Patched Accessory")
     assert isinstance(patched_accessory, Accessory)
     assert patched_accessory.name == "Patched Accessory"
 
+@pytest.mark.unit
 def test_delete_accessory(snipeit_client, requests_mock):
     requests_mock.delete("https://test.snipeitapp.com/api/v1/accessories/1", json={"status": "success", "messages": "Accessory deleted"})
     snipeit_client.accessories.delete(1)
     assert requests_mock.called
 
+@pytest.mark.unit
 def test_save_accessory(snipeit_client, requests_mock):
     requests_mock.get("https://test.snipeitapp.com/api/v1/accessories/1", json={"id": 1, "name": "Test Accessory"})
     requests_mock.patch("https://test.snipeitapp.com/api/v1/accessories/1", json={"status": "success", "payload": {"id": 1, "name": "Saved Accessory"}})
@@ -47,6 +53,7 @@ def test_save_accessory(snipeit_client, requests_mock):
     assert accessory.name == "Saved Accessory"
 
 
+@pytest.mark.unit
 def test_accessory_repr(snipeit_client, requests_mock):
     requests_mock.get(
         "https://test.snipeitapp.com/api/v1/accessories/1",
@@ -57,6 +64,7 @@ def test_accessory_repr(snipeit_client, requests_mock):
     assert rep == "<Accessory 1: Test Accessory>"
 
 
+@pytest.mark.unit
 def test_checkin_from_user(snipeit_client, requests_mock):
     requests_mock.post(
         "https://test.snipeitapp.com/api/v1/accessories/42/checkin",

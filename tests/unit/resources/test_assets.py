@@ -3,6 +3,7 @@ from snipeit.resources.assets import Asset
 from snipeit.exceptions import SnipeITNotFoundError
 
 
+@pytest.mark.unit
 def test_list_assets(snipeit_client, requests_mock):
     """Tests that getting a list of assets works correctly."""
     # Mock the API response
@@ -32,6 +33,7 @@ def test_list_assets(snipeit_client, requests_mock):
     assert requests_mock.last_request.method == "GET"
 
 
+@pytest.mark.unit
 def test_get_single_asset(snipeit_client, requests_mock):
     """Tests that getting a single asset by ID works."""
     mock_response = {
@@ -50,6 +52,7 @@ def test_get_single_asset(snipeit_client, requests_mock):
     assert asset.name == "Another Asset"
 
 
+@pytest.mark.unit
 def test_create_asset(snipeit_client, requests_mock):
     """Tests creating a new asset."""
     requests_mock.post("https://test.snipeitapp.com/api/v1/hardware", json={"status": "success", "payload": {"id": 3, "name": "New Asset"}})
@@ -72,6 +75,7 @@ def test_create_asset(snipeit_client, requests_mock):
     }
 
 
+@pytest.mark.unit
 def test_save_asset(snipeit_client, requests_mock):
     """Tests saving an asset with dirty fields."""
     # Mock the GET and PATCH responses
@@ -105,6 +109,7 @@ def test_save_asset(snipeit_client, requests_mock):
     assert not asset._dirty_fields
 
 
+@pytest.mark.unit
 def test_save_new_attribute(snipeit_client, requests_mock):
     """Tests that setting a new attribute marks it as dirty and saves correctly."""
     # Mock the GET and PATCH responses
@@ -131,6 +136,7 @@ def test_save_new_attribute(snipeit_client, requests_mock):
     assert requests_mock.last_request.json() == {"notes": "These are new notes"}
 
 
+@pytest.mark.unit
 def test_create_asset_with_auto_increment(snipeit_client, requests_mock):
     """Tests creating a new asset with auto-incrementing asset tag."""
     requests_mock.post("https://test.snipeitapp.com/api/v1/hardware", json={"status": "success", "payload": {"id": 4, "name": "Auto-Increment Asset"}})
@@ -146,6 +152,7 @@ def test_create_asset_with_auto_increment(snipeit_client, requests_mock):
     assert "asset_tag" not in requests_mock.last_request.json()
 
 
+@pytest.mark.unit
 def test_get_by_serial_found(snipeit_client, requests_mock):
     requests_mock.get("https://test.snipeitapp.com/api/v1/hardware/byserial/SN123", json={
         "total": 1,
@@ -156,6 +163,7 @@ def test_get_by_serial_found(snipeit_client, requests_mock):
     assert asset.serial == "SN123"
 
 
+@pytest.mark.unit
 def test_get_by_serial_not_found(snipeit_client, requests_mock):
     from snipeit.exceptions import SnipeITNotFoundError
     requests_mock.get("https://test.snipeitapp.com/api/v1/hardware/byserial/SN456", status_code=404, json={"messages": "Asset not found"})
@@ -163,6 +171,7 @@ def test_get_by_serial_not_found(snipeit_client, requests_mock):
         snipeit_client.assets.get_by_serial("SN456")
 
 
+@pytest.mark.unit
 def test_get_by_serial_multiple_found(snipeit_client, requests_mock):
     from snipeit.exceptions import SnipeITApiError
     requests_mock.get("https://test.snipeitapp.com/api/v1/hardware/byserial/SN789", json={
@@ -174,6 +183,7 @@ def test_get_by_serial_multiple_found(snipeit_client, requests_mock):
     assert str(excinfo.value) == "Expected 1 asset with serial SN789, but found 2."
 
 
+@pytest.mark.unit
 def test_get_by_tag_found(snipeit_client, requests_mock):
     requests_mock.get("https://test.snipeitapp.com/api/v1/hardware/bytag/12345", json={"id": 1, "name": "Test Asset", "asset_tag": "12345"})
     asset = snipeit_client.assets.get_by_tag("12345")
@@ -181,6 +191,7 @@ def test_get_by_tag_found(snipeit_client, requests_mock):
     assert asset.asset_tag == "12345"
 
 
+@pytest.mark.unit
 def test_get_by_tag_not_found(snipeit_client, requests_mock):
     from snipeit.exceptions import SnipeITNotFoundError
     requests_mock.get("https://test.snipeitapp.com/api/v1/hardware/bytag/67890", status_code=404, json={"messages": "Asset not found"})
@@ -188,49 +199,60 @@ def test_get_by_tag_not_found(snipeit_client, requests_mock):
         snipeit_client.assets.get_by_tag("67890")
 
 
+@pytest.mark.unit
 def test_asset_checkout_to_user(snipeit_client, requests_mock):
     requests_mock.get("https://test.snipeitapp.com/api/v1/hardware/1", json={"id": 1, "name": "Test Asset"})
     requests_mock.post("https://test.snipeitapp.com/api/v1/hardware/1/checkout", json={"status": "success", "payload": {}})
     asset = snipeit_client.assets.get(1)
     asset.checkout(checkout_to_type='user', assigned_to_id=123)
-    assert requests_mock.last_request.json()["checkout_to_type"] == "user"
-    assert requests_mock.last_request.json()["assigned_user"] == 123
+    post_request = requests_mock.request_history[1]
+    assert post_request.json()["checkout_to_type"] == "user"
+    assert post_request.json()["assigned_user"] == 123
 
 
+@pytest.mark.unit
 def test_asset_checkout_to_location(snipeit_client, requests_mock):
     requests_mock.get("https://test.snipeitapp.com/api/v1/hardware/1", json={"id": 1, "name": "Test Asset"})
     requests_mock.post("https://test.snipeitapp.com/api/v1/hardware/1/checkout", json={"status": "success", "payload": {}})
     asset = snipeit_client.assets.get(1)
     asset.checkout(checkout_to_type='location', assigned_to_id=456)
-    assert requests_mock.last_request.json()["checkout_to_type"] == "location"
-    assert requests_mock.last_request.json()["assigned_location"] == 456
+    post_request = requests_mock.request_history[1]
+    assert post_request.json()["checkout_to_type"] == "location"
+    assert post_request.json()["assigned_location"] == 456
 
 
+@pytest.mark.unit
 def test_asset_checkout_to_asset(snipeit_client, requests_mock):
     requests_mock.get("https://test.snipeitapp.com/api/v1/hardware/1", json={"id": 1, "name": "Test Asset"})
     requests_mock.post("https://test.snipeitapp.com/api/v1/hardware/1/checkout", json={"status": "success", "payload": {}})
     asset = snipeit_client.assets.get(1)
     asset.checkout(checkout_to_type='asset', assigned_to_id=789)
-    assert requests_mock.last_request.json()["checkout_to_type"] == "asset"
-    assert requests_mock.last_request.json()["assigned_asset"] == 789
+    post_request = requests_mock.request_history[1]
+    assert post_request.json()["checkout_to_type"] == "asset"
+    assert post_request.json()["assigned_asset"] == 789
 
 
+@pytest.mark.unit
 def test_asset_checkin(snipeit_client, requests_mock):
     requests_mock.get("https://test.snipeitapp.com/api/v1/hardware/1", json={"id": 1, "name": "Test Asset"})
     requests_mock.post("https://test.snipeitapp.com/api/v1/hardware/1/checkin", json={"status": "success", "payload": {}})
     asset = snipeit_client.assets.get(1)
     asset.checkin(note="Returned")
-    assert requests_mock.last_request.json()["note"] == "Returned"
+    post_request = requests_mock.request_history[1]
+    assert post_request.json()["note"] == "Returned"
 
 
+@pytest.mark.unit
 def test_asset_audit(snipeit_client, requests_mock):
     requests_mock.get("https://test.snipeitapp.com/api/v1/hardware/1", json={"id": 1, "name": "Test Asset"})
     requests_mock.post("https://test.snipeitapp.com/api/v1/hardware/1/audit", json={"status": "success", "payload": {}})
     asset = snipeit_client.assets.get(1)
     asset.audit(note="Audited")
-    assert requests_mock.last_request.json()["note"] == "Audited"
+    post_request = requests_mock.request_history[1]
+    assert post_request.json()["note"] == "Audited"
 
 
+@pytest.mark.unit
 def test_assets_patch(snipeit_client, requests_mock):
     requests_mock.patch(
         "https://test.snipeitapp.com/api/v1/hardware/1",
@@ -241,6 +263,7 @@ def test_assets_patch(snipeit_client, requests_mock):
     assert patched.name == "Patched"
 
 
+@pytest.mark.unit
 def test_assets_delete(snipeit_client, requests_mock):
     requests_mock.delete(
         "https://test.snipeitapp.com/api/v1/hardware/1",
@@ -250,6 +273,7 @@ def test_assets_delete(snipeit_client, requests_mock):
     assert requests_mock.called
 
 
+@pytest.mark.unit
 def test_asset_repr_with_defaults(snipeit_client, requests_mock):
     # Provide minimal fields to exercise default fallbacks in __repr__
     requests_mock.get(
@@ -261,6 +285,7 @@ def test_asset_repr_with_defaults(snipeit_client, requests_mock):
     assert rep == "<Asset N/A (N/A - N/A - N/A)>"
 
 
+@pytest.mark.unit
 def test_asset_repr_full_fields(snipeit_client, requests_mock):
     requests_mock.get(
         "https://test.snipeitapp.com/api/v1/hardware/11",
@@ -276,6 +301,7 @@ def test_asset_repr_full_fields(snipeit_client, requests_mock):
     assert repr(asset) == "<Asset 12345 (Foo - ABC - Model)>"
 
 
+@pytest.mark.unit
 def test_asset_checkout_invalid_type_raises_valueerror(snipeit_client, requests_mock):
     requests_mock.get(
         "https://test.snipeitapp.com/api/v1/hardware/1", json={"id": 1}
@@ -286,6 +312,7 @@ def test_asset_checkout_invalid_type_raises_valueerror(snipeit_client, requests_
     assert str(excinfo.value) == "checkout_to_type must be one of 'user', 'asset', or 'location'"
 
 
+@pytest.mark.unit
 def test_get_by_serial_zero_total_raises_not_found(snipeit_client, requests_mock):
     requests_mock.get(
         "https://test.snipeitapp.com/api/v1/hardware/byserial/SN000",
@@ -295,6 +322,7 @@ def test_get_by_serial_zero_total_raises_not_found(snipeit_client, requests_mock
         snipeit_client.assets.get_by_serial("SN000")
 
 
+@pytest.mark.unit
 def test_get_by_serial_missing_total_treated_as_not_found(snipeit_client, requests_mock):
     from snipeit.exceptions import SnipeITNotFoundError
     # API returns rows but omits 'total' key
@@ -306,6 +334,7 @@ def test_get_by_serial_missing_total_treated_as_not_found(snipeit_client, reques
         snipeit_client.assets.get_by_serial("SN111")
 
 
+@pytest.mark.unit
 def test_create_maintenance_returns_payload(snipeit_client, requests_mock):
     requests_mock.post(
         "https://test.snipeitapp.com/api/v1/hardware/1/maintenances",

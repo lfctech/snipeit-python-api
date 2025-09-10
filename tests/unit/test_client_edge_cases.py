@@ -9,6 +9,14 @@ from snipeit.exceptions import (
 )
 
 
+@pytest.mark.unit
+def test_https_required():
+    with pytest.raises(ValueError) as excinfo:
+        SnipeIT(url="http://test.snipeitapp.com", token="test")
+    assert str(excinfo.value) == "URL must start with https://"
+
+
+@pytest.mark.unit
 def test_delete_returns_none_on_204(snipeit_client, requests_mock):
     requests_mock.delete(
         "https://test.snipeitapp.com/api/v1/hardware/1", status_code=204
@@ -17,6 +25,7 @@ def test_delete_returns_none_on_204(snipeit_client, requests_mock):
     assert result is None
 
 
+@pytest.mark.unit
 def test_status_error_in_json_raises_api_error(snipeit_client, requests_mock):
     requests_mock.post(
         "https://test.snipeitapp.com/api/v1/hardware",
@@ -28,6 +37,7 @@ def test_status_error_in_json_raises_api_error(snipeit_client, requests_mock):
     assert "Something went wrong" in str(excinfo.value)
 
 
+@pytest.mark.unit
 def test_non_json_2xx_raises_snipeit_exception(snipeit_client, requests_mock):
     requests_mock.get(
         "https://test.snipeitapp.com/api/v1/hardware/1",
@@ -39,6 +49,7 @@ def test_non_json_2xx_raises_snipeit_exception(snipeit_client, requests_mock):
     assert str(excinfo.value) == "Expected JSON response but received invalid or non-JSON content."
 
 
+@pytest.mark.unit
 def test_400_client_error_raises_SnipeITClientError(snipeit_client, requests_mock):
     requests_mock.get(
         "https://test.snipeitapp.com/api/v1/hardware/1",
@@ -49,6 +60,7 @@ def test_400_client_error_raises_SnipeITClientError(snipeit_client, requests_moc
         snipeit_client.get("hardware/1")
 
 
+@pytest.mark.unit
 def test_timeout_raises_SnipeITTimeoutError(snipeit_client, requests_mock):
     requests_mock.get(
         "https://test.snipeitapp.com/api/v1/hardware/1",
@@ -59,6 +71,7 @@ def test_timeout_raises_SnipeITTimeoutError(snipeit_client, requests_mock):
     assert str(excinfo.value) == "Request timed out after 10 seconds."
 
 
+@pytest.mark.unit
 def test_generic_request_exception_raises_SnipeITException(
     snipeit_client, requests_mock
 ):
@@ -71,6 +84,7 @@ def test_generic_request_exception_raises_SnipeITException(
     assert str(excinfo.value) == "An unexpected error occurred: boom"
 
 
+@pytest.mark.unit
 def test_status_error_default_message(snipeit_client, requests_mock):
     requests_mock.post(
         "https://test.snipeitapp.com/api/v1/hardware",
@@ -82,6 +96,7 @@ def test_status_error_default_message(snipeit_client, requests_mock):
     assert str(excinfo.value) == "Unknown API error"
 
 
+@pytest.mark.unit
 def test_context_manager_calls_close_on_exit():
     close_called = {"count": 0}
     with SnipeIT(url="https://test.snipeitapp.com", token="fake") as client:
@@ -91,6 +106,7 @@ def test_context_manager_calls_close_on_exit():
     assert close_called["count"] == 1
 
 
+@pytest.mark.unit
 def test_context_manager_does_not_suppress_exceptions_and_closes():
     close_called = {"count": 0}
     with pytest.raises(RuntimeError):
@@ -101,4 +117,3 @@ def test_context_manager_does_not_suppress_exceptions_and_closes():
             raise RuntimeError("boom")
     # Even though the exception was raised, close() should have been called
     assert close_called["count"] == 1
-
