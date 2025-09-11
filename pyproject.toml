@@ -28,4 +28,4 @@ dev = [
 ]
 
 [tool.setuptools]
-packages = ["snipeit"]
+packages = ["snipeit", "snipeit.resources"]
