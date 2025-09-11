@@ -213,7 +213,9 @@ class AssetsManager(BaseResourceManager[Asset]):
 
         content_type = response.headers.get('Content-Type', '')
         if 'application/pdf' in content_type:
-            os.makedirs(os.path.dirname(save_path) if os.path.dirname(save_path) else '.', exist_ok=True)
+            directory = os.path.dirname(save_path)
+            if directory:
+                os.makedirs(directory, exist_ok=True)
             with open(save_path, 'wb') as f:
                 f.write(response.content)
         else:
