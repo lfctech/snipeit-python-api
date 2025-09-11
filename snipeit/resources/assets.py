@@ -114,8 +114,13 @@ class AssetsManager(BaseResourceManager[Asset]):
         Returns:
             An Asset object.
         """
-        response = self._get(f"{self.path}/bytag/{asset_tag}", **kwargs)
-        return self._make(response)
+        try:
+            response = self._get(f"{self.path}/bytag/{asset_tag}", **kwargs)
+            return self._make(response)
+        except SnipeITApiError as e:
+            if "Asset does not exist" in str(e):
+                raise SnipeITNotFoundError(f"Asset with tag {asset_tag} not found.") from e
+            raise e
 
     def get_by_serial(self, serial: str, **kwargs: Any) -> 'Asset':
         """
@@ -128,7 +133,14 @@ class AssetsManager(BaseResourceManager[Asset]):
         Returns:
             An Asset object.
         """
-        response = self._get(f"{self.path}/byserial/{serial}", **kwargs)
+        try:
+            response = self._get(f"{self.path}/byserial/{serial}", **kwargs)
+        except SnipeITApiError as e:
+            # Handle cases where the API returns a direct error for not found serials
+            if "Asset does not exist" in str(e):
+                raise SnipeITNotFoundError(f"Asset with serial {serial} not found.") from e
+            raise e
+
         if response.get("total", 0) == 1:
             return self._make(response["rows"][0])
         elif response.get("total", 0) > 1:
