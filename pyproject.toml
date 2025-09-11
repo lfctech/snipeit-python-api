@@ -27,5 +27,5 @@ dev = [
     "mutmut<3",
 ]
 
-[tool.setuptools]
-packages = ["snipeit"]
+[tool.setuptools.packages.find]
+where = ["snipeit"]
