@@ -1,6 +1,9 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 from ..exceptions import SnipeITApiError, SnipeITNotFoundError
 from .base import ApiObject, BaseResourceManager
+
+import base64
+import os
 
 
 class Asset(ApiObject):
@@ -154,3 +157,64 @@ class AssetsManager(BaseResourceManager[Asset]):
         data.update(kwargs)
         response = self._create(f"{self.path}/{asset_id}/maintenances", data)
         return response['payload']
+
+    def labels(self, save_path: str, assets_or_tags: Union[List['Asset'], List[str]]) -> str:
+        """
+        Generates and saves asset labels as a PDF.
+
+        Args:
+            save_path: The file path where the PDF labels will be saved.
+            assets_or_tags: A list of Asset objects or a list of asset tag strings.
+
+        Returns:
+            The save_path where the PDF was saved.
+
+        Raises:
+            ValueError: If no valid assets or tags are provided.
+            SnipeITApiError: If the API request fails.
+        """
+        if not assets_or_tags:
+            raise ValueError("At least one asset or tag required")
+
+        if isinstance(assets_or_tags[0], Asset):
+            tags = [a.asset_tag for a in assets_or_tags if getattr(a, 'asset_tag', None)]
+        else:
+            tags = [tag for tag in assets_or_tags if isinstance(tag, str) and tag.strip()]
+
+        if not tags:
+            raise ValueError("No valid asset tags found")
+
+        url = f"{self.api.url}/api/v1/hardware/labels"
+        headers = self.api.session.headers.copy()
+        headers['Accept'] = 'application/json'
+
+        response = self.api.session.post(
+            url, json={"asset_tags": tags}, headers=headers, timeout=self.api.timeout
+        )
+
+        if response.status_code != 200:
+            try:
+                error_data = response.json()
+            except ValueError:
+                error_data = {"messages": response.text}
+            raise SnipeITApiError(error_data.get("messages", f"API error: {response.status_code}"))
+
+        content_type = response.headers.get('Content-Type', '')
+        if 'application/pdf' in content_type:
+            os.makedirs(os.path.dirname(save_path) if os.path.dirname(save_path) else '.', exist_ok=True)
+            with open(save_path, 'wb') as f:
+                f.write(response.content)
+        else:
+            # Fallback for base64 (if JSON)
+            try:
+                data = response.json()
+                if 'pdf_base64' in data:  # Adjust key based on actual response
+                    pdf_bytes = base64.b64decode(data['pdf_base64'])
+                    with open(save_path, 'wb') as f:
+                        f.write(pdf_bytes)
+                else:
+                    raise SnipeITApiError("Unexpected response format; expected PDF.")
+            except (ValueError, KeyError) as e:
+                raise SnipeITApiError(f"Failed to parse PDF: {e}")
+
+        return save_path
