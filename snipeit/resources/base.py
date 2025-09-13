@@ -1,5 +1,4 @@
-from typing import Any, Dict, Generic, Iterable, List, Set, Type, TypeVar
-from ..exceptions import SnipeITApiError
+from typing import Any, Dict, Generic, Iterable, List, Type, TypeVar
 
 # Sentinel object to distinguish missing attributes from explicit None values
 _MISSING = object()

@@ -1,4 +1,3 @@
-import pytest
 from snipeit.resources.fieldsets import Fieldset
 
 

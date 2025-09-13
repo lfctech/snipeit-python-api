@@ -1,4 +1,3 @@
-import pytest
 from snipeit.resources.locations import Location
 
 
