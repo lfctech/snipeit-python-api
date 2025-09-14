@@ -6,22 +6,19 @@ Project: snipeit-python-api — a Python 3.11+ client for the Snipe-IT API.
 
 Quick setup
 - Use Python 3.11+.
-- Create and activate a virtual environment, then install dev extras:
-  - python3 -m venv .venv && source .venv/bin/activate
-  - pip install -e ".[dev]"
-- To install the library (non-editable): pip install .
+- use the uv python package manager
 
 Common commands
-- Lint (Ruff):
-  - ruff check .
-  - ruff check --fix .
-- Type check (Pyright):
-  - pyright
+- Lint & Type:
+  - uv run ruff check . # run linter directly via uv
+  - uv run pyright      # run type checker directly via uv
 - Tests (pytest):
-  - All tests: make test
-  - Unit-only: make test-unit
-  - Run a single test: python -m pytest -q tests/unit/resources/test_assets.py::test_list_assets
-  - Filter by keyword: python -m pytest -q -k "assets and not labels"
+  - Unit-only (default): make test
+  - Unit-only alias:     make test-unit
+  - Integration only:    make test-integration
+  - All tests:           make test-all
+  - Run a single test:   uv run -m pytest -q tests/unit/resources/test_assets.py::test_list_assets
+  - Filter by keyword:   uv run -m pytest -q -k "assets and not labels"
 - Coverage (branch coverage, fail-under=95):
   - make cov
 - Mutation testing (Mutmut):
@@ -30,16 +27,24 @@ Common commands
   - make mut-reset  # clear cache
 - Cleanup test artifacts:
   - make clean
+- Docker helpers for integration tests:
+  - make docker-up   # start local Snipe-IT stack
+  - make docker-down # stop stack and remove volumes
 
 Testing and environment
 - Unit tests use requests-mock and a local fixture snipeit_client.
-- real_snipeit_client requires env vars and skips if absent:
-  - export SNIPEIT_TEST_URL=http://localhost:8000
-  - export SNIPEIT_TEST_TOKEN=<your_api_token>
-  - Then run pytest as usual (tests using this fixture will exercise a live instance when present).
+- Integration tests auto-configure the environment from Docker:
+  - Start the stack with `make docker-up` (or `cd docker && docker compose up -d`).
+  - The seeder writes an API token to `docker/api_key.txt`.
+  - tests/integration/conftest.py sets:
+    - SNIPEIT_TEST_URL=http://localhost:8000
+    - SNIPEIT_TEST_TOKEN=<contents of docker/api_key.txt>
+  - Run integration tests with `make test-integration`.
+  - Teardown with `make docker-down` to remove containers and volumes.
 
 High-level architecture
 - Entry point: snipeit/client.py — SnipeIT
+  - Note: Use `status_labels` (with underscore) for the status labels manager (e.g., `client.status_labels`).
   - Manages a requests.Session with retries (urllib3 Retry) and timeouts.
   - Normalizes URL (requires https://, except http://localhost) and sets headers (Bearer token, JSON, UA including package version when available).
   - Exposes HTTP helpers get/post/put/patch/delete that delegate to _request, which builds URLs as {base}/api/v1/{path}.

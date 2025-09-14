@@ -34,6 +34,7 @@ mut-reset:
 
 clean:
 	rm -rf .pytest_cache htmlcov .coverage .mutmut-cache .hypothesis .ruff_cache
+	$(MAKE) docker-down
 
 # Start Snipe-IT stack
 docker-up:
@@ -42,6 +43,7 @@ docker-up:
 # Stop stack and delete volumes
 docker-down:
 	cd docker && docker compose down -v
+	> docker/api_key.txt
 
 # Run integration tests: bring up docker, wait for api_key.txt, then test
 test-integration:
@@ -56,7 +58,7 @@ test-integration:
 		exit 1; \
 	fi
 	.venv/bin/python -m pytest -q -m integration
-	$(MAKE) docker-down
+	
 
 # Run both unit and integration tests
 test-all:
