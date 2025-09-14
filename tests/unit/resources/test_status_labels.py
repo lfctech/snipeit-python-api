@@ -1,4 +1,3 @@
-import pytest
 from snipeit.resources.status_labels import StatusLabel
 
 

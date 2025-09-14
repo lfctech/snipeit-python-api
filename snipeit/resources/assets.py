@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Union, cast
 from ..exceptions import SnipeITApiError, SnipeITNotFoundError
 from .base import ApiObject, BaseResourceManager
 
@@ -9,12 +9,18 @@ import os
 class Asset(ApiObject):
     """Represents a Snipe-IT asset."""
     _path = "hardware"
+    # Commonly-present fields declared for type checking convenience
+    asset_tag: str | None
+    name: str | None
+    serial: str | None
+    model: Dict[str, Any] | None
 
     def __repr__(self) -> str:
         asset_tag = getattr(self, 'asset_tag', 'N/A')
         name = getattr(self, 'name', 'N/A')
         serial = getattr(self, 'serial', 'N/A')
-        model_name = getattr(self, 'model', {}).get('name', 'N/A')
+        model = getattr(self, 'model', None)
+        model_name = model.get('name', 'N/A') if isinstance(model, dict) else 'N/A'
         return f"<Asset {asset_tag} ({name} - {serial} - {model_name})>"
 
     def checkout(self, checkout_to_type: str, assigned_to_id: int, **kwargs: Any) -> 'Asset':
@@ -30,7 +36,7 @@ class Asset(ApiObject):
             The updated Asset object.
         """
         path = f"{self._path}/{self.id}/checkout"
-        data = {
+        data: Dict[str, Any] = {
             "checkout_to_type": checkout_to_type,
         }
         if checkout_to_type == 'user':
@@ -189,33 +195,38 @@ class AssetsManager(BaseResourceManager[Asset]):
             raise ValueError("At least one asset or tag required")
 
         if isinstance(assets_or_tags[0], Asset):
-            tags = [a.asset_tag for a in assets_or_tags if getattr(a, 'asset_tag', None)]
+            assets = cast(List[Asset], assets_or_tags)
+            tags = [a.asset_tag for a in assets if getattr(a, 'asset_tag', None)]
         else:
-            tags = [tag for tag in assets_or_tags if isinstance(tag, str) and tag.strip()]
+            tags = [tag for tag in cast(List[str], assets_or_tags) if isinstance(tag, str) and tag.strip()]
 
         if not tags:
             raise ValueError("No valid asset tags found")
 
         url = f"{self.api.url}/api/v1/hardware/labels"
-        headers = self.api.session.headers.copy()
-        headers['Accept'] = 'application/json'
+        headers = dict(self.api.session.headers)
+        # Prefer receiving a PDF directly; fall back to JSON handling below if needed
+        headers['Accept'] = 'application/pdf'
 
         response = self.api.session.post(
             url, json={"asset_tags": tags}, headers=headers, timeout=self.api.timeout
         )
 
         if response.status_code != 200:
+            # Normalize error message from JSON or text
             try:
                 error_data = response.json()
+                msg = error_data.get("messages") or response.reason or f"API error: {response.status_code}"
             except ValueError:
-                error_data = {"messages": response.text}
-            raise SnipeITApiError(error_data.get("messages", f"API error: {response.status_code}"))
+                msg = response.text or response.reason or f"API error: {response.status_code}"
+            raise SnipeITApiError(str(msg))
 
         content_type = response.headers.get('Content-Type', '')
+        directory = os.path.dirname(save_path)
+        if directory:
+            os.makedirs(directory, exist_ok=True)
+
         if 'application/pdf' in content_type:
-            directory = os.path.dirname(save_path)
-            if directory:
-                os.makedirs(directory, exist_ok=True)
             with open(save_path, 'wb') as f:
                 f.write(response.content)
         else:
@@ -227,7 +238,7 @@ class AssetsManager(BaseResourceManager[Asset]):
                     with open(save_path, 'wb') as f:
                         f.write(pdf_bytes)
                 else:
-                    raise SnipeITApiError("Unexpected response format; expected PDF.")
+                    raise SnipeITApiError("Unexpected response format; expected application/pdf content-type or 'pdf_base64' JSON field.")
             except (ValueError, KeyError) as e:
                 raise SnipeITApiError(f"Failed to parse PDF: {e}")
 

@@ -65,4 +65,4 @@ GEMINI.md
 .mutmut-cache/
 mutants/
 *.bak
-
+*.lock

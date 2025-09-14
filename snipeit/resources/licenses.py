@@ -1,6 +1,5 @@
-from typing import Any, Dict, List
+from typing import Any
 from .base import ApiObject, BaseResourceManager
-from ..exceptions import SnipeITApiError
 
 
 class License(ApiObject):

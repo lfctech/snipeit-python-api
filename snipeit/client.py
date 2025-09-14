@@ -54,21 +54,42 @@ class SnipeIT:
         if not self.url.startswith("https://") and not self.url.startswith("http://localhost"):
             raise ValueError("URL must start with https:// or http://localhost")
 
+        if not token or not token.strip():
+            raise ValueError("token must be non-empty")
+
         self.token = token
         self.session = requests.Session()
+        # Best-effort to include package version in UA
+        try:
+            from importlib.metadata import version
+            _ver = version("snipeit-api")
+        except Exception:
+            _ver = ""
+        ua = f"snipeit-api/{_ver}".rstrip("/") if _ver else "snipeit-api"
         self.session.headers.update({
             "Authorization": f"Bearer {self.token}",
             "Accept": "application/json",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "User-Agent": ua,
         })
         self.timeout = timeout
 
-        retry_strategy = Retry(
-            total=max_retries,
-            status_forcelist=[429, 500, 502, 503, 504],
-            backoff_factor=backoff_factor,
-            allowed_methods=frozenset(retry_allowed_methods) if retry_allowed_methods is not None else frozenset(["HEAD", "GET", "OPTIONS"])
-        )
+        # Configure retries; be compatible with older urllib3 that might not support respect_retry_after_header
+        try:
+            retry_strategy = Retry(
+                total=max_retries,
+                status_forcelist=[429, 500, 502, 503, 504],
+                backoff_factor=backoff_factor,
+                allowed_methods=frozenset(retry_allowed_methods) if retry_allowed_methods is not None else frozenset(["HEAD", "GET", "OPTIONS"]),
+                respect_retry_after_header=True,
+            )
+        except TypeError:
+            retry_strategy = Retry(
+                total=max_retries,
+                status_forcelist=[429, 500, 502, 503, 504],
+                backoff_factor=backoff_factor,
+                allowed_methods=frozenset(retry_allowed_methods) if retry_allowed_methods is not None else frozenset(["HEAD", "GET", "OPTIONS"]),
+            )
         adapter = HTTPAdapter(max_retries=retry_strategy)
         self.session.mount("https://", adapter)
         self.session.mount("http://", adapter)
@@ -109,13 +130,22 @@ class SnipeIT:
             response = self.session.request(method, url, timeout=self.timeout, **kwargs)
 
             if response.status_code >= 400:
-                messages: str
+                def _stringify_messages(msg: Any) -> str:
+                    if msg is None:
+                        return ""
+                    if isinstance(msg, str):
+                        return msg
+                    if isinstance(msg, (list, tuple)):
+                        return "; ".join(map(str, msg))
+                    if isinstance(msg, dict):
+                        return "; ".join(f"{k}: {v}" for k, v in msg.items())
+                    return str(msg)
                 try:
                     body = response.json()
-                    messages = body.get("messages", response.reason)
+                    messages = _stringify_messages(body.get("messages", response.reason))
                 except ValueError:
                     body = None
-                    messages = response.text or response.reason
+                    messages = _stringify_messages(response.text or response.reason)
 
                 if response.status_code == 401:
                     raise SnipeITAuthenticationError(messages, response)

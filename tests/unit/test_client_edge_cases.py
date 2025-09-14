@@ -13,7 +13,7 @@ from snipeit.exceptions import (
 def test_https_required():
     with pytest.raises(ValueError) as excinfo:
         SnipeIT(url="http://test.snipeitapp.com", token="test")
-    assert str(excinfo.value) == "URL must start with https://"
+    assert str(excinfo.value) == "URL must start with https:// or http://localhost"
 
 
 @pytest.mark.unit
