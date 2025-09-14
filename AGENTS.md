@@ -62,7 +62,7 @@ High-level architecture
 - Resource modules (selected)
   - assets.py
     - Asset._path = "hardware"; operations include checkout, checkin, audit; __repr__ shows tag/name/serial/model.
-    - AssetsManager extends create(status_id, model_id, asset_tag?=None, **kwargs), get_by_tag, get_by_serial.
+    - AssetsManager extends create(status_id, model_id, asset_tag=None, **kwargs), get_by_tag, get_by_serial.
     - labels(save_path, assets_or_tags): POSTs to /hardware/labels, requests application/pdf, writes PDF to save_path; falls back to base64 in JSON when necessary.
   - accessories.py: Accessory manager includes checkin_from_user(accessory_user_id) helper.
   - users.py: UsersManager.me() returns the authenticated user (GET users/me).
