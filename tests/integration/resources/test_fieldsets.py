@@ -9,6 +9,16 @@ pytestmark = pytest.mark.integration
 
 
 def test_fieldsets_crud(real_snipeit_client: SnipeIT, run_id: str, _n, id_int):
+    """
+    Integration test that exercises CRUD operations for fieldsets using a real Snipe-IT client.
+    
+    Creates a fieldset, verifies it received a positive ID, updates its name via both the client's patch API and by modifying the in-memory object followed by save(), and re-fetches after each update to confirm persistence. Attempts to delete the fieldset; if deletion fails due to the fieldset being "in use" a SnipeITApiError with that message is expected. A finally block performs best-effort cleanup (deletes the fieldset if possible) and suppresses cleanup errors.
+    
+    Parameters:
+        run_id (str): Unique identifier for this test run, used to generate distinct resource names.
+        _n (callable): Name factory used to produce unique names (e.g., _n(prefix, run_id)).
+        id_int (callable): Helper that returns the integer ID for a created resource object.
+    """
     c = real_snipeit_client
     fs = c.fieldsets.create(name=_n("fs", run_id))
     try:

@@ -14,11 +14,10 @@ from snipeit import SnipeIT
 
 @pytest.fixture(scope="session", autouse=True)
 def _configure_integration_env():
-    """Configure environment for integration tests.
-
-    - Sets SNIPEIT_TEST_URL to the local Docker URL.
-    - Reads SNIPEIT_TEST_TOKEN from docker/api_key.txt.
-    - Skips the integration suite if api_key.txt is missing or empty.
+    """
+    Configure environment for integration tests by setting required environment variables and skipping the suite if credentials are missing.
+    
+    This autouse session fixture sets SNIPEIT_TEST_URL to "http://localhost:8000" and reads the API token from docker/api_key.txt, publishing it as SNIPEIT_TEST_TOKEN. If the api_key file is missing or contains only whitespace, the fixture calls pytest.skip with a message explaining how to start the local test environment.
     """
     # Project root = tests/integration/../../
     root = Path(__file__).resolve().parents[2]
@@ -49,42 +48,85 @@ def _configure_integration_env():
 # ---------------------------
 
 def _name(prefix: str, run_id: str) -> str:
+    """
+    Generate a unique resource name by combining a prefix, a session run identifier, and a short random hex suffix.
+    
+    Parameters:
+        prefix (str): Human-readable prefix indicating resource type (e.g., "mfg", "model").
+        run_id (str): Session-unique run identifier to group resources created in the same test run.
+    
+    Returns:
+        str: Name in the form "{prefix}-{run_id}-{6hex}", where "{6hex}" is the first 6 hex digits of a UUID4.
+    """
     return f"{prefix}-{run_id}-{uuid.uuid4().hex[:6]}"
 
 
 def _id_int(x) -> int:
-    """Return int ID from an object with .id or from an int-like value."""
+    """Return an integer ID from an object with an `id` attribute or from an int-like value.
+    
+    If `x` has an `id` attribute, that attribute is used; otherwise `x` itself is converted to int.
+    Returns:
+        int: The extracted integer ID.
+    """
     return int(getattr(x, "id", x))
 
 
 @pytest.fixture(scope="session")
 def run_id() -> str:
-    """Unique ID for this test session to avoid name collisions."""
+    """
+    Return a session-unique identifier used to avoid resource name collisions in tests.
+    
+    The identifier has the form "YYYYMMDDHHMMSS-XXXXXX" — a timestamp (year-month-day-hour-minute-second) followed by a hyphen and a 6-hex-digit random suffix.
+    
+    Returns:
+        str: The generated run identifier.
+    """
     return time.strftime("%Y%m%d%H%M%S") + "-" + uuid.uuid4().hex[:6]
 
 
 @pytest.fixture(scope="session")
 def _n():
-    """Provide the name generator used throughout tests.
-
-    Signature kept the same as in the original tests: _n(prefix, run_id)
+    """
+    Return the test suite's name-generator function.
+    
+    The returned callable has signature (prefix: str, run_id: str) -> str and produces a unique resource name by combining the given prefix and run_id with a 6-hex-digit random suffix.
     """
     return _name
 
 
 @pytest.fixture(scope="session")
 def id_int():
-    """Provide an ID extractor function to simplify int(...) casting."""
+    """
+    Return a helper that converts an object or value to an integer ID.
+    
+    The returned callable accepts either an object with an `id` attribute or a raw value and returns
+    int(getattr(x, "id", x)). Useful in tests to normalize IDs from responses or fixtures.
+    """
     return _id_int
 
 
 @pytest.fixture(scope="session")
 def base(real_snipeit_client: SnipeIT, run_id: str):
-    """Bootstrap shared base data used across tests.
-
-    We keep these around for the entire session to minimize cross-test dependencies
-    and then delete them at the very end only where safe. Individual tests create
-    and delete their own resources for CRUD validation.
+    """
+    Create a set of persistent test resources in Snipe‑IT for use across the test session.
+    
+    This fixture bootstraps shared resources (manufacturer, category set, locations with parent,
+    two status labels, a model, and a test user) and yields a dictionary of the created objects
+    for reuse by integration tests. Resources are intended to remain available for the entire
+    session; after tests complete the fixture performs a best‑effort cleanup in reverse‑dependency
+    order and ignores errors during deletion.
+    
+    Parameters:
+        run_id (str): Session-unique suffix used to make resource names unique.
+    
+    Returns:
+        Dict[str, Any]: Mapping with keys:
+          - "manufacturer": manufacturer object
+          - "categories": dict with keys "asset", "accessory", "component", "consumable", "license"
+          - "locations": dict with keys "root" and "child"
+          - "status": dict with keys "deployable" and "undeployable"
+          - "model": model object
+          - "user": user object
     """
     c = real_snipeit_client
 

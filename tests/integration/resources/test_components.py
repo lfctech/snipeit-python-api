@@ -8,6 +8,14 @@ pytestmark = pytest.mark.integration
 
 
 def test_components_crud(real_snipeit_client: SnipeIT, base, run_id: str, _n, id_int):
+    """
+    Integration test exercising full CRUD lifecycle for Snipe-IT components.
+    
+    Creates a component (qty=2) with provided category and manufacturer IDs, verifies creation (positive ID and qty),
+    patches the quantity to 3 and verifies via get, updates the in-memory object to qty=4 and saves then verifies persistence,
+    performs a list check to ensure the component appears, and finally attempts to delete the component in a cleanup
+    block (deletion errors are ignored).
+    """
     c = real_snipeit_client
     comp = c.components.create(
         name=_n("comp", run_id),

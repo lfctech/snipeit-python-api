@@ -12,6 +12,20 @@ pytestmark = pytest.mark.integration
 
 
 def test_models_crud(real_snipeit_client: SnipeIT, base, run_id: str, _n, id_int):
+    """
+    Integration test that exercises full CRUD lifecycle for the SnipeIT "models" resource.
+    
+    Creates a model, verifies creation, updates the model_number twice (via patch and via in-place save),
+    validates updates by fetching the resource, performs a list-contains smoke check, and finally deletes
+    the created model. After cleanup the test asserts that fetching the deleted model and a large non-existent
+    ID raises SnipeITNotFoundError or SnipeITApiError.
+    
+    Parameters:
+        base (dict): Fixture providing base resource IDs (e.g., categories and manufacturer) used to construct the model.
+        run_id (str): Unique run identifier used to namespace created resource values.
+        _n (callable): Name-generator fixture; called as _n("model2", run_id) to produce a unique name.
+        id_int (callable): Helper that returns the integer ID for a resource or model wrapper.
+    """
     c = real_snipeit_client
     m = c.models.create(
         name=_n("model2", run_id),
