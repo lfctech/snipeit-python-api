@@ -30,3 +30,14 @@ dev = [
 
 [tool.setuptools]
 packages = ["snipeit", "snipeit.resources"]
+
+[dependency-groups]
+dev = ["requests-mock",
+    "pytest",
+    "pytest-cov",
+    "coverage",
+    "hypothesis",
+    "mutmut<3",
+    "ruff",
+    "pyright",
+]
