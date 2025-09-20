@@ -32,7 +32,8 @@ dev = [
 packages = ["snipeit", "snipeit.resources"]
 
 [dependency-groups]
-dev = ["requests-mock",
+dev = [
+    "requests-mock",
     "pytest",
     "pytest-cov",
     "coverage",
@@ -40,4 +41,5 @@ dev = ["requests-mock",
     "mutmut<3",
     "ruff",
     "pyright",
+    "ty>=0.0.1a21",
 ]

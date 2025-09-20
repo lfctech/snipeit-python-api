@@ -1,9 +1,6 @@
 import base64
-import os
-import io
 import pytest
 
-from snipeit import SnipeIT
 
 
 @pytest.mark.unit

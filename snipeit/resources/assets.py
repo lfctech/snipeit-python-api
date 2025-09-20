@@ -1,3 +1,8 @@
+"""Assets resources.
+
+Define the Asset model and AssetsManager for interacting with hardware endpoints.
+"""
+
 from typing import Any, Dict, List, Union, cast
 from ..exceptions import SnipeITApiError, SnipeITNotFoundError
 from .base import ApiObject, BaseResourceManager
@@ -7,7 +12,14 @@ import os
 
 
 class Asset(ApiObject):
-    """Represents a Snipe-IT asset."""
+    """Represents a Snipe-IT asset.
+
+    Examples:
+        Fetch and check out an asset:
+
+            asset = api.assets.get(1)
+            asset.checkout(checkout_to_type="user", assigned_to_id=123)
+    """
     _path = "hardware"
     # Commonly-present fields declared for type checking convenience
     asset_tag: str | None
@@ -16,6 +28,11 @@ class Asset(ApiObject):
     model: Dict[str, Any] | None
 
     def __repr__(self) -> str:
+        """Return a concise string representation including tag, name, serial and model.
+
+        Returns:
+            str: Human-friendly summary string.
+        """
         asset_tag = getattr(self, 'asset_tag', 'N/A')
         name = getattr(self, 'name', 'N/A')
         serial = getattr(self, 'serial', 'N/A')
@@ -24,16 +41,23 @@ class Asset(ApiObject):
         return f"<Asset {asset_tag} ({name} - {serial} - {model_name})>"
 
     def checkout(self, checkout_to_type: str, assigned_to_id: int, **kwargs: Any) -> 'Asset':
-        """
-        Checks out the asset to a user, asset or location.
+        """Check out this asset to a user, asset, or location.
 
         Args:
-            checkout_to_type: The type of item to check out to (user, asset, or location).
-            assigned_to_id: The ID of the user, asset, or location to check out the asset to.
-            **kwargs: Additional optional fields.
- 
+            checkout_to_type (str): One of "user", "asset", or "location".
+            assigned_to_id (int): The id of the user/asset/location to assign.
+            **kwargs: Additional optional fields such as expected_checkin, note, etc.
+
         Returns:
-            The updated Asset object.
+            Asset: The updated Asset object.
+
+        Raises:
+            ValueError: If checkout_to_type is not one of "user", "asset", or "location".
+
+        Examples:
+            Check out an asset to a user:
+
+                asset.checkout("user", assigned_to_id=123, note="Loaner laptop")
         """
         path = f"{self._path}/{self.id}/checkout"
         data: Dict[str, Any] = {
@@ -53,61 +77,68 @@ class Asset(ApiObject):
         return self.refresh()
 
     def checkin(self, **kwargs: Any) -> 'Asset':
-        """
-        Checks in the asset.
+        """Check in this asset.
 
         Args:
-            **kwargs: Additional optional fields.
+            **kwargs: Additional optional fields such as note, location_id.
 
         Returns:
-            The updated Asset object.
+            Asset: The updated Asset object.
         """
         path = f"{self._path}/{self.id}/checkin"
         self._manager._create(path, kwargs)
         return self.refresh()
 
     def audit(self, **kwargs: Any) -> 'Asset':
-        """
-        Audits the asset by ID.
+        """Audit this asset by id.
 
-        Primary path: POST /hardware/{id}/audit (supported by the existing tests).
-        Note: A manager helper exists for POST /hardware/audit/:id as well.
+        Primary path: POST /hardware/{id}/audit.
 
         Args:
             **kwargs: Optional fields such as location_id, note, update_location, next_audit_date.
 
         Returns:
-            The updated Asset object.
+            Asset: The updated Asset object.
         """
         path = f"{self._path}/{self.id}/audit"
         self._manager._create(path, kwargs)
         return self.refresh()
 
     def restore(self) -> 'Asset':
-        """Restores a soft-deleted asset via POST /hardware/:id/restore and refreshes it."""
+        """Restore a soft-deleted asset and refresh its data.
+
+        Returns:
+            Asset: The updated Asset object after restoration.
+        """
         path = f"{self._path}/{self.id}/restore"
         self._manager._create(path, {})
         return self.refresh()
 
 
 class AssetsManager(BaseResourceManager[Asset]):
-    """Manager for all Asset-related API operations."""
+    """Manager for Asset-related API operations.
+
+    Examples:
+        Create and fetch an asset:
+
+            new_asset = api.assets.create(status_id=1, model_id=1)
+            fetched = api.assets.get(new_asset.id)
+    """
 
     resource_cls = Asset
     path = Asset._path
 
     def create(self, status_id: int, model_id: int, asset_tag: str | None = None, **kwargs: Any) -> 'Asset':
-        """
-        Creates a new asset.
+        """Create a new asset.
 
         Args:
-            status_id: The ID of the status label.
-            model_id: The ID of the asset model.
-            asset_tag: The unique asset tag. If not provided, Snipe-IT will auto-increment.
+            status_id (int): The id of the status label.
+            model_id (int): The id of the asset model.
+            asset_tag (str | None): The asset tag. If omitted, Snipe-IT will auto-increment.
             **kwargs: Additional optional fields for the new asset.
 
         Returns:
-            The newly created Asset object.
+            Asset: The newly created Asset object.
         """
         data: Dict[str, Any] = {
             "status_id": status_id,
@@ -120,27 +151,45 @@ class AssetsManager(BaseResourceManager[Asset]):
 
     # ---- Audits ----
     def audit_by_id(self, asset_id: int, **kwargs: Any) -> Dict[str, Any]:
-        """POST /hardware/audit/:id with optional fields like location_id, note, update_location."""
+        """Audit an asset by id via POST /hardware/audit/:id.
+
+        Args:
+            asset_id (int): The asset identifier.
+            **kwargs: Optional fields (location_id, note, update_location, etc.).
+
+        Returns:
+            dict[str, Any]: The API response dictionary.
+        """
         return self._create(f"{self.path}/audit/{asset_id}", kwargs)
 
     def list_audit_overdue(self) -> Dict[str, Any]:
-        """GET /hardware/audit/overdue"""
+        """List overdue audits via GET /hardware/audit/overdue.
+
+        Returns:
+            dict[str, Any]: The API response dictionary.
+        """
         return self._get(f"{self.path}/audit/overdue")
 
     def list_audit_due(self) -> Dict[str, Any]:
-        """GET /hardware/audit/due"""
+        """List due audits via GET /hardware/audit/due.
+
+        Returns:
+            dict[str, Any]: The API response dictionary.
+        """
         return self._get(f"{self.path}/audit/due")
 
     def get_by_tag(self, asset_tag: str, **kwargs: Any) -> 'Asset':
-        """
-        Gets a single asset by its asset tag.
+        """Get a single asset by its asset tag.
 
         Args:
-            asset_tag: The asset tag to search for.
+            asset_tag (str): The asset tag to search for.
             **kwargs: Additional optional parameters.
 
         Returns:
-            An Asset object.
+            Asset: The matching asset.
+
+        Raises:
+            SnipeITNotFoundError: If no asset exists with the provided tag.
         """
         try:
             response = self._get(f"{self.path}/bytag/{asset_tag}", **kwargs)
@@ -151,16 +200,21 @@ class AssetsManager(BaseResourceManager[Asset]):
             raise e
 
     def get_by_serial(self, serial: str, **kwargs: Any) -> 'Asset':
-        """
-        Gets a single asset by its serial number. Handles responses that are either a single
-        object or a list-style envelope with rows/total.
+        """Get a single asset by serial number.
+
+        Handles responses that are either a single object or a list envelope
+        with rows/total.
 
         Args:
-            serial: The serial number to search for.
+            serial (str): The serial number to search for.
             **kwargs: Additional optional parameters.
 
         Returns:
-            An Asset object.
+            Asset: The matching asset.
+
+        Raises:
+            SnipeITNotFoundError: If the asset cannot be found.
+            SnipeITApiError: If the API indicates multiple matches or an unexpected shape.
         """
         try:
             response = self._get(f"{self.path}/byserial/{serial}", **kwargs)
@@ -188,10 +242,17 @@ class AssetsManager(BaseResourceManager[Asset]):
         raise SnipeITApiError("Unexpected response for byserial")
 
     def create_maintenance(self, asset_id: int, asset_improvement: str, supplier_id: int, title: str, **kwargs: Any) -> Dict[str, Any]:
-        """
-        Creates a new asset maintenance record.
+        """Create a new asset maintenance record.
 
-        NOTE: Left as-is per user request to handle maintenances later.
+        Args:
+            asset_id (int): The asset identifier.
+            asset_improvement (str): Type of improvement/maintenance.
+            supplier_id (int): Supplier identifier.
+            title (str): Maintenance title.
+            **kwargs: Additional maintenance fields (cost, start_date, etc.).
+
+        Returns:
+            dict[str, Any]: The API response payload.
         """
         data = {
             "asset_improvement": asset_improvement,
@@ -204,16 +265,43 @@ class AssetsManager(BaseResourceManager[Asset]):
 
     # ---- Licenses ----
     def get_licenses(self, asset_id: int) -> Dict[str, Any]:
-        """GET /hardware/:id/licenses - get licenses checked out to an asset."""
+        """Get licenses checked out to an asset via GET /hardware/:id/licenses.
+
+        Args:
+            asset_id (int): The asset identifier.
+
+        Returns:
+            dict[str, Any]: The API response dictionary.
+        """
         return self._get(f"{self.path}/{asset_id}/licenses")
 
     # ---- Files ----
     def list_files(self, asset_id: int) -> Dict[str, Any]:
-        """GET /hardware/:id/files - list uploaded files for an asset."""
+        """List uploaded files for an asset via GET /hardware/:id/files.
+
+        Args:
+            asset_id (int): The asset identifier.
+
+        Returns:
+            dict[str, Any]: The API response dictionary.
+        """
         return self._get(f"{self.path}/{asset_id}/files")
 
     def upload_files(self, asset_id: int, paths: List[str], notes: str | None = None) -> Dict[str, Any]:
-        """POST /hardware/:id/files - upload one or more files (multipart)."""
+        """Upload one or more files for an asset via POST /hardware/:id/files.
+
+        Args:
+            asset_id (int): The asset identifier.
+            paths (list[str]): Paths to local files to upload.
+            notes (str | None): Optional notes attached to the upload.
+
+        Returns:
+            dict[str, Any]: The API response dictionary.
+
+        Raises:
+            ValueError: If no file paths are provided.
+            SnipeITApiError: If the response indicates an error or is invalid.
+        """
         if not paths:
             raise ValueError("At least one file path required")
         url = f"{self.api.url}/api/v1/{self.path}/{asset_id}/files"
@@ -247,7 +335,19 @@ class AssetsManager(BaseResourceManager[Asset]):
                     pass
 
     def download_file(self, asset_id: int, file_id: int, save_path: str) -> str:
-        """GET /hardware/:id/files/:file_id - download a specific file to save_path."""
+        """Download a specific file via GET /hardware/:id/files/:file_id.
+
+        Args:
+            asset_id (int): The asset identifier.
+            file_id (int): The file identifier.
+            save_path (str): Local filesystem path to save the downloaded file.
+
+        Returns:
+            str: The save_path where the file was written.
+
+        Raises:
+            SnipeITApiError: If the API response is not a 200 OK or body is invalid.
+        """
         url = f"{self.api.url}/api/v1/{self.path}/{asset_id}/files/{file_id}"
         resp = self.api.session.get(url, timeout=self.api.timeout)
         if resp.status_code != 200:
@@ -265,27 +365,39 @@ class AssetsManager(BaseResourceManager[Asset]):
         return save_path
 
     def delete_file(self, asset_id: int, file_id: int) -> None:
-        """DELETE /hardware/:id/files/:file_id/delete - delete a specific file on an asset."""
+        """Delete a specific file via DELETE /hardware/:id/files/:file_id/delete.
+
+        Args:
+            asset_id (int): The asset identifier.
+            file_id (int): The file identifier.
+
+        Returns:
+            None
+        """
         self._delete(f"{self.path}/{asset_id}/files/{file_id}/delete")
 
     # ---- Labels ----
     def labels(self, save_path: str, assets_or_tags: Union[List['Asset'], List[str]]) -> str:
-        """
-        Generates and saves asset labels to a file by calling POST /hardware/labels.
+        """Generate and save asset labels via POST /hardware/labels.
 
-        Supports both JSON base64 payloads and direct PDF responses for compatibility
-        with different server configurations and tests.
+        Supports both JSON base64 payloads and direct PDF responses.
 
         Args:
-            save_path: The file path where the labels PDF will be saved.
-            assets_or_tags: A list of Asset objects or a list of asset tag strings.
+            save_path (str): The file path where the labels PDF will be saved.
+            assets_or_tags (list[Asset] | list[str]): A list of Asset objects or
+                a list of asset tag strings.
 
         Returns:
-            The save_path where the PDF was saved.
+            str: The save_path where the PDF was saved.
 
         Raises:
             ValueError: If no valid assets or tags are provided.
             SnipeITApiError: If the API request fails or response is malformed.
+
+        Examples:
+            Generate labels for specific assets:
+
+                api.assets.labels("/tmp/labels.pdf", [asset1, asset2])
         """
         if not assets_or_tags:
             raise ValueError("At least one asset or tag required")
