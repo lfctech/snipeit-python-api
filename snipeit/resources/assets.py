@@ -7,9 +7,8 @@ from typing import Any, Dict, List, Union, cast
 from ..exceptions import SnipeITApiError, SnipeITNotFoundError
 from .base import ApiObject, BaseResourceManager
 
-import base64
 import os
-
+import warnings
 
 class Asset(ApiObject):
     """Represents a Snipe-IT asset.
@@ -300,10 +299,21 @@ class AssetsManager(BaseResourceManager[Asset]):
 
         Raises:
             ValueError: If no file paths are provided.
+            FileNotFoundError: If any provided path does not exist.
+            PermissionError: If any provided path is not readable.
             SnipeITApiError: If the response indicates an error or is invalid.
         """
         if not paths:
             raise ValueError("At least one file path required")
+
+        # Validate all paths before opening any files to avoid mid-upload failures
+        missing: List[str] = [str(p) for p in paths if not os.path.isfile(p)]
+        unreadable: List[str] = [str(p) for p in paths if os.path.isfile(p) and not os.access(p, os.R_OK)]
+        if missing:
+            raise FileNotFoundError(f"File(s) not found: {', '.join(missing)}")
+        if unreadable:
+            raise PermissionError(f"File(s) not readable: {', '.join(unreadable)}")
+
         url = f"{self.api.url}/api/v1/{self.path}/{asset_id}/files"
         files: List[tuple[str, tuple[str, Any]]] = []
         opened_files: List[Any] = []
@@ -331,8 +341,8 @@ class AssetsManager(BaseResourceManager[Asset]):
             for f in opened_files:
                 try:
                     f.close()
-                except Exception:
-                    pass
+                except Exception as e:
+                    warnings.warn(f"Failed to close file {getattr(f, 'name', '<unknown>')}: {e}")
 
     def download_file(self, asset_id: int, file_id: int, save_path: str) -> str:
         """Download a specific file via GET /hardware/:id/files/:file_id.
@@ -378,9 +388,9 @@ class AssetsManager(BaseResourceManager[Asset]):
 
     # ---- Labels ----
     def labels(self, save_path: str, assets_or_tags: Union[List['Asset'], List[str]]) -> str:
-        """Generate and save asset labels via POST /hardware/labels.
+        """Generate and save asset labels as a PDF via POST /hardware/labels.
 
-        Supports both JSON base64 payloads and direct PDF responses.
+        This method only supports PDF responses. JSON/base64 legacy responses are not supported.
 
         Args:
             save_path (str): The file path where the labels PDF will be saved.
@@ -392,7 +402,7 @@ class AssetsManager(BaseResourceManager[Asset]):
 
         Raises:
             ValueError: If no valid assets or tags are provided.
-            SnipeITApiError: If the API request fails or response is malformed.
+            SnipeITApiError: If the API request fails or a non-PDF response is returned.
 
         Examples:
             Generate labels for specific assets:
@@ -414,8 +424,8 @@ class AssetsManager(BaseResourceManager[Asset]):
         # Perform request directly to allow binary PDF handling
         url = f"{self.api.url}/api/v1/{self.path}/labels"
         headers = dict(self.api.session.headers)
-        # Accept either JSON payload or PDF
-        headers["Accept"] = "application/json, application/pdf"
+        # Only accept PDF
+        headers["Accept"] = "application/pdf"
         resp = self.api.session.post(url, json={"asset_tags": tags}, headers=headers, timeout=self.api.timeout)
         if resp.status_code >= 400:
             try:
@@ -430,32 +440,9 @@ class AssetsManager(BaseResourceManager[Asset]):
             os.makedirs(directory, exist_ok=True)
 
         content_type = (resp.headers.get("Content-Type") or "").lower()
-        if "application/pdf" in content_type:
-            with open(save_path, "wb") as f:
-                f.write(resp.content)
-            return save_path
+        if "application/pdf" not in content_type:
+            raise SnipeITApiError(f"Expected PDF from hardware/labels; got Content-Type: {content_type or 'unknown'}")
 
-        # Otherwise expect JSON with file contents.
-        try:
-            data = resp.json()
-        except ValueError as e:
-            raise SnipeITApiError("Unexpected non-JSON and non-PDF response from hardware/labels") from e
-
-        # Support official payload shape and legacy 'pdf_base64'
-        b64 = None
-        if isinstance(data, dict):
-            payload = data.get("payload") if isinstance(data.get("payload"), dict) else None
-            if payload and isinstance(payload, dict):
-                b64 = payload.get("file_contents")
-            if not b64:
-                b64 = data.get("pdf_base64")
-        if not b64:
-            raise SnipeITApiError("hardware/labels did not return file data")
-
-        try:
-            pdf_bytes = base64.b64decode(b64)
-        except Exception as e:
-            raise SnipeITApiError(f"Failed to decode label file: {e}")
         with open(save_path, "wb") as f:
-            f.write(pdf_bytes)
+            f.write(resp.content)
         return save_path
