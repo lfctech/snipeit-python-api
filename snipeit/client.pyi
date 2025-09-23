@@ -16,6 +16,8 @@ from .resources.manufacturers import ManufacturersManager
 from .resources.models import ModelsManager
 from .resources.status_labels import StatusLabelsManager
 from .resources.users import UsersManager
+from .resources.companies import CompaniesManager
+from .resources.suppliers import SuppliersManager
 
 class SnipeIT:
     """A client for interacting with the Snipe-IT API."""
@@ -53,6 +55,8 @@ class SnipeIT:
     models: ModelsManager
     status_labels: StatusLabelsManager
     users: UsersManager
+    companies: CompaniesManager
+    suppliers: SuppliersManager
 
     def close(self) -> None: ...
     """Closes the underlying HTTP session."""
