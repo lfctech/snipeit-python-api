@@ -1,0 +1,66 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "snipe-it-rest-api",
+    "version": "8.2.0"
+  },
+  "servers": [
+    {
+      "url": "https://develop.snipeitapp.com/api/v1"
+    }
+  ],
+  "security": [
+    {}
+  ],
+  "components": {
+    "securitySchemes": {}
+  },
+  "paths": {
+    "/audit/{id}": {
+      "post": {
+        "description": "",
+        "operationId": "post_audit{id}",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {}
+          }
+        },
+        "parameters": [
+          {
+            "in": "query",
+            "name": "location_id",
+            "schema": {
+              "type": "integer",
+              "default": ""
+            }
+          },
+          {
+            "in": "query",
+            "name": "note",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "in": "query",
+            "name": "update_location",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Optionally update the assets location through the audit."
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ]
+      }
+    }
+  }
+}

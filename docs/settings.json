@@ -1,0 +1,115 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "snipe-it-rest-api",
+    "version": "8.2.0"
+  },
+  "servers": [
+    {
+      "url": "https://develop.snipeitapp.com/api/v1"
+    }
+  ],
+  "security": [
+    {}
+  ],
+  "components": {
+    "securitySchemes": {}
+  },
+  "paths": {
+    "/settings/backups": {
+      "get": {
+        "summary": "/settings/backups",
+        "description": "",
+        "operationId": "backups-1",
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Result": {
+                    "value": "{}"
+                  }
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "400",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Result": {
+                    "value": "{}"
+                  }
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/settings/backups/download/{file}": {
+      "get": {
+        "summary": "/settings/backups/download/:file",
+        "description": "",
+        "operationId": "backupsdownloadfile",
+        "parameters": [
+          {
+            "name": "file",
+            "in": "path",
+            "description": "The short name of the file to download",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Result": {
+                    "value": "{}"
+                  }
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "400",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Result": {
+                    "value": "{}"
+                  }
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    }
+  }
+}
