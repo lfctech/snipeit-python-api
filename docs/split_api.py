@@ -1,5 +1,4 @@
 import json
-import os
 
 # Load the original API spec
 with open("snipe-it-rest-api.json", "r") as f:

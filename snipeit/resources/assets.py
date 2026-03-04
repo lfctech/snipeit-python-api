@@ -20,6 +20,7 @@ class Asset(ApiObject):
             asset = api.assets.get(1)
             asset.checkout(checkout_to_type="user", assigned_to_id=123)
     """
+
     _path = "hardware"
     # Commonly-present fields declared for type checking convenience
     asset_tag: str | None
@@ -33,14 +34,16 @@ class Asset(ApiObject):
         Returns:
             str: Human-friendly summary string.
         """
-        asset_tag = getattr(self, 'asset_tag', 'N/A')
-        name = getattr(self, 'name', 'N/A')
-        serial = getattr(self, 'serial', 'N/A')
-        model = getattr(self, 'model', None)
-        model_name = model.get('name', 'N/A') if isinstance(model, dict) else 'N/A'
+        asset_tag = getattr(self, "asset_tag", "N/A")
+        name = getattr(self, "name", "N/A")
+        serial = getattr(self, "serial", "N/A")
+        model = getattr(self, "model", None)
+        model_name = model.get("name", "N/A") if isinstance(model, dict) else "N/A"
         return f"<Asset {asset_tag} ({name} - {serial} - {model_name})>"
 
-    def checkout(self, checkout_to_type: str, assigned_to_id: int, **kwargs: Any) -> 'Asset':
+    def checkout(
+        self, checkout_to_type: str, assigned_to_id: int, **kwargs: Any
+    ) -> "Asset":
         """Check out this asset to a user, asset, or location.
 
         Args:
@@ -63,20 +66,22 @@ class Asset(ApiObject):
         data: Dict[str, Any] = {
             "checkout_to_type": checkout_to_type,
         }
-        if checkout_to_type == 'user':
-            data['assigned_user'] = assigned_to_id
-        elif checkout_to_type == 'asset':
-            data['assigned_asset'] = assigned_to_id
-        elif checkout_to_type == 'location':
-            data['assigned_location'] = assigned_to_id
+        if checkout_to_type == "user":
+            data["assigned_user"] = assigned_to_id
+        elif checkout_to_type == "asset":
+            data["assigned_asset"] = assigned_to_id
+        elif checkout_to_type == "location":
+            data["assigned_location"] = assigned_to_id
         else:
-            raise ValueError("checkout_to_type must be one of 'user', 'asset', or 'location'")
+            raise ValueError(
+                "checkout_to_type must be one of 'user', 'asset', or 'location'"
+            )
 
         data.update(kwargs)
         self._manager._create(path, data)
         return self.refresh()
 
-    def checkin(self, **kwargs: Any) -> 'Asset':
+    def checkin(self, **kwargs: Any) -> "Asset":
         """Check in this asset.
 
         Args:
@@ -89,7 +94,7 @@ class Asset(ApiObject):
         self._manager._create(path, kwargs)
         return self.refresh()
 
-    def audit(self, **kwargs: Any) -> 'Asset':
+    def audit(self, **kwargs: Any) -> "Asset":
         """Audit this asset by id.
 
         Primary path: POST /hardware/{id}/audit.
@@ -104,7 +109,7 @@ class Asset(ApiObject):
         self._manager._create(path, kwargs)
         return self.refresh()
 
-    def restore(self) -> 'Asset':
+    def restore(self) -> "Asset":
         """Restore a soft-deleted asset and refresh its data.
 
         Returns:
@@ -128,7 +133,9 @@ class AssetsManager(BaseResourceManager[Asset]):
     resource_cls = Asset
     path = Asset._path
 
-    def create(self, status_id: int, model_id: int, asset_tag: str | None = None, **kwargs: Any) -> 'Asset':
+    def create(
+        self, status_id: int, model_id: int, asset_tag: str | None = None, **kwargs: Any
+    ) -> "Asset":
         """Create a new asset.
 
         Args:
@@ -145,7 +152,7 @@ class AssetsManager(BaseResourceManager[Asset]):
             "model_id": model_id,
         }
         if asset_tag:
-            data['asset_tag'] = asset_tag
+            data["asset_tag"] = asset_tag
         data.update(kwargs)
         return super().create(**data)
 
@@ -178,7 +185,7 @@ class AssetsManager(BaseResourceManager[Asset]):
         """
         return self._get(f"{self.path}/audit/due")
 
-    def get_by_tag(self, asset_tag: str, **kwargs: Any) -> 'Asset':
+    def get_by_tag(self, asset_tag: str, **kwargs: Any) -> "Asset":
         """Get a single asset by its asset tag.
 
         Args:
@@ -196,10 +203,12 @@ class AssetsManager(BaseResourceManager[Asset]):
             return self._make(response)
         except SnipeITApiError as e:
             if "Asset does not exist" in str(e):
-                raise SnipeITNotFoundError(f"Asset with tag {asset_tag} not found.") from e
+                raise SnipeITNotFoundError(
+                    f"Asset with tag {asset_tag} not found."
+                ) from e
             raise e
 
-    def get_by_serial(self, serial: str, **kwargs: Any) -> 'Asset':
+    def get_by_serial(self, serial: str, **kwargs: Any) -> "Asset":
         """Get a single asset by serial number.
 
         Handles responses that are either a single object or a list envelope
@@ -220,7 +229,9 @@ class AssetsManager(BaseResourceManager[Asset]):
             response = self._get(f"{self.path}/byserial/{serial}", **kwargs)
         except SnipeITApiError as e:
             if "Asset does not exist" in str(e):
-                raise SnipeITNotFoundError(f"Asset with serial {serial} not found.") from e
+                raise SnipeITNotFoundError(
+                    f"Asset with serial {serial} not found."
+                ) from e
             raise
 
         # Envelope shape
@@ -232,7 +243,9 @@ class AssetsManager(BaseResourceManager[Asset]):
             if len(rows) == 1 and response.get("total") == 1:
                 return self._make(rows[0])
             if response.get("total", 0) > 1:
-                raise SnipeITApiError(f"Expected 1 asset with serial {serial}, but found {response.get('total')}.")
+                raise SnipeITApiError(
+                    f"Expected 1 asset with serial {serial}, but found {response.get('total')}."
+                )
             raise SnipeITNotFoundError(f"Asset with serial {serial} not found.")
 
         # Single-object shape
@@ -241,7 +254,14 @@ class AssetsManager(BaseResourceManager[Asset]):
 
         raise SnipeITApiError("Unexpected response for byserial")
 
-    def create_maintenance(self, asset_id: int, asset_improvement: str, supplier_id: int, title: str, **kwargs: Any) -> Dict[str, Any]:
+    def create_maintenance(
+        self,
+        asset_id: int,
+        asset_improvement: str,
+        supplier_id: int,
+        title: str,
+        **kwargs: Any,
+    ) -> Dict[str, Any]:
         """Create a new asset maintenance record.
 
         Args:
@@ -261,7 +281,7 @@ class AssetsManager(BaseResourceManager[Asset]):
         }
         data.update(kwargs)
         response = self._create(f"{self.path}/{asset_id}/maintenances", data)
-        return response['payload']
+        return response["payload"]
 
     # ---- Licenses ----
     def get_licenses(self, asset_id: int) -> Dict[str, Any]:
@@ -287,7 +307,9 @@ class AssetsManager(BaseResourceManager[Asset]):
         """
         return self._get(f"{self.path}/{asset_id}/files")
 
-    def upload_files(self, asset_id: int, paths: List[str], notes: str | None = None) -> Dict[str, Any]:
+    def upload_files(
+        self, asset_id: int, paths: List[str], notes: str | None = None
+    ) -> Dict[str, Any]:
         """Upload one or more files for an asset via POST /hardware/:id/files.
 
         Args:
@@ -315,7 +337,16 @@ class AssetsManager(BaseResourceManager[Asset]):
             data: Dict[str, Any] = {}
             if notes is not None:
                 data["notes"] = notes
-            resp = self.api.session.post(url, files=files, data=data, timeout=self.api.timeout)
+            # Clear the session-level Content-Type so requests can set the correct
+            # multipart/form-data boundary for the file upload.  merge_setting()
+            # in requests treats a None value as "remove this header".
+            resp = self.api.session.post(
+                url,
+                files=files,
+                data=data,
+                timeout=self.api.timeout,
+                headers={"Content-Type": None},
+            )
             if resp.status_code >= 400:
                 try:
                     body = resp.json()
@@ -377,7 +408,9 @@ class AssetsManager(BaseResourceManager[Asset]):
         self._delete(f"{self.path}/{asset_id}/files/{file_id}/delete")
 
     # ---- Labels ----
-    def labels(self, save_path: str, assets_or_tags: Union[List['Asset'], List[str]]) -> str:
+    def labels(
+        self, save_path: str, assets_or_tags: Union[List["Asset"], List[str]]
+    ) -> str:
         """Generate and save asset labels via POST /hardware/labels.
 
         Supports both JSON base64 payloads and direct PDF responses.
@@ -404,9 +437,13 @@ class AssetsManager(BaseResourceManager[Asset]):
 
         if isinstance(assets_or_tags[0], Asset):
             assets = cast(List[Asset], assets_or_tags)
-            tags = [a.asset_tag for a in assets if getattr(a, 'asset_tag', None)]
+            tags = [a.asset_tag for a in assets if getattr(a, "asset_tag", None)]
         else:
-            tags = [tag for tag in cast(List[str], assets_or_tags) if isinstance(tag, str) and tag.strip()]
+            tags = [
+                tag
+                for tag in cast(List[str], assets_or_tags)
+                if isinstance(tag, str) and tag.strip()
+            ]
 
         if not tags:
             raise ValueError("No valid asset tags found")
@@ -416,7 +453,9 @@ class AssetsManager(BaseResourceManager[Asset]):
         headers = dict(self.api.session.headers)
         # Accept either JSON payload or PDF
         headers["Accept"] = "application/json, application/pdf"
-        resp = self.api.session.post(url, json={"asset_tags": tags}, headers=headers, timeout=self.api.timeout)
+        resp = self.api.session.post(
+            url, json={"asset_tags": tags}, headers=headers, timeout=self.api.timeout
+        )
         if resp.status_code >= 400:
             try:
                 body = resp.json()
@@ -439,12 +478,16 @@ class AssetsManager(BaseResourceManager[Asset]):
         try:
             data = resp.json()
         except ValueError as e:
-            raise SnipeITApiError("Unexpected non-JSON and non-PDF response from hardware/labels") from e
+            raise SnipeITApiError(
+                "Unexpected non-JSON and non-PDF response from hardware/labels"
+            ) from e
 
         # Support official payload shape and legacy 'pdf_base64'
         b64 = None
         if isinstance(data, dict):
-            payload = data.get("payload") if isinstance(data.get("payload"), dict) else None
+            payload = (
+                data.get("payload") if isinstance(data.get("payload"), dict) else None
+            )
             if payload and isinstance(payload, dict):
                 b64 = payload.get("file_contents")
             if not b64:
