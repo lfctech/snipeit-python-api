@@ -109,6 +109,12 @@ def test_licenses_and_files_endpoints(snipeit_client, requests_mock, tmp_path):
     )
     up = snipeit_client.assets.upload_files(1, [str(f)], notes="Test")
     assert up["file"]["original_name"] == "hello.txt"
+    assert requests_mock.last_request.headers["Content-Type"].startswith(
+        "multipart/form-data; boundary="
+    )
+    assert (
+        snipeit_client.session.headers["Content-Type"] == "application/json"
+    )
 
     # Files - download
     dest = tmp_path / "dl.txt"

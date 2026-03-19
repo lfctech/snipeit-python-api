@@ -337,16 +337,21 @@ class AssetsManager(BaseResourceManager[Asset]):
             data: Dict[str, Any] = {}
             if notes is not None:
                 data["notes"] = notes
-            # Clear the session-level Content-Type so requests can set the correct
-            # multipart/form-data boundary for the file upload.  merge_setting()
-            # in requests treats a None value as "remove this header".
-            resp = self.api.session.post(
-                url,
-                files=files,
-                data=data,
-                timeout=self.api.timeout,
-                headers={"Content-Type": None},
-            )
+            # Remove the session-level JSON Content-Type for this request so
+            # requests can generate the multipart/form-data boundary itself.
+            # Temporarily popping the header is more robust across requests
+            # versions than relying on per-request header removal semantics.
+            original_content_type = self.api.session.headers.pop("Content-Type", None)
+            try:
+                resp = self.api.session.post(
+                    url,
+                    files=files,
+                    data=data,
+                    timeout=self.api.timeout,
+                )
+            finally:
+                if original_content_type is not None:
+                    self.api.session.headers["Content-Type"] = original_content_type
             if resp.status_code >= 400:
                 try:
                     body = resp.json()
