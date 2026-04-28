@@ -107,6 +107,10 @@ class ApiObject:
                 setattr(self, key, value)
             # Clear dirty fields after successful save
             self._dirty_fields.clear()
+        else:
+            msg = response.get("messages", "Save failed with unknown error")
+            from ..exceptions import SnipeITApiError
+            raise SnipeITApiError(str(msg))
         
         return self
 

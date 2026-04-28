@@ -233,6 +233,42 @@ class SnipeIT:
         # Do not suppress exceptions
         return False
 
+    def _raise_for_status(self, response: requests.Response) -> None:
+        """Raise typed exceptions for error status codes."""
+        if response.status_code >= 400:
+
+            def _stringify_messages(msg: Any) -> str:
+                if msg is None:
+                    return ""
+                if isinstance(msg, str):
+                    return msg
+                if isinstance(msg, (list, tuple)):
+                    return "; ".join(map(str, msg))
+                if isinstance(msg, dict):
+                    return "; ".join(f"{k}: {v}" for k, v in msg.items())
+                return str(msg)
+
+            try:
+                body = response.json()
+                messages = _stringify_messages(
+                    body.get("messages", response.reason)
+                )
+            except ValueError:
+                body = None
+                messages = _stringify_messages(response.text or response.reason)
+
+            if response.status_code == 401:
+                raise SnipeITAuthenticationError(messages, response)
+            if response.status_code == 404:
+                raise SnipeITNotFoundError(messages, response)
+            if response.status_code == 422:
+                raise SnipeITValidationError(messages, response)
+            if 400 <= response.status_code < 500:
+                raise SnipeITClientError(messages, response)
+            else:
+                # Must be 5xx here since we are in the >=400 block and not <500
+                raise SnipeITServerError(messages, response)
+
     def _request(self, method: str, path: str, **kwargs: Any) -> Dict[str, Any] | None:
         """Construct and send an API request.
 
@@ -259,39 +295,7 @@ class SnipeIT:
         try:
             response = self.session.request(method, url, timeout=self.timeout, **kwargs)
 
-            if response.status_code >= 400:
-
-                def _stringify_messages(msg: Any) -> str:
-                    if msg is None:
-                        return ""
-                    if isinstance(msg, str):
-                        return msg
-                    if isinstance(msg, (list, tuple)):
-                        return "; ".join(map(str, msg))
-                    if isinstance(msg, dict):
-                        return "; ".join(f"{k}: {v}" for k, v in msg.items())
-                    return str(msg)
-
-                try:
-                    body = response.json()
-                    messages = _stringify_messages(
-                        body.get("messages", response.reason)
-                    )
-                except ValueError:
-                    body = None
-                    messages = _stringify_messages(response.text or response.reason)
-
-                if response.status_code == 401:
-                    raise SnipeITAuthenticationError(messages, response)
-                if response.status_code == 404:
-                    raise SnipeITNotFoundError(messages, response)
-                if response.status_code == 422:
-                    raise SnipeITValidationError(messages, response)
-                if 400 <= response.status_code < 500:
-                    raise SnipeITClientError(messages, response)
-                else:
-                    # Must be 5xx here since we are in the >=400 block and not <500
-                    raise SnipeITServerError(messages, response)
+            self._raise_for_status(response)
 
             if response.status_code == 204:
                 return None
@@ -304,7 +308,8 @@ class SnipeIT:
                     and json_response.get("status") == "error"
                 ):
                     raise SnipeITApiError(
-                        json_response.get("messages", "Unknown API error")
+                        json_response.get("messages", "Unknown API error"),
+                        response=response,
                     )
                 return json_response
             except ValueError as e:

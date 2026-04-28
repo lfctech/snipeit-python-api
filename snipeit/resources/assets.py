@@ -281,7 +281,7 @@ class AssetsManager(BaseResourceManager[Asset]):
         }
         data.update(kwargs)
         response = self._create(f"{self.path}/{asset_id}/maintenances", data)
-        return response["payload"]
+        return response.get("payload", response)
 
     # ---- Licenses ----
     def get_licenses(self, asset_id: int) -> Dict[str, Any]:
@@ -331,6 +331,8 @@ class AssetsManager(BaseResourceManager[Asset]):
         opened_files: List[Any] = []
         try:
             for p in paths:
+                if not os.path.isfile(p):
+                    raise ValueError(f"File not found: {p}")
                 f = open(p, "rb")
                 opened_files.append(f)
                 files.append(("file[]", (os.path.basename(p), f)))
@@ -342,27 +344,37 @@ class AssetsManager(BaseResourceManager[Asset]):
             # Temporarily popping the header is more robust across requests
             # versions than relying on per-request header removal semantics.
             original_content_type = self.api.session.headers.pop("Content-Type", None)
+            import requests
             try:
-                resp = self.api.session.post(
-                    url,
-                    files=files,
-                    data=data,
-                    timeout=self.api.timeout,
-                )
-            finally:
-                if original_content_type is not None:
-                    self.api.session.headers["Content-Type"] = original_content_type
-            if resp.status_code >= 400:
                 try:
-                    body = resp.json()
-                    msg = body.get("messages") or body.get("message") or resp.reason
+                    resp = self.api.session.post(
+                        url,
+                        files=files,
+                        data=data,
+                        timeout=self.api.timeout,
+                    )
+                finally:
+                    if original_content_type is not None:
+                        self.api.session.headers["Content-Type"] = original_content_type
+                
+                self.api._raise_for_status(resp)
+                
+                try:
+                    json_resp = resp.json()
+                    if isinstance(json_resp, dict) and json_resp.get("status") == "error":
+                        raise SnipeITApiError(
+                            json_resp.get("messages", "Unknown API error"),
+                            response=resp,
+                        )
+                    return json_resp
                 except ValueError:
-                    msg = resp.text or resp.reason
-                raise SnipeITApiError(str(msg))
-            try:
-                return resp.json()
-            except ValueError:
-                raise SnipeITApiError("Expected JSON response from file upload")
+                    raise SnipeITApiError("Expected JSON response from file upload", response=resp)
+            except requests.exceptions.Timeout as e:
+                from ..exceptions import SnipeITTimeoutError
+                raise SnipeITTimeoutError(f"Request timed out after {self.api.timeout} seconds.") from e
+            except requests.exceptions.RequestException as e:
+                from ..exceptions import SnipeITException
+                raise SnipeITException(f"An unexpected error occurred: {e}") from e
         finally:
             for f in opened_files:
                 try:
@@ -384,15 +396,20 @@ class AssetsManager(BaseResourceManager[Asset]):
         Raises:
             SnipeITApiError: If the API response is not a 200 OK or body is invalid.
         """
+        import requests
         url = f"{self.api.url}/api/v1/{self.path}/{asset_id}/files/{file_id}"
-        resp = self.api.session.get(url, timeout=self.api.timeout)
-        if resp.status_code != 200:
-            try:
-                body = resp.json()
-                msg = body.get("messages") or body.get("message") or resp.reason
-            except ValueError:
-                msg = resp.text or resp.reason
-            raise SnipeITApiError(str(msg))
+        try:
+            resp = self.api.session.get(url, timeout=self.api.timeout)
+            self.api._raise_for_status(resp)
+            if resp.status_code != 200:
+                raise SnipeITApiError(f"Unexpected status code {resp.status_code}", response=resp)
+        except requests.exceptions.Timeout as e:
+            from ..exceptions import SnipeITTimeoutError
+            raise SnipeITTimeoutError(f"Request timed out after {self.api.timeout} seconds.") from e
+        except requests.exceptions.RequestException as e:
+            from ..exceptions import SnipeITException
+            raise SnipeITException(f"An unexpected error occurred: {e}") from e
+            
         directory = os.path.dirname(save_path)
         if directory:
             os.makedirs(directory, exist_ok=True)
@@ -453,21 +470,24 @@ class AssetsManager(BaseResourceManager[Asset]):
         if not tags:
             raise ValueError("No valid asset tags found")
 
+        import requests
         # Perform request directly to allow binary PDF handling
         url = f"{self.api.url}/api/v1/{self.path}/labels"
         headers = dict(self.api.session.headers)
         # Accept either JSON payload or PDF
         headers["Accept"] = "application/json, application/pdf"
-        resp = self.api.session.post(
-            url, json={"asset_tags": tags}, headers=headers, timeout=self.api.timeout
-        )
-        if resp.status_code >= 400:
-            try:
-                body = resp.json()
-                msg = body.get("messages") or body.get("message") or resp.reason
-            except ValueError:
-                msg = resp.text or resp.reason
-            raise SnipeITApiError(str(msg))
+        
+        try:
+            resp = self.api.session.post(
+                url, json={"asset_tags": tags}, headers=headers, timeout=self.api.timeout
+            )
+            self.api._raise_for_status(resp)
+        except requests.exceptions.Timeout as e:
+            from ..exceptions import SnipeITTimeoutError
+            raise SnipeITTimeoutError(f"Request timed out after {self.api.timeout} seconds.") from e
+        except requests.exceptions.RequestException as e:
+            from ..exceptions import SnipeITException
+            raise SnipeITException(f"An unexpected error occurred: {e}") from e
 
         directory = os.path.dirname(save_path)
         if directory:
