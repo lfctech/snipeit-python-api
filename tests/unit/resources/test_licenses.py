@@ -1,4 +1,8 @@
+import pytest
+
 from snipeit.resources.licenses import License
+
+pytestmark = pytest.mark.unit
 
 
 def test_list_licenses(snipeit_client, requests_mock):

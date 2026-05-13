@@ -16,7 +16,7 @@ class Component(ApiObject):
             comp = api.components.get(1)
             print(comp)
     """
-    _path = "components"
+    _resource_path = "components"
 
     def __repr__(self) -> str:
         """Return a concise string representation.
@@ -24,7 +24,7 @@ class Component(ApiObject):
         Returns:
             str: The component id, name, and quantity.
         """
-        return f"<Component {getattr(self, 'id', 'N/A')}: {getattr(self, 'name', 'N/A')} (Qty: {getattr(self, 'qty', 'N/A')})>"
+        return f"<Component {(self.id if self.id is not None else 'N/A')}: {getattr(self, 'name', 'N/A')} (Qty: {getattr(self, 'qty', 'N/A')})>"
 
 
 class ComponentsManager(BaseResourceManager[Component]):
@@ -37,7 +37,7 @@ class ComponentsManager(BaseResourceManager[Component]):
     """
 
     resource_cls = Component
-    path = Component._path
+    path = Component._resource_path
 
     def create(self, name: str, qty: int, category_id: int, **kwargs: Any) -> 'Component':
         """Create a new component.

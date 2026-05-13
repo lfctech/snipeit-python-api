@@ -2,6 +2,10 @@ import os
 import pytest
 from snipeit import SnipeIT
 
+# Re-export the httpx-backed ``requests_mock`` fixture so historical tests
+# continue to work unchanged during the T4 migration.
+from tests._requests_mock_shim import requests_mock  # noqa: F401
+
 
 @pytest.fixture
 def snipeit_client():

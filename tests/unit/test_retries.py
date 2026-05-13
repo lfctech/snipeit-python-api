@@ -1,24 +1,20 @@
+"""Tests for the RetryTransport and SnipeIT retry configuration."""
+
 import pytest
 from snipeit import SnipeIT
+from snipeit._retry import RetryTransport
 from snipeit.exceptions import SnipeITServerError
 
 
 @pytest.mark.unit
 def test_retry_defaults_configured():
-    # Do not override defaults so we can detect mutations of default values
-    client = SnipeIT(
-        url="https://test.snipeitapp.com",
-        token="fake",
-    )
-    # Defaults
+    client = SnipeIT(url="https://test.snipeitapp.com", token="fake")
     assert client.timeout == 10
-    retries = client.session.adapters["https://"].max_retries
-    assert getattr(retries, "total", None) == 3
-    assert getattr(retries, "backoff_factor", None) == 0.3
-    # Only idempotent methods by default
-    assert retries.allowed_methods == frozenset({"HEAD", "GET", "OPTIONS"})
-    # Status forcelist should be exact
-    assert set(retries.status_forcelist) == {429, 500, 502, 503, 504}
+    rt: RetryTransport = client._retry_transport
+    assert rt.max_retries == 3
+    assert rt.backoff_factor == 0.3
+    assert rt.allowed_methods == frozenset({"HEAD", "GET", "OPTIONS"})
+    assert rt.status_forcelist == frozenset({429, 500, 502, 503, 504})
 
 
 @pytest.mark.unit
@@ -31,10 +27,12 @@ def test_post_503_does_not_retry_by_default(requests_mock):
     )
     requests_mock.post(
         "https://test.snipeitapp.com/api/v1/hardware",
-        [{"status_code": 503, "json": {"messages": "Service Unavailable"}}],
+        json={"messages": "Service Unavailable"},
+        status_code=503,
     )
     with pytest.raises(SnipeITServerError):
         client.post("hardware", data={"x": 1})
+    # POST is not in allowed_methods, so no retries — exactly 1 call.
     assert requests_mock.call_count == 1
 
 
@@ -45,13 +43,72 @@ def test_retry_allows_post_when_configured():
         token="fake",
         retry_allowed_methods={"HEAD", "GET", "OPTIONS", "POST"},
     )
-    retries = client.session.adapters["https://"].max_retries
-    assert "POST" in retries.allowed_methods
+    rt: RetryTransport = client._retry_transport
+    assert "POST" in rt.allowed_methods
 
 
 @pytest.mark.unit
-def test_http_and_https_adapters_mounted():
-    client = SnipeIT(url="https://test.snipeitapp.com", token="fake")
-    adapters = client.session.adapters
-    assert "https://" in adapters
-    assert "http://" in adapters
+def test_retry_transport_retries_get_on_503(httpx_mock):
+    """GET on 503 should be retried up to max_retries times."""
+    import httpx
+    from snipeit._retry import RetryTransport
+
+    sleep_calls: list[float] = []
+    rt = RetryTransport(max_retries=2, backoff_factor=0, sleep=lambda s: sleep_calls.append(s))
+
+    # Register 2 × 503 then a 200.
+    httpx_mock.add_response(status_code=503, json={"messages": "down"})
+    httpx_mock.add_response(status_code=503, json={"messages": "down"})
+    httpx_mock.add_response(status_code=200, json={"id": 1})
+
+    client = httpx.Client(transport=rt)
+    resp = client.get("https://example.com/api/v1/hardware/1")
+    assert resp.status_code == 200
+    assert len(httpx_mock.get_requests()) == 3
+
+
+@pytest.mark.unit
+def test_retry_transport_respects_retry_after(httpx_mock):
+    """Retry-After header should override backoff sleep."""
+    from snipeit._retry import RetryTransport
+    import httpx
+
+    sleep_calls: list[float] = []
+    rt = RetryTransport(
+        max_retries=1,
+        backoff_factor=99,  # would be huge without Retry-After
+        sleep=lambda s: sleep_calls.append(s),
+    )
+    httpx_mock.add_response(
+        status_code=429,
+        headers={"Retry-After": "2"},
+        json={"messages": "rate limited"},
+    )
+    httpx_mock.add_response(status_code=200, json={"id": 1})
+
+    client = httpx.Client(transport=rt)
+    resp = client.get("https://example.com/api/v1/hardware/1")
+    assert resp.status_code == 200
+    assert sleep_calls == [2.0]
+
+
+@pytest.mark.unit
+def test_retry_transport_does_not_retry_post_read_error_by_default():
+    import httpx
+
+    class ReadErrorTransport(httpx.BaseTransport):
+        def __init__(self):
+            self.calls = 0
+
+        def handle_request(self, request):
+            self.calls += 1
+            raise httpx.ReadError("socket closed", request=request)
+
+    wrapped = ReadErrorTransport()
+    rt = RetryTransport(wrapped=wrapped, max_retries=2, backoff_factor=0)
+    client = httpx.Client(transport=rt)
+
+    with pytest.raises(httpx.ReadError):
+        client.post("https://example.com/api/v1/hardware", json={"x": 1})
+
+    assert wrapped.calls == 1

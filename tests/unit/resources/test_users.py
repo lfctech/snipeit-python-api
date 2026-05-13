@@ -1,4 +1,8 @@
+import pytest
+
 from snipeit.resources.users import User
+
+pytestmark = pytest.mark.unit
 
 
 def test_list_users(snipeit_client, requests_mock):

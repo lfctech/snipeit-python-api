@@ -1,4 +1,8 @@
+import pytest
+
 from snipeit.resources.status_labels import StatusLabel
+
+pytestmark = pytest.mark.unit
 
 
 def test_list_status_labels(snipeit_client, requests_mock):

@@ -16,7 +16,7 @@ class License(ApiObject):
             lic = api.licenses.get(1)
             print(lic)
     """
-    _path = "licenses"
+    _resource_path = "licenses"
 
     def __repr__(self) -> str:
         """Return a concise string representation.
@@ -24,7 +24,7 @@ class License(ApiObject):
         Returns:
             str: The license id, name, and seats.
         """
-        return f"<License {getattr(self, 'id', 'N/A')}: {getattr(self, 'name', 'N/A')} (Seats: {getattr(self, 'seats', 'N/A')})>"
+        return f"<License {(self.id if self.id is not None else 'N/A')}: {getattr(self, 'name', 'N/A')} (Seats: {getattr(self, 'seats', 'N/A')})>"
 
 
 class LicensesManager(BaseResourceManager[License]):
@@ -37,7 +37,7 @@ class LicensesManager(BaseResourceManager[License]):
     """
 
     resource_cls = License
-    path = License._path
+    path = License._resource_path
 
     def create(self, name: str, seats: int, category_id: int, **kwargs: Any) -> 'License':
         """Create a new license.

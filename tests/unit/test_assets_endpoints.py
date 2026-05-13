@@ -1,15 +1,14 @@
-import base64
 import pytest
 
 
 
 @pytest.mark.unit
-def test_labels_decodes_base64_and_writes_file(snipeit_client, requests_mock, tmp_path):
+def test_labels_writes_pdf_bytes_directly(snipeit_client, requests_mock, tmp_path):
     pdf_bytes = b"%PDF-1.4 test"
-    b64 = base64.b64encode(pdf_bytes).decode()
     requests_mock.post(
         "https://test.snipeitapp.com/api/v1/hardware/labels",
-        json={"status": "success", "payload": {"file_type": "application/pdf", "file_contents": b64}},
+        content=pdf_bytes,
+        headers={"Content-Type": "application/pdf"},
         status_code=200,
     )
 
@@ -112,9 +111,7 @@ def test_licenses_and_files_endpoints(snipeit_client, requests_mock, tmp_path):
     assert requests_mock.last_request.headers["Content-Type"].startswith(
         "multipart/form-data; boundary="
     )
-    assert (
-        snipeit_client.session.headers["Content-Type"] == "application/json"
-    )
+    # No default Content-Type on the session — httpx sets it per-request.
 
     # Files - download
     dest = tmp_path / "dl.txt"

@@ -16,7 +16,7 @@ class Consumable(ApiObject):
             item = api.consumables.get(1)
             print(item)
     """
-    _path = "consumables"
+    _resource_path = "consumables"
 
     def __repr__(self) -> str:
         """Return a concise string representation.
@@ -24,7 +24,7 @@ class Consumable(ApiObject):
         Returns:
             str: The consumable id, name, and quantity.
         """
-        return f"<Consumable {getattr(self, 'id', 'N/A')}: {getattr(self, 'name', 'N/A')} (Qty: {getattr(self, 'qty', 'N/A')})>"
+        return f"<Consumable {(self.id if self.id is not None else 'N/A')}: {getattr(self, 'name', 'N/A')} (Qty: {getattr(self, 'qty', 'N/A')})>"
 
 
 class ConsumablesManager(BaseResourceManager[Consumable]):
@@ -37,7 +37,7 @@ class ConsumablesManager(BaseResourceManager[Consumable]):
     """
 
     resource_cls = Consumable
-    path = Consumable._path
+    path = Consumable._resource_path
 
     def create(self, name: str, qty: int, category_id: int, **kwargs: Any) -> 'Consumable':
         """Create a new consumable.

@@ -4,28 +4,20 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "snipeit-api"
-version = "0.1.0"
+version = "0.2.0"
 description = "A Python client for the Snipe-IT API"
 readme = "README.md"
 requires-python = ">=3.11"
 classifiers = [
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "requests",
-]
-
-[project.optional-dependencies]
-dev = [
-    "requests-mock",
-    "pytest",
-    "pytest-cov",
-    "coverage",
-    "hypothesis",
-    "mutmut<3",
-    "ruff",
-    "pyright",
+    "httpx>=0.27",
+    "pydantic>=2.0",
 ]
 
 [tool.setuptools]
@@ -33,13 +25,12 @@ packages = ["snipeit", "snipeit.resources"]
 
 [dependency-groups]
 dev = [
-    "requests-mock",
     "pytest",
     "pytest-cov",
+    "pytest-httpx>=0.30",
     "coverage",
     "hypothesis",
     "mutmut<3",
     "ruff",
     "pyright",
-    "ty>=0.0.1a21",
 ]

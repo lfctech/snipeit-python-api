@@ -50,9 +50,8 @@ def test_500_raises_server_error(snipeit_client, requests_mock):
 
 @pytest.mark.unit
 def test_api_error_preserves_response_and_status_code():
-    import requests
-    r = requests.models.Response()
-    r.status_code = 418
+    import httpx
+    r = httpx.Response(418, text="")
     exc = SnipeITApiError("I am a teapot", response=r)
     assert exc.response is r
     assert exc.status_code == 418

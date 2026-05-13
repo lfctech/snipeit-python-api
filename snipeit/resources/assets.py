@@ -3,7 +3,7 @@
 Define the Asset model and AssetsManager for interacting with hardware endpoints.
 """
 
-from typing import Any, Dict, List, Union, cast
+from typing import Any, Callable, ClassVar, cast
 from ..exceptions import SnipeITApiError, SnipeITNotFoundError
 from .base import ApiObject, BaseResourceManager
 
@@ -20,23 +20,18 @@ class Asset(ApiObject):
             asset.checkout(checkout_to_type="user", assigned_to_id=123)
     """
 
-    _path = "hardware"
+    _resource_path: ClassVar[str] = "hardware"
     # Commonly-present fields declared for type checking convenience
-    asset_tag: str | None
-    name: str | None
-    serial: str | None
-    model: Dict[str, Any] | None
+    asset_tag: str | None = None
+    name: str | None = None
+    serial: str | None = None
+    model: dict[str, Any] | None = None
 
     def __repr__(self) -> str:
-        """Return a concise string representation including tag, name, serial and model.
-
-        Returns:
-            str: Human-friendly summary string.
-        """
-        asset_tag = getattr(self, "asset_tag", "N/A")
-        name = getattr(self, "name", "N/A")
-        serial = getattr(self, "serial", "N/A")
-        model = getattr(self, "model", None)
+        asset_tag = self.asset_tag or "N/A"
+        name = self.name or "N/A"
+        serial = self.serial or "N/A"
+        model = self.model
         model_name = model.get("name", "N/A") if isinstance(model, dict) else "N/A"
         return f"<Asset {asset_tag} ({name} - {serial} - {model_name})>"
 
@@ -62,7 +57,7 @@ class Asset(ApiObject):
                 asset.checkout("user", assigned_to_id=123, note="Loaner laptop")
         """
         path = f"{self._path}/{self.id}/checkout"
-        data: Dict[str, Any] = {
+        data: dict[str, Any] = {
             "checkout_to_type": checkout_to_type,
         }
         if checkout_to_type == "user":
@@ -130,7 +125,7 @@ class AssetsManager(BaseResourceManager[Asset]):
     """
 
     resource_cls = Asset
-    path = Asset._path
+    path = Asset._resource_path
 
     def create(
         self, status_id: int, model_id: int, asset_tag: str | None = None, **kwargs: Any
@@ -146,7 +141,7 @@ class AssetsManager(BaseResourceManager[Asset]):
         Returns:
             Asset: The newly created Asset object.
         """
-        data: Dict[str, Any] = {
+        data: dict[str, Any] = {
             "status_id": status_id,
             "model_id": model_id,
         }
@@ -156,7 +151,7 @@ class AssetsManager(BaseResourceManager[Asset]):
         return super().create(**data)
 
     # ---- Audits ----
-    def audit_by_id(self, asset_id: int, **kwargs: Any) -> Dict[str, Any]:
+    def audit_by_id(self, asset_id: int, **kwargs: Any) -> dict[str, Any]:
         """Audit an asset by id via POST /hardware/audit/:id.
 
         Args:
@@ -168,7 +163,7 @@ class AssetsManager(BaseResourceManager[Asset]):
         """
         return self._create(f"{self.path}/audit/{asset_id}", kwargs)
 
-    def list_audit_overdue(self) -> Dict[str, Any]:
+    def list_audit_overdue(self) -> dict[str, Any]:
         """List overdue audits via GET /hardware/audit/overdue.
 
         Returns:
@@ -176,7 +171,7 @@ class AssetsManager(BaseResourceManager[Asset]):
         """
         return self._get(f"{self.path}/audit/overdue")
 
-    def list_audit_due(self) -> Dict[str, Any]:
+    def list_audit_due(self) -> dict[str, Any]:
         """List due audits via GET /hardware/audit/due.
 
         Returns:
@@ -185,67 +180,37 @@ class AssetsManager(BaseResourceManager[Asset]):
         return self._get(f"{self.path}/audit/due")
 
     def get_by_tag(self, asset_tag: str, **kwargs: Any) -> "Asset":
-        """Get a single asset by its asset tag.
-
-        Args:
-            asset_tag (str): The asset tag to search for.
-            **kwargs: Additional optional parameters.
-
-        Returns:
-            Asset: The matching asset.
-
-        Raises:
-            SnipeITNotFoundError: If no asset exists with the provided tag.
-        """
+        """Get a single asset by its asset tag."""
         try:
             response = self._get(f"{self.path}/bytag/{asset_tag}", **kwargs)
             return self._make(response)
-        except SnipeITApiError as e:
-            if "Asset does not exist" in str(e):
-                raise SnipeITNotFoundError(
-                    f"Asset with tag {asset_tag} not found."
-                ) from e
-            raise e
+        except SnipeITNotFoundError:
+            raise SnipeITNotFoundError(f"Asset with tag {asset_tag!r} not found.")
+        # Other SnipeITApiError subtypes propagate unchanged.
 
     def get_by_serial(self, serial: str, **kwargs: Any) -> "Asset":
         """Get a single asset by serial number.
 
-        Handles responses that are either a single object or a list envelope
-        with rows/total.
-
-        Args:
-            serial (str): The serial number to search for.
-            **kwargs: Additional optional parameters.
-
-        Returns:
-            Asset: The matching asset.
-
-        Raises:
-            SnipeITNotFoundError: If the asset cannot be found.
-            SnipeITApiError: If the API indicates multiple matches or an unexpected shape.
+        Handles both single-object and list-envelope response shapes.
         """
         try:
             response = self._get(f"{self.path}/byserial/{serial}", **kwargs)
-        except SnipeITApiError as e:
-            if "Asset does not exist" in str(e):
-                raise SnipeITNotFoundError(
-                    f"Asset with serial {serial} not found."
-                ) from e
-            raise
+        except SnipeITNotFoundError:
+            raise SnipeITNotFoundError(f"Asset with serial {serial!r} not found.")
 
-        # Envelope shape
+        # Envelope shape: {"rows": [...], "total": N}
         if isinstance(response, dict) and "rows" in response:
-            # If API does not include 'total', treat as not found for safety (per tests)
             if "total" not in response:
-                raise SnipeITNotFoundError(f"Asset with serial {serial} not found.")
+                raise SnipeITNotFoundError(f"Asset with serial {serial!r} not found.")
             rows = response.get("rows") or []
-            if len(rows) == 1 and response.get("total") == 1:
+            total = response.get("total", 0)
+            if len(rows) == 1 and total == 1:
                 return self._make(rows[0])
-            if response.get("total", 0) > 1:
+            if total > 1:
                 raise SnipeITApiError(
-                    f"Expected 1 asset with serial {serial}, but found {response.get('total')}."
+                    f"Expected 1 asset with serial {serial!r}, but found {total}."
                 )
-            raise SnipeITNotFoundError(f"Asset with serial {serial} not found.")
+            raise SnipeITNotFoundError(f"Asset with serial {serial!r} not found.")
 
         # Single-object shape
         if isinstance(response, dict) and response.get("id") is not None:
@@ -260,7 +225,7 @@ class AssetsManager(BaseResourceManager[Asset]):
         supplier_id: int,
         title: str,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Create a new asset maintenance record.
 
         Args:
@@ -283,7 +248,7 @@ class AssetsManager(BaseResourceManager[Asset]):
         return response.get("payload", response)
 
     # ---- Licenses ----
-    def get_licenses(self, asset_id: int) -> Dict[str, Any]:
+    def get_licenses(self, asset_id: int) -> dict[str, Any]:
         """Get licenses checked out to an asset via GET /hardware/:id/licenses.
 
         Args:
@@ -295,7 +260,7 @@ class AssetsManager(BaseResourceManager[Asset]):
         return self._get(f"{self.path}/{asset_id}/licenses")
 
     # ---- Files ----
-    def list_files(self, asset_id: int) -> Dict[str, Any]:
+    def list_files(self, asset_id: int) -> dict[str, Any]:
         """List uploaded files for an asset via GET /hardware/:id/files.
 
         Args:
@@ -307,8 +272,8 @@ class AssetsManager(BaseResourceManager[Asset]):
         return self._get(f"{self.path}/{asset_id}/files")
 
     def upload_files(
-        self, asset_id: int, paths: List[str], notes: str | None = None
-    ) -> Dict[str, Any]:
+        self, asset_id: int, paths: list[str], notes: str | None = None
+    ) -> dict[str, Any]:
         """Upload one or more files for an asset via POST /hardware/:id/files.
 
         Args:
@@ -329,46 +294,35 @@ class AssetsManager(BaseResourceManager[Asset]):
             raise ValueError("At least one file path required")
 
         # Validate all paths before opening any files to avoid mid-upload failures
-        missing: List[str] = [str(p) for p in paths if not os.path.isfile(p)]
-        unreadable: List[str] = [str(p) for p in paths if os.path.isfile(p) and not os.access(p, os.R_OK)]
+        missing: list[str] = [str(p) for p in paths if not os.path.isfile(p)]
+        unreadable: list[str] = [str(p) for p in paths if os.path.isfile(p) and not os.access(p, os.R_OK)]
         if missing:
             raise FileNotFoundError(f"File(s) not found: {', '.join(missing)}")
         if unreadable:
             raise PermissionError(f"File(s) not readable: {', '.join(unreadable)}")
 
         url = f"{self.api.url}/api/v1/{self.path}/{asset_id}/files"
-        files: List[tuple[str, tuple[str, Any]]] = []
-        opened_files: List[Any] = []
+        files: list[tuple[str, tuple[str, Any]]] = []
+        opened_files: list[Any] = []
         try:
             for p in paths:
-                if not os.path.isfile(p):
-                    raise ValueError(f"File not found: {p}")
                 f = open(p, "rb")
                 opened_files.append(f)
                 files.append(("file[]", (os.path.basename(p), f)))
-            data: Dict[str, Any] = {}
+            data: dict[str, Any] = {}
             if notes is not None:
                 data["notes"] = notes
-            # Remove the session-level JSON Content-Type for this request so
-            # requests can generate the multipart/form-data boundary itself.
-            # Temporarily popping the header is more robust across requests
-            # versions than relying on per-request header removal semantics.
-            original_content_type = self.api.session.headers.pop("Content-Type", None)
-            import requests
+            # httpx sets Content-Type: multipart/form-data automatically when
+            # files= is provided. No header manipulation needed.
+            import httpx
             try:
-                try:
-                    resp = self.api.session.post(
-                        url,
-                        files=files,
-                        data=data,
-                        timeout=self.api.timeout,
-                    )
-                finally:
-                    if original_content_type is not None:
-                        self.api.session.headers["Content-Type"] = original_content_type
-                
+                resp = self.api.session.post(
+                    url,
+                    files=files,
+                    data=data,
+                    timeout=self.api.timeout,
+                )
                 self.api._raise_for_status(resp)
-                
                 try:
                     json_resp = resp.json()
                     if isinstance(json_resp, dict) and json_resp.get("status") == "error":
@@ -379,10 +333,10 @@ class AssetsManager(BaseResourceManager[Asset]):
                     return json_resp
                 except ValueError:
                     raise SnipeITApiError("Expected JSON response from file upload", response=resp)
-            except requests.exceptions.Timeout as e:
+            except httpx.TimeoutException as e:
                 from ..exceptions import SnipeITTimeoutError
                 raise SnipeITTimeoutError(f"Request timed out after {self.api.timeout} seconds.") from e
-            except requests.exceptions.RequestException as e:
+            except httpx.RequestError as e:
                 from ..exceptions import SnipeITException
                 raise SnipeITException(f"An unexpected error occurred: {e}") from e
         finally:
@@ -392,39 +346,52 @@ class AssetsManager(BaseResourceManager[Asset]):
                 except Exception as e:
                     warnings.warn(f"Failed to close file {getattr(f, 'name', '<unknown>')}: {e}")
 
-    def download_file(self, asset_id: int, file_id: int, save_path: str) -> str:
+    def download_file(
+        self,
+        asset_id: int,
+        file_id: int,
+        save_path: str,
+        progress: Callable[[int, int | None], None] | None = None,
+    ) -> str:
         """Download a specific file via GET /hardware/:id/files/:file_id.
 
+        Streams the response in chunks so large files don't load into memory.
+
         Args:
-            asset_id (int): The asset identifier.
-            file_id (int): The file identifier.
-            save_path (str): Local filesystem path to save the downloaded file.
+            asset_id: The asset identifier.
+            file_id: The file identifier.
+            save_path: Local filesystem path to save the downloaded file.
+            progress: Optional callback ``(bytes_written, total_bytes_or_None)``.
 
         Returns:
             str: The save_path where the file was written.
-
-        Raises:
-            SnipeITApiError: If the API response is not a 200 OK or body is invalid.
         """
-        import requests
+        import httpx
         url = f"{self.api.url}/api/v1/{self.path}/{asset_id}/files/{file_id}"
-        try:
-            resp = self.api.session.get(url, timeout=self.api.timeout)
-            self.api._raise_for_status(resp)
-            if resp.status_code != 200:
-                raise SnipeITApiError(f"Unexpected status code {resp.status_code}", response=resp)
-        except requests.exceptions.Timeout as e:
-            from ..exceptions import SnipeITTimeoutError
-            raise SnipeITTimeoutError(f"Request timed out after {self.api.timeout} seconds.") from e
-        except requests.exceptions.RequestException as e:
-            from ..exceptions import SnipeITException
-            raise SnipeITException(f"An unexpected error occurred: {e}") from e
-            
         directory = os.path.dirname(save_path)
         if directory:
             os.makedirs(directory, exist_ok=True)
-        with open(save_path, "wb") as f:
-            f.write(resp.content)
+        try:
+            with self.api.session.stream("GET", url, timeout=self.api.timeout) as resp:
+                self.api._raise_for_status(resp)
+                total = (
+                    int(resp.headers["Content-Length"])
+                    if "Content-Length" in resp.headers
+                    else None
+                )
+                written = 0
+                with open(save_path, "wb") as fh:
+                    for chunk in resp.iter_bytes(chunk_size=65536):
+                        fh.write(chunk)
+                        written += len(chunk)
+                        if progress is not None:
+                            progress(written, total)
+        except httpx.TimeoutException as e:
+            from ..exceptions import SnipeITTimeoutError
+            raise SnipeITTimeoutError(f"Request timed out after {self.api.timeout} seconds.") from e
+        except httpx.RequestError as e:
+            from ..exceptions import SnipeITException
+            raise SnipeITException(f"An unexpected error occurred: {e}") from e
         return save_path
 
     def delete_file(self, asset_id: int, file_id: int) -> None:
@@ -441,7 +408,7 @@ class AssetsManager(BaseResourceManager[Asset]):
 
     # ---- Labels ----
     def labels(
-        self, save_path: str, assets_or_tags: Union[List["Asset"], List[str]]
+        self, save_path: str, assets_or_tags: list["Asset"] | list[str]
     ) -> str:
         """Generate and save asset labels as a PDF via POST /hardware/labels.
 
@@ -468,34 +435,38 @@ class AssetsManager(BaseResourceManager[Asset]):
             raise ValueError("At least one asset or tag required")
 
         if isinstance(assets_or_tags[0], Asset):
-            assets = cast(List[Asset], assets_or_tags)
+            assets = cast(list[Asset], assets_or_tags)
             tags = [a.asset_tag for a in assets if getattr(a, "asset_tag", None)]
         else:
             tags = [
                 tag
-                for tag in cast(List[str], assets_or_tags)
+                for tag in cast(list[str], assets_or_tags)
                 if isinstance(tag, str) and tag.strip()
             ]
 
         if not tags:
             raise ValueError("No valid asset tags found")
 
-        import requests
-        # Perform request directly to allow binary PDF handling
+        import httpx
+        # Perform request directly to allow binary PDF handling.
+        # Passing headers= to the per-request call lets httpx merge them over
+        # the client's default Accept header (application/json) with the
+        # per-request value winning; do NOT copy the client headers into a
+        # plain dict first, since that would send duplicate Accept headers.
         url = f"{self.api.url}/api/v1/{self.path}/labels"
-        headers = dict(self.api.session.headers)
-        # Only accept PDF
-        headers["Accept"] = "application/pdf"
-        
+
         try:
             resp = self.api.session.post(
-                url, json={"asset_tags": tags}, headers=headers, timeout=self.api.timeout
+                url,
+                json={"asset_tags": tags},
+                headers={"Accept": "application/pdf"},
+                timeout=self.api.timeout,
             )
             self.api._raise_for_status(resp)
-        except requests.exceptions.Timeout as e:
+        except httpx.TimeoutException as e:
             from ..exceptions import SnipeITTimeoutError
             raise SnipeITTimeoutError(f"Request timed out after {self.api.timeout} seconds.") from e
-        except requests.exceptions.RequestException as e:
+        except httpx.RequestError as e:
             from ..exceptions import SnipeITException
             raise SnipeITException(f"An unexpected error occurred: {e}") from e
 

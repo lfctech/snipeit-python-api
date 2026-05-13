@@ -16,7 +16,7 @@ class User(ApiObject):
             me = api.users.me()
             print(me)
     """
-    _path = "users"
+    _resource_path = "users"
 
     def __repr__(self) -> str:
         """Return a concise string representation.
@@ -24,7 +24,7 @@ class User(ApiObject):
         Returns:
             str: The user id, name, and username.
         """
-        return f"<User {getattr(self, 'id', 'N/A')}: {getattr(self, 'name', 'N/A')} ({getattr(self, 'username', 'N/A')})>"
+        return f"<User {(self.id if self.id is not None else 'N/A')}: {getattr(self, 'name', 'N/A')} ({getattr(self, 'username', 'N/A')})>"
 
 
 class UsersManager(BaseResourceManager[User]):
@@ -37,7 +37,7 @@ class UsersManager(BaseResourceManager[User]):
     """
 
     resource_cls = User
-    path = User._path
+    path = User._resource_path
 
     def create(self, username: str, **kwargs: Any) -> 'User':
         """Create a new user.

@@ -1,4 +1,8 @@
+import pytest
+
 from snipeit.resources.locations import Location
+
+pytestmark = pytest.mark.unit
 
 
 def test_list_locations(snipeit_client, requests_mock):

@@ -1,4 +1,8 @@
+import pytest
+
 from snipeit.resources.models import Model
+
+pytestmark = pytest.mark.unit
 
 
 def test_list_models(snipeit_client, requests_mock):

@@ -1,4 +1,8 @@
+import pytest
+
 from snipeit.resources.components import Component
+
+pytestmark = pytest.mark.unit
 
 
 def test_list_components(snipeit_client, requests_mock):

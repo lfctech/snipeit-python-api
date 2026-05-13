@@ -1,4 +1,8 @@
+import pytest
+
 from snipeit.resources.manufacturers import Manufacturer
+
+pytestmark = pytest.mark.unit
 
 
 def test_list_manufacturers(snipeit_client, requests_mock):

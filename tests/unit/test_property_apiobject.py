@@ -58,4 +58,4 @@ def test_apiobject_property_only_sends_changed_fields(initial, updates):
     assert mgr._patched_path == "props/1"
     assert mgr._patched_data == changed
     # Dirty fields cleared
-    assert not getattr(obj, "_dirty_fields")
+    assert not obj._dirty_set()

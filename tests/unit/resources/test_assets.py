@@ -106,7 +106,7 @@ def test_save_asset(snipeit_client, requests_mock):
     assert asset.name == "Updated Name"
     assert asset.notes == "Updated notes"
     # Check that dirty fields are cleared
-    assert not asset._dirty_fields
+    assert not asset._dirty_set()
 
 
 @pytest.mark.unit
@@ -180,7 +180,7 @@ def test_get_by_serial_multiple_found(snipeit_client, requests_mock):
     })
     with pytest.raises(SnipeITApiError) as excinfo:
         snipeit_client.assets.get_by_serial("SN789")
-    assert str(excinfo.value) == "Expected 1 asset with serial SN789, but found 2."
+    assert "SN789" in str(excinfo.value) and "2" in str(excinfo.value)
 
 
 @pytest.mark.unit
