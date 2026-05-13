@@ -68,6 +68,8 @@ class SnipeIT:
         "status_labels": (".resources.status_labels", "StatusLabelsManager"),
         "fields": (".resources.fields", "FieldsManager"),
         "fieldsets": (".resources.fieldsets", "FieldsetsManager"),
+        "companies": (".resources.companies", "CompaniesManager"),
+        "suppliers": (".resources.suppliers", "SuppliersManager"),
     }
 
     def __init__(
