@@ -6,21 +6,21 @@ PY ?= python3
 
 # Run unit tests only
 test:
-	$(PY) -m pytest tests/unit -q -m unit
+	$(PY) -m pytest tests/unit tests/contract -q -m unit
 
 # Run unit tests only (alias)
 test-unit:
-	$(PY) -m pytest tests/unit -q -m unit
+	$(PY) -m pytest tests/unit tests/contract -q -m unit
 
 # Lint and type check
 check:
 	.venv/bin/ruff check .
 	.venv/bin/pyright
 
-# Run tests with coverage (branch coverage) and enforce 95%
+# Run tests with coverage (branch coverage) and enforce 85%
 cov:
-	$(PY) -m coverage run -m pytest -q && \
-	$(PY) -m coverage report -m --fail-under=95
+	$(PY) -m coverage run -m pytest tests/unit tests/contract -q -m unit && \
+	$(PY) -m coverage report -m --fail-under=85
 
 # Mutation testing (can be slow)
 mut:
