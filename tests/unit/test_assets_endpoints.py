@@ -1,7 +1,6 @@
 import pytest
 
-
-@pytest.mark.unit
+pytestmark = pytest.mark.unit
 def test_labels_writes_pdf_bytes_directly(snipeit_client, httpx_mock, tmp_path):
     pdf_bytes = b"%PDF-1.4 test"
     httpx_mock.add_response(
@@ -80,3 +79,107 @@ def test_licenses_and_files_endpoints(snipeit_client, httpx_mock, tmp_path):
 
 
 
+
+
+# ---------------------------------------------------------------------------
+# Task 11: _raw_request error paths via upload_files
+# ---------------------------------------------------------------------------
+
+@pytest.mark.unit
+def test_upload_files_timeout_raises_snipeit_timeout_error(snipeit_client, httpx_mock, tmp_path):
+    """A timeout during file upload must surface as SnipeITTimeoutError."""
+    import httpx
+    from snipeit.exceptions import SnipeITTimeoutError
+
+    f = tmp_path / "file.txt"
+    f.write_text("data")
+    httpx_mock.add_exception(
+        httpx.TimeoutException("timed out"),
+        method="POST",
+        url="https://snipe.example.test/api/v1/hardware/1/files",
+    )
+    with pytest.raises(SnipeITTimeoutError):
+        snipeit_client.assets.upload_files(1, [str(f)])
+
+
+# ---------------------------------------------------------------------------
+# Task 13: upload_files validation and error-response paths
+# ---------------------------------------------------------------------------
+
+@pytest.mark.unit
+def test_upload_files_empty_paths_raises_value_error(snipeit_client):
+    """upload_files([]) must raise ValueError before making any HTTP request."""
+    with pytest.raises(ValueError, match="At least one file path"):
+        snipeit_client.assets.upload_files(1, [])
+
+
+@pytest.mark.unit
+def test_upload_files_missing_file_raises_file_not_found(snipeit_client, tmp_path):
+    """upload_files with a non-existent path must raise FileNotFoundError."""
+    with pytest.raises(FileNotFoundError, match="not found"):
+        snipeit_client.assets.upload_files(1, [str(tmp_path / "ghost.txt")])
+
+
+@pytest.mark.unit
+def test_upload_files_server_error_json_raises_api_error(snipeit_client, httpx_mock, tmp_path):
+    """When the server returns status:error JSON, SnipeITApiError must be raised."""
+    from snipeit.exceptions import SnipeITApiError
+
+    f = tmp_path / "file.txt"
+    f.write_text("data")
+    httpx_mock.add_response(
+        method="POST",
+        url="https://snipe.example.test/api/v1/hardware/1/files",
+        json={"status": "error", "messages": "Upload failed"},
+        status_code=200,
+    )
+    with pytest.raises(SnipeITApiError, match="Upload failed"):
+        snipeit_client.assets.upload_files(1, [str(f)])
+
+
+@pytest.mark.unit
+def test_upload_files_non_json_response_raises_api_error(snipeit_client, httpx_mock, tmp_path):
+    """When the server returns a non-JSON 200, SnipeITApiError must be raised."""
+    from snipeit.exceptions import SnipeITApiError
+
+    f = tmp_path / "file.txt"
+    f.write_text("data")
+    httpx_mock.add_response(
+        method="POST",
+        url="https://snipe.example.test/api/v1/hardware/1/files",
+        text="not json",
+        status_code=200,
+        headers={"Content-Type": "text/plain"},
+    )
+    with pytest.raises(SnipeITApiError, match="Expected JSON"):
+        snipeit_client.assets.upload_files(1, [str(f)])
+
+
+@pytest.mark.unit
+def test_upload_files_closes_file_handles_on_success(snipeit_client, httpx_mock, tmp_path):
+    """File handles opened during upload must be closed even on success."""
+    f = tmp_path / "file.txt"
+    f.write_text("data")
+    httpx_mock.add_response(
+        method="POST",
+        url="https://snipe.example.test/api/v1/hardware/1/files",
+        json={"file": {"original_name": "file.txt"}},
+        status_code=200,
+    )
+    opened_handles: list = []
+    original_open = __builtins__["open"] if isinstance(__builtins__, dict) else open
+
+    import builtins
+    original_open = builtins.open
+
+    def tracking_open(path, mode="r", **kwargs):
+        fh = original_open(path, mode, **kwargs)
+        opened_handles.append(fh)
+        return fh
+
+    import unittest.mock as mock
+    with mock.patch("builtins.open", side_effect=tracking_open):
+        snipeit_client.assets.upload_files(1, [str(f)])
+
+    assert all(fh.closed for fh in opened_handles if hasattr(fh, "closed")), \
+        "All file handles must be closed after upload"

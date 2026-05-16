@@ -69,3 +69,46 @@ def test_labels_sends_exactly_one_accept_header(tmp_path):
     assert captured["accept"] == ["application/pdf"], (
         f"expected a single Accept: application/pdf header, got {captured['accept']!r}"
     )
+
+
+# ---------------------------------------------------------------------------
+# Task 14: labels() validation paths
+# ---------------------------------------------------------------------------
+
+@pytest.mark.unit
+def test_labels_empty_list_raises_value_error(snipeit_client, tmp_path):
+    """labels() with an empty list must raise ValueError before any HTTP call."""
+    with pytest.raises(ValueError, match="At least one"):
+        snipeit_client.assets.labels(str(tmp_path / "out.pdf"), [])
+
+
+@pytest.mark.unit
+def test_labels_all_blank_strings_raises_value_error(snipeit_client, tmp_path):
+    """labels() with only blank/whitespace strings must raise ValueError."""
+    with pytest.raises(ValueError, match="No valid asset tags"):
+        snipeit_client.assets.labels(str(tmp_path / "out.pdf"), ["", "  "])
+
+
+@pytest.mark.unit
+def test_labels_with_asset_objects_sends_only_valid_tags(snipeit_client, httpx_mock, tmp_path):
+    """labels() accepts Asset objects; only assets with a non-None asset_tag are sent."""
+    import json as _json
+    from snipeit.resources.assets import Asset
+
+    class _Mgr:
+        api = snipeit_client
+
+    # Asset with tag, Asset without tag
+    a1 = Asset(_Mgr(), {"id": 1, "asset_tag": "TAG-A"})
+    a2 = Asset(_Mgr(), {"id": 2})  # no asset_tag
+
+    httpx_mock.add_response(
+        method="POST",
+        url="https://snipe.example.test/api/v1/hardware/labels",
+        content=b"%PDF-1.4",
+        headers={"Content-Type": "application/pdf"},
+        status_code=200,
+    )
+    snipeit_client.assets.labels(str(tmp_path / "out.pdf"), [a1, a2])
+    body = _json.loads(httpx_mock.get_requests()[-1].content)
+    assert body["asset_tags"] == ["TAG-A"], "only the asset with a tag should be sent"
