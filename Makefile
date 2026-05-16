@@ -57,7 +57,7 @@ test-integration:
 		echo "Timed out waiting for docker/api_key.txt. Check 'docker compose logs --follow seeder'."; \
 		exit 1; \
 	fi
-	.venv/bin/python -m pytest -q -m integration
+	.venv/bin/python -m pytest tests/integration -q -m integration
 	
 
 # Run both unit and integration tests
