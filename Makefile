@@ -2,7 +2,7 @@
 
 PY ?= python3
 
-.PHONY: test test-unit check cov cov-html property mut mut-report mut-reset clean docker-up docker-down test-integration test-all
+.PHONY: test test-unit check cov cov-html property mut mut-quick mut-report mut-reset clean docker-up docker-down test-integration test-all
 
 # Run unit tests only
 test:
@@ -25,6 +25,12 @@ cov:
 # Mutation testing (can be slow)
 mut:
 	$(PY) -m mutmut run --paths-to-mutate snipeit --tests-dir tests || true
+
+# Quick mutation run scoped to the highest-value source files (used in CI)
+mut-quick:
+	$(PY) -m mutmut run \
+		--paths-to-mutate snipeit/client.py,snipeit/_retry.py,snipeit/resources/base.py \
+		--tests-dir tests/unit tests/contract || true
 
 mut-report:
 	$(PY) -m mutmut results
