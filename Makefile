@@ -60,7 +60,14 @@ docker-down:
 	rm -rf docker/api_key.txt
 	touch docker/api_key.txt
 
-# Run integration tests: bring up docker, wait for api_key.txt, then test
+# Run integration tests: bring up docker, wait for api_key.txt AND for the API
+# to actually respond to authenticated requests, then test.
+#
+# Two-stage wait is required because the seeder writes the token to
+# api_key.txt as soon as it generates one, but the Snipe-IT app container is
+# usually still booting Apache/PHP at that point. Hitting the API before it's
+# ready causes ECONNRESET on the first few requests, which manifests as
+# "flaky" test failures that disappear on a re-run once the app is warm.
 test-integration:
 	$(MAKE) docker-up
 	@echo "Waiting for docker/api_key.txt (up to ~120s)..."
@@ -74,6 +81,24 @@ test-integration:
 	fi; \
 	if [ ! -s docker/api_key.txt ]; then \
 		echo "Timed out waiting for docker/api_key.txt. Check 'docker compose logs --follow seeder'."; \
+		exit 1; \
+	fi
+	@echo "Waiting for Snipe-IT API to accept authenticated requests (up to ~120s)..."
+	@TOKEN=$$(cat docker/api_key.txt); \
+	i=0; \
+	while [ $$i -lt 120 ]; do \
+		code=$$(curl -s -o /dev/null -w "%{http_code}" -m 5 \
+			-H "Authorization: Bearer $$TOKEN" \
+			-H "Accept: application/json" \
+			http://localhost:8000/api/v1/users/me 2>/dev/null || echo "000"); \
+		if [ "$$code" = "200" ]; then \
+			echo "API is ready (HTTP 200 on /users/me)"; \
+			break; \
+		fi; \
+		sleep 1; i=$$((i+1)); \
+	done; \
+	if [ "$$code" != "200" ]; then \
+		echo "Timed out waiting for Snipe-IT API. Last status: $$code. Check 'docker compose logs --follow app'."; \
 		exit 1; \
 	fi
 	.venv/bin/python -m pytest tests/integration -q -m integration

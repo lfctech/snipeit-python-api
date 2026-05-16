@@ -1,8 +1,8 @@
 """End-to-end integration test for asset file attachments.
 
-Uploads a file with non-trivial binary content, lists files on the asset,
-streams the download to disk, byte-compares the result against the original,
-and finally deletes the attachment via Snipe-IT's non-standard /delete suffix.
+Uploads a file with non-trivial content, lists files on the asset, streams the
+download to disk, byte-compares the result against the original, and finally
+deletes the attachment via Snipe-IT's non-standard /delete suffix.
 
 This test exercises:
 
@@ -12,6 +12,12 @@ This test exercises:
 
 Mocks cannot reproduce real multipart encoding or HTTP/1.1 chunked transfer
 edge cases, so this test catches a class of bugs the unit suite cannot.
+
+Note on file format: Snipe-IT validates uploads against a hardcoded extension
+allowlist (``.txt``, ``.pdf``, ``.zip``, ``.xml``, ``.json``, image types,
+etc.). We use ``.txt`` with random hex content so the bytes are non-trivial
+(64 KiB exercises multi-chunk download) while still passing extension/MIME
+validation.
 """
 from __future__ import annotations
 
@@ -32,10 +38,13 @@ def test_asset_file_upload_download_delete_roundtrip(
 ):
     c = real_snipeit_client
 
-    # Generate ~64 KiB of pseudo-random binary content. Larger than a single
-    # streaming chunk so we exercise the multi-chunk path on download.
-    payload = secrets.token_bytes(64 * 1024)
-    src = tmp_path / f"upload-{run_id}.bin"
+    # 64 KiB of pseudo-random hex characters (printable ASCII). Larger than a
+    # single streaming chunk so we exercise the multi-chunk path on download.
+    # token_hex(N) returns 2N chars, so token_hex(32 * 1024) -> 64 KiB.
+    payload = secrets.token_hex(32 * 1024).encode("ascii")
+    assert len(payload) == 64 * 1024
+
+    src = tmp_path / f"upload-{run_id}.txt"
     src.write_bytes(payload)
 
     asset = c.assets.create(
@@ -63,9 +72,12 @@ def test_asset_file_upload_download_delete_roundtrip(
             )
 
         for row in rows:
-            # Match by original_name when present, fallback to name/filename.
+            # Snipe-IT prefixes the stored filename with asset-{id}-{random}-,
+            # so an exact match won't work. Match by suffix instead — the
+            # original basename appears at the end of the stored filename.
             for key in ("original_name", "name", "filename"):
-                if str(row.get(key, "")) == src.name:
+                stored = str(row.get(key, ""))
+                if stored.endswith(src.name):
                     uploaded_file_id = int(row["id"])
                     break
             if uploaded_file_id is not None:
@@ -76,7 +88,7 @@ def test_asset_file_upload_download_delete_roundtrip(
         )
 
         # Download with progress callback and byte-compare.
-        dest = tmp_path / f"download-{run_id}.bin"
+        dest = tmp_path / f"download-{run_id}.txt"
         progress_calls: list[tuple[int, int | None]] = []
         out_path = c.assets.download_file(
             asset_id,

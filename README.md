@@ -43,14 +43,36 @@ strict type-checking in your editor (pyright or mypy) and rely on the declared
 fields (`asset_tag`, `name`, `serial`, `model`) which are type-checked. For
 fields not declared on the model, there is no static protection.
 
+### Setting custom field values
+
+Snipe-IT's REST API expects custom field values as **top-level keys** named
+`_snipeit_<slug>_<id>` (the column name), not as nested entries under
+`custom_fields`. The library's dirty tracker treats any attribute starting
+with `_` as a private internal attribute and skips it, which means a plain
+`setattr(asset, "_snipeit_owner_3", "alice")` is silently dropped from the
+PATCH payload. Use `mark_dirty()` to force the column into the PATCH:
+
+```python
+asset = api.assets.get(1)
+column_name = asset.custom_fields["Owner"]["field"]   # e.g. "_snipeit_owner_3"
+setattr(asset, column_name, "alice")
+asset.mark_dirty(column_name)
+asset.save()
+```
+
+Mutating the nested response shape directly (`asset.custom_fields["Owner"]["value"] = "alice"`)
+*is* detected by the dirty tracker, but Snipe-IT's PATCH endpoint silently
+ignores the nested `{"custom_fields": {...}}` form on the versions tested in
+CI. Stick with the column-name + `mark_dirty()` pattern above.
+
 ### In-place mutation of nested objects
 
 Mutating a nested dict or list in-place is detected automatically via
 snapshot-and-diff tracking:
 
 ```python
-asset.custom_fields["owner"] = "alice"
-asset.save()  # correctly PATCHes custom_fields
+asset.tags.append("retired")
+asset.save()  # correctly PATCHes tags
 ```
 
 If you need to force a field into the PATCH payload regardless of whether it
