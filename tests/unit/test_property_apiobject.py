@@ -50,7 +50,7 @@ def test_apiobject_property_only_sends_changed_fields(initial, updates):
     if not changed:
         # Force at least one change if all updates were same as before
         k = next(iter(updates.keys()))
-        setattr(obj, k, object())  # make it definitely different
+        setattr(obj, k, ("__forced__",))  # deterministic sentinel, never equal to real values
         changed[k] = getattr(obj, k)
 
     obj.save()

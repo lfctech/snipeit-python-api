@@ -183,7 +183,12 @@ def test_context_manager_does_not_suppress_exceptions_and_closes():
 # T9: 3xx redirect and localization-safe lookups
 # ---------------------------------------------------------------------------
 @pytest.mark.unit
-def test_3xx_raises_api_error(snipeit_client, httpx_mock):
+def test_3xx_raises_api_error_with_status_and_location(snipeit_client, httpx_mock):
+    """A 3xx response must raise SnipeITApiError carrying the status code and redirect target.
+
+    Snipe-IT behind a misconfigured reverse proxy often redirects to a login page.
+    The error must surface both the status code and the Location so operators can diagnose it.
+    """
     httpx_mock.add_response(
         method="GET",
         url="https://snipe.example.test/api/v1/hardware/1",
@@ -192,7 +197,8 @@ def test_3xx_raises_api_error(snipeit_client, httpx_mock):
     )
     with pytest.raises(SnipeITApiError) as excinfo:
         snipeit_client.get("hardware/1")
-    assert "redirect" in str(excinfo.value).lower() or "302" in str(excinfo.value)
+    assert excinfo.value.status_code == 302
+    assert "https://snipe.example.test/login" in str(excinfo.value)
 
 
 @pytest.mark.unit

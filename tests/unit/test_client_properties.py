@@ -21,14 +21,22 @@ def test_manager_properties_are_cached():
 
 
 @pytest.mark.unit
-def test_session_headers_are_correct():
-    client = SnipeIT(url="https://snipe.example.test", token="fake-token")
-    headers = client._http.headers
-    assert headers["Authorization"] == "Bearer fake-token"
-    assert headers["Accept"] == "application/json"
-    # Content-Type is NOT set at the session level; httpx sets it per-request
-    # based on the body type (json= → application/json, files= → multipart).
-    assert "Content-Type" not in headers
+def test_request_headers_are_correct(httpx_mock):
+    """The client must send Authorization, Accept, and a snipeit-api User-Agent on every request."""
+    httpx_mock.add_response(
+        method="GET",
+        url="https://snipe.example.test/api/v1/hardware/1",
+        json={"id": 1},
+    )
+    client = SnipeIT(url="https://snipe.example.test", token="my-secret-token")
+    client.get("hardware/1")
+
+    req = httpx_mock.get_requests()[0]
+    assert req.headers["Authorization"] == "Bearer my-secret-token"
+    assert req.headers["Accept"] == "application/json"
+    assert req.headers["User-Agent"].startswith("snipeit-api")
+    # Content-Type is NOT set at the session level; httpx sets it per-request.
+    assert "content-type" not in {k.lower() for k in dict(req.headers)}
 
 
 

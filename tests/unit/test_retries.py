@@ -112,3 +112,33 @@ def test_retry_transport_does_not_retry_post_read_error_by_default():
         client.post("https://example.com/api/v1/hardware", json={"x": 1})
 
     assert wrapped.calls == 1
+
+
+@pytest.mark.unit
+def test_retry_after_future_http_date_sleeps_for_correct_duration(httpx_mock):
+    """A Retry-After HTTP-date 30 seconds in the future must produce a sleep of ~30s."""
+    import time
+    import httpx
+    from email.utils import formatdate
+    from snipeit._retry import RetryTransport
+
+    future_date = formatdate(time.time() + 30, usegmt=True)
+    sleep_calls: list[float] = []
+    rt = RetryTransport(
+        max_retries=1,
+        backoff_factor=0,
+        sleep=lambda s: sleep_calls.append(s),
+    )
+    httpx_mock.add_response(
+        status_code=429,
+        headers={"Retry-After": future_date},
+        json={"messages": "rate limited"},
+    )
+    httpx_mock.add_response(status_code=200, json={"id": 1})
+
+    client = httpx.Client(transport=rt)
+    resp = client.get("https://example.com/api/v1/hardware/1")
+    assert resp.status_code == 200
+    assert len(sleep_calls) == 1
+    # Allow ±2s tolerance for test execution time
+    assert 28.0 <= sleep_calls[0] <= 32.0
