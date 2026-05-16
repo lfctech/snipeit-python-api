@@ -144,3 +144,74 @@ def test_retry_after_future_http_date_sleeps_for_correct_duration(httpx_mock):
     assert len(sleep_calls) == 1
     # Allow ±2s tolerance for test execution time
     assert 28.0 <= sleep_calls[0] <= 32.0
+
+
+# ---------------------------------------------------------------------------
+# Task 17: respect_retry_after=False and PATCH/DELETE non-retry
+# ---------------------------------------------------------------------------
+
+@pytest.mark.unit
+def test_retry_after_false_uses_backoff_not_header(httpx_mock):
+    """When respect_retry_after=False, the Retry-After header must be ignored and backoff used."""
+    import httpx
+    from snipeit._retry import RetryTransport
+
+    sleep_calls: list[float] = []
+    rt = RetryTransport(
+        max_retries=1,
+        backoff_factor=0,  # backoff = 0 * 2^0 = 0
+        respect_retry_after=False,
+        sleep=lambda s: sleep_calls.append(s),
+    )
+    httpx_mock.add_response(
+        status_code=429,
+        headers={"Retry-After": "60"},  # would be 60s if respected
+        json={"messages": "rate limited"},
+    )
+    httpx_mock.add_response(status_code=200, json={"id": 1})
+
+    client = httpx.Client(transport=rt)
+    resp = client.get("https://example.com/api/v1/hardware/1")
+    assert resp.status_code == 200
+    # backoff_factor=0 → delay=0 → sleep not called (delay > 0 guard in _backoff)
+    assert sleep_calls == []
+
+
+@pytest.mark.unit
+def test_patch_503_does_not_retry_by_default(httpx_mock):
+    """PATCH is not in DEFAULT_ALLOWED_METHODS, so a 503 must not be retried."""
+    client = SnipeIT(
+        url="https://snipe.example.test",
+        token="fake",
+        max_retries=3,
+        backoff_factor=0,
+    )
+    httpx_mock.add_response(
+        method="PATCH",
+        url="https://snipe.example.test/api/v1/hardware/1",
+        json={"messages": "Service Unavailable"},
+        status_code=503,
+    )
+    with pytest.raises(SnipeITServerError):
+        client.patch("hardware/1", data={"name": "x"})
+    assert len(httpx_mock.get_requests()) == 1
+
+
+@pytest.mark.unit
+def test_delete_503_does_not_retry_by_default(httpx_mock):
+    """DELETE is not in DEFAULT_ALLOWED_METHODS, so a 503 must not be retried."""
+    client = SnipeIT(
+        url="https://snipe.example.test",
+        token="fake",
+        max_retries=3,
+        backoff_factor=0,
+    )
+    httpx_mock.add_response(
+        method="DELETE",
+        url="https://snipe.example.test/api/v1/hardware/1",
+        json={"messages": "Service Unavailable"},
+        status_code=503,
+    )
+    with pytest.raises(SnipeITServerError):
+        client.delete("hardware/1")
+    assert len(httpx_mock.get_requests()) == 1

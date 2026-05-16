@@ -299,3 +299,23 @@ def test_create_maintenance_returns_payload(snipeit_client, httpx_mock):
     )
     payload = snipeit_client.assets.create_maintenance(asset_id=1, asset_improvement="repair", supplier_id=2, title="Tune-up")
     assert payload == {"id": 99, "title": "Tune-up"}
+
+
+@pytest.mark.unit
+def test_asset_checkout_passes_extra_kwargs_to_request(snipeit_client, httpx_mock):
+    """Extra kwargs like note and expected_checkin must reach the POST body."""
+    import json as _json
+    httpx_mock.add_response(method="GET", url="https://snipe.example.test/api/v1/hardware/1", json={"id": 1})
+    httpx_mock.add_response(method="POST", url="https://snipe.example.test/api/v1/hardware/1/checkout", json={"status": "success", "payload": {}})
+    httpx_mock.add_response(method="GET", url="https://snipe.example.test/api/v1/hardware/1", json={"id": 1})
+    asset = snipeit_client.assets.get(1)
+    asset.checkout(
+        checkout_to_type="user",
+        assigned_to_id=5,
+        note="deploying to alice",
+        expected_checkin="2026-12-31",
+    )
+    body = _json.loads(httpx_mock.get_requests()[1].content)
+    assert body["note"] == "deploying to alice"
+    assert body["expected_checkin"] == "2026-12-31"
+    assert body["assigned_user"] == 5

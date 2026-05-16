@@ -204,27 +204,31 @@ def test_3xx_raises_api_error_with_status_and_location(snipeit_client, httpx_moc
 
 
 @pytest.mark.unit
-def test_get_by_tag_localized_404_raises_not_found(snipeit_client, httpx_mock):
+def test_get_by_tag_localized_404_raises_not_found_with_tag_in_message(snipeit_client, httpx_mock):
+    """A localized 404 from get_by_tag must raise SnipeITNotFoundError and include the tag."""
     httpx_mock.add_response(
         method="GET",
         url="https://snipe.example.test/api/v1/hardware/bytag/TAG1",
         status_code=404,
         json={"messages": "L'actif n'existe pas"},
     )
-    with pytest.raises(SnipeITNotFoundError):
+    with pytest.raises(SnipeITNotFoundError) as excinfo:
         snipeit_client.assets.get_by_tag("TAG1")
+    assert "TAG1" in str(excinfo.value)
 
 
 @pytest.mark.unit
-def test_get_by_serial_localized_404_raises_not_found(snipeit_client, httpx_mock):
+def test_get_by_serial_localized_404_raises_not_found_with_serial_in_message(snipeit_client, httpx_mock):
+    """A localized 404 from get_by_serial must raise SnipeITNotFoundError and include the serial."""
     httpx_mock.add_response(
         method="GET",
         url="https://snipe.example.test/api/v1/hardware/byserial/SN999",
         status_code=404,
         json={"messages": "El activo no existe"},
     )
-    with pytest.raises(SnipeITNotFoundError):
+    with pytest.raises(SnipeITNotFoundError) as excinfo:
         snipeit_client.assets.get_by_serial("SN999")
+    assert "SN999" in str(excinfo.value)
 
 
 @pytest.mark.unit
