@@ -1,5 +1,33 @@
 # Changelog
 
+## Unreleased
+
+### Test suite overhaul
+
+- **Removed 13 duplicated per-resource test files** (~500 LoC) and replaced them
+  with a single parametrised smoke test covering all 15 managers × 6 operations.
+- **Added Companies and Suppliers** to repr tests and integration CRUD suite.
+- **Fixture URL** switched to RFC 6761 reserved domain `snipe.example.test`;
+  `real_snipeit_client` now yields and closes the HTTP client on teardown.
+- **Integration env-var setup** converted from direct `os.environ` mutation to
+  `pytest.MonkeyPatch.context()` to prevent session leakage.
+- **Assertion accuracy**: 3xx test pins `status_code` and `Location`; session
+  headers test inspects actual request headers and pins `User-Agent`; localized-404
+  tests assert the lookup key is preserved in the exception message.
+- **Coverage gaps closed**: URL/token validation, `_require_body` 204 on
+  POST/PUT/PATCH, error-message list/dict/null extraction, `_stream_request`
+  timeout/connect errors, `SnipeITValidationError` parse-failure warning,
+  `upload_files` validation + file-handle cleanup, `labels()` validation paths,
+  streaming download without `Content-Length`, `list_all` no-total termination,
+  `checkout` kwargs pass-through, PATCH/DELETE non-retry, `respect_retry_after=False`.
+- **Retry tests**: future HTTP-date `Retry-After`, `respect_retry_after=False`,
+  PATCH/DELETE non-retry assertions added.
+- **`filterwarnings = error`** added to `pytest.ini` — unintentional warnings now
+  fail the build.
+- **Coverage gate** raised from 85% to 95% (current: 97% source, 98% overall).
+- **Advisory mutation CI job** added (`.github/workflows/mutation.yml`); runs
+  `make mut-quick` on PRs, uploads `.mutmut-cache` as an artifact, never blocks.
+
 ## 0.3.0 (2026-05-15)
 
 ### Breaking changes

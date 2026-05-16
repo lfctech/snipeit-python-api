@@ -51,4 +51,4 @@ jobs:
         if: matrix.python-version == '3.13' && matrix.pydantic-version == '~=2.10.0'
         run: |
           uv run coverage run -m pytest tests/unit tests/contract -q -m unit
-          uv run coverage report -m --fail-under=85
+          uv run coverage report -m --fail-under=95

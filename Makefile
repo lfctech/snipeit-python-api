@@ -17,10 +17,10 @@ check:
 	.venv/bin/ruff check .
 	.venv/bin/pyright
 
-# Run tests with coverage (branch coverage) and enforce 85%
+# Run tests with coverage (branch coverage) and enforce 95%
 cov:
 	$(PY) -m coverage run -m pytest tests/unit tests/contract -q -m unit && \
-	$(PY) -m coverage report -m --fail-under=85
+	$(PY) -m coverage report -m --fail-under=95
 
 # Mutation testing (can be slow)
 mut:
