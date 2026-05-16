@@ -6,7 +6,7 @@ from snipeit.exceptions import SnipeITException
 def test_list_non_dict_response_raises(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="GET",
-        url="https://test.snipeitapp.com/api/v1/users",
+        url="https://snipe.example.test/api/v1/users",
         json="not-a-dict",
         status_code=200,
     )
@@ -19,7 +19,7 @@ def test_list_non_dict_response_raises(snipeit_client, httpx_mock):
 def test_list_rows_not_list_raises(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="GET",
-        url="https://test.snipeitapp.com/api/v1/users",
+        url="https://snipe.example.test/api/v1/users",
         json={"rows": {}},
         status_code=200,
     )
@@ -32,7 +32,7 @@ def test_list_rows_not_list_raises(snipeit_client, httpx_mock):
 def test_get_non_dict_response_raises(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="GET",
-        url="https://test.snipeitapp.com/api/v1/users/1",
+        url="https://snipe.example.test/api/v1/users/1",
         json=[{"id": 1}],
         status_code=200,
     )

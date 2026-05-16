@@ -9,7 +9,7 @@ def test_labels_pdf_content(snipeit_client, httpx_mock, tmp_path):
     pdf_bytes = b"%PDF-1.4\n...binary..."
     httpx_mock.add_response(
         method="POST",
-        url="https://test.snipeitapp.com/api/v1/hardware/labels",
+        url="https://snipe.example.test/api/v1/hardware/labels",
         content=pdf_bytes,
         headers={"Content-Type": "application/pdf"},
         status_code=200,
@@ -25,7 +25,7 @@ def test_labels_pdf_content(snipeit_client, httpx_mock, tmp_path):
 def test_labels_rejects_non_pdf_content_type(snipeit_client, httpx_mock, tmp_path):
     httpx_mock.add_response(
         method="POST",
-        url="https://test.snipeitapp.com/api/v1/hardware/labels",
+        url="https://snipe.example.test/api/v1/hardware/labels",
         json={"pdf_base64": "not-supported-anymore"},
         headers={"Content-Type": "application/json"},
         status_code=200,
@@ -55,9 +55,9 @@ def test_labels_sends_exactly_one_accept_header(tmp_path):
                 headers={"Content-Type": "application/pdf"},
             )
 
-    client = SnipeIT(url="https://test.snipeitapp.com", token="t")
+    client = SnipeIT(url="https://snipe.example.test", token="t")
     client._http = httpx.Client(
-        base_url="https://test.snipeitapp.com/api/v1/",
+        base_url="https://snipe.example.test/api/v1/",
         headers={"Authorization": "Bearer t", "Accept": "application/json", "User-Agent": "x"},
         transport=CaptureTransport(),
     )

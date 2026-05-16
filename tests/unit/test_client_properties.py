@@ -4,10 +4,10 @@ from snipeit import SnipeIT
 
 @pytest.mark.unit
 def test_manager_properties_are_cached():
-    client = SnipeIT(url="https://test.snipeitapp.com/", token="fake")
+    client = SnipeIT(url="https://snipe.example.test/", token="fake")
 
     # url normalization trims trailing slash
-    assert client.url == "https://test.snipeitapp.com"
+    assert client.url == "https://snipe.example.test"
 
     # Each property should return the same object on subsequent access
     for name in (
@@ -22,7 +22,7 @@ def test_manager_properties_are_cached():
 
 @pytest.mark.unit
 def test_session_headers_are_correct():
-    client = SnipeIT(url="https://test.snipeitapp.com", token="fake-token")
+    client = SnipeIT(url="https://snipe.example.test", token="fake-token")
     headers = client._http.headers
     assert headers["Authorization"] == "Bearer fake-token"
     assert headers["Accept"] == "application/json"

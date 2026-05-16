@@ -5,7 +5,7 @@ import pytest
 def test_asset_repr_model_none(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="GET",
-        url="https://test.snipeitapp.com/api/v1/hardware/12",
+        url="https://snipe.example.test/api/v1/hardware/12",
         json={"id": 12, "name": "Foo", "asset_tag": "T12", "serial": "S12", "model": None},
     )
     asset = snipeit_client.assets.get(12)

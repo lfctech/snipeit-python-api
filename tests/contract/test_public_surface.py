@@ -120,7 +120,7 @@ EXPECTED_MANAGERS: tuple[str, ...] = (
 def test_all_expected_managers_present() -> None:
     from snipeit import SnipeIT
 
-    client = SnipeIT(url="https://test.snipeitapp.com", token="fake")
+    client = SnipeIT(url="https://snipe.example.test", token="fake")
     for name in EXPECTED_MANAGERS:
         mgr = getattr(client, name)
         # Common CRUD methods every manager exposes.
@@ -158,7 +158,7 @@ def test_assets_manager_extra_methods() -> None:
 def test_client_context_manager_protocol() -> None:
     from snipeit import SnipeIT
 
-    client = SnipeIT(url="https://test.snipeitapp.com", token="fake")
+    client = SnipeIT(url="https://snipe.example.test", token="fake")
     assert hasattr(client, "__enter__") and hasattr(client, "__exit__")
     assert hasattr(client, "close")
     # get/post/put/patch/delete helpers on the client itself

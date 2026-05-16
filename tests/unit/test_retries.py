@@ -8,7 +8,7 @@ from snipeit.exceptions import SnipeITServerError
 
 @pytest.mark.unit
 def test_retry_defaults_configured():
-    client = SnipeIT(url="https://test.snipeitapp.com", token="fake")
+    client = SnipeIT(url="https://snipe.example.test", token="fake")
     assert client.timeout == 10
     rt: RetryTransport = client._retry_transport
     assert rt.max_retries == 3
@@ -20,14 +20,14 @@ def test_retry_defaults_configured():
 @pytest.mark.unit
 def test_post_503_does_not_retry_by_default(httpx_mock):
     client = SnipeIT(
-        url="https://test.snipeitapp.com",
+        url="https://snipe.example.test",
         token="fake",
         max_retries=2,
         backoff_factor=0,
     )
     httpx_mock.add_response(
         method="POST",
-        url="https://test.snipeitapp.com/api/v1/hardware",
+        url="https://snipe.example.test/api/v1/hardware",
         json={"messages": "Service Unavailable"},
         status_code=503,
     )
@@ -40,7 +40,7 @@ def test_post_503_does_not_retry_by_default(httpx_mock):
 @pytest.mark.unit
 def test_retry_allows_post_when_configured():
     client = SnipeIT(
-        url="https://test.snipeitapp.com",
+        url="https://snipe.example.test",
         token="fake",
         retry_allowed_methods={"HEAD", "GET", "OPTIONS", "POST"},
     )

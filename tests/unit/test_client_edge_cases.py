@@ -23,7 +23,7 @@ from snipeit.exceptions import (
 @pytest.mark.unit
 def test_https_required():
     with pytest.raises(ValueError):
-        SnipeIT(url="http://test.snipeitapp.com", token="test")
+        SnipeIT(url="http://snipe.example.com", token="test")
 
 
 @pytest.mark.unit
@@ -46,11 +46,11 @@ def test_url_localhost_evil_rejected():
 
 @pytest.mark.unit
 def test_repr_redacts_token():
-    client = SnipeIT(url="https://test.snipeitapp.com", token="super-secret")
+    client = SnipeIT(url="https://snipe.example.test", token="super-secret")
     r = repr(client)
     assert "super-secret" not in r
     assert "***" in r
-    assert "https://test.snipeitapp.com" in r
+    assert "https://snipe.example.test" in r
 
 
 # ---------------------------------------------------------------------------
@@ -60,7 +60,7 @@ def test_repr_redacts_token():
 def test_delete_returns_none_on_204(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="DELETE",
-        url="https://test.snipeitapp.com/api/v1/hardware/1",
+        url="https://snipe.example.test/api/v1/hardware/1",
         status_code=204,
     )
     result = snipeit_client.delete("hardware/1")
@@ -71,7 +71,7 @@ def test_delete_returns_none_on_204(snipeit_client, httpx_mock):
 def test_delete_returns_body_on_200(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="DELETE",
-        url="https://test.snipeitapp.com/api/v1/hardware/1",
+        url="https://snipe.example.test/api/v1/hardware/1",
         json={"status": "success", "messages": "Asset deleted"},
         status_code=200,
     )
@@ -84,7 +84,7 @@ def test_delete_returns_body_on_200(snipeit_client, httpx_mock):
 def test_status_error_in_json_raises_api_error(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="POST",
-        url="https://test.snipeitapp.com/api/v1/hardware",
+        url="https://snipe.example.test/api/v1/hardware",
         json={"status": "error", "messages": "Something went wrong"},
         status_code=200,
     )
@@ -97,7 +97,7 @@ def test_status_error_in_json_raises_api_error(snipeit_client, httpx_mock):
 def test_non_json_2xx_raises_snipeit_exception(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="GET",
-        url="https://test.snipeitapp.com/api/v1/hardware/1",
+        url="https://snipe.example.test/api/v1/hardware/1",
         text="this is not json",
         status_code=200,
     )
@@ -110,7 +110,7 @@ def test_non_json_2xx_raises_snipeit_exception(snipeit_client, httpx_mock):
 def test_400_client_error_raises_SnipeITClientError(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="GET",
-        url="https://test.snipeitapp.com/api/v1/hardware/1",
+        url="https://snipe.example.test/api/v1/hardware/1",
         status_code=400,
         json={"messages": "Bad Request"},
     )
@@ -123,7 +123,7 @@ def test_timeout_raises_SnipeITTimeoutError(snipeit_client, httpx_mock):
     httpx_mock.add_exception(
         httpx.TimeoutException("timed out"),
         method="GET",
-        url="https://test.snipeitapp.com/api/v1/hardware/1",
+        url="https://snipe.example.test/api/v1/hardware/1",
     )
     with pytest.raises(SnipeITTimeoutError) as excinfo:
         snipeit_client.get("hardware/1")
@@ -137,7 +137,7 @@ def test_generic_request_exception_raises_SnipeITException(snipeit_client, httpx
         httpx_mock.add_exception(
             httpx.ConnectError("boom"),
             method="GET",
-            url="https://test.snipeitapp.com/api/v1/hardware/1",
+            url="https://snipe.example.test/api/v1/hardware/1",
         )
     with pytest.raises(SnipeITException) as excinfo:
         snipeit_client.get("hardware/1")
@@ -148,7 +148,7 @@ def test_generic_request_exception_raises_SnipeITException(snipeit_client, httpx
 def test_status_error_default_message(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="POST",
-        url="https://test.snipeitapp.com/api/v1/hardware",
+        url="https://snipe.example.test/api/v1/hardware",
         json={"status": "error"},
         status_code=200,
     )
@@ -160,7 +160,7 @@ def test_status_error_default_message(snipeit_client, httpx_mock):
 @pytest.mark.unit
 def test_context_manager_calls_close_on_exit():
     close_called = {"count": 0}
-    with SnipeIT(url="https://test.snipeitapp.com", token="fake") as client:
+    with SnipeIT(url="https://snipe.example.test", token="fake") as client:
         def close_stub():
             close_called["count"] += 1
         client._http.close = close_stub
@@ -171,7 +171,7 @@ def test_context_manager_calls_close_on_exit():
 def test_context_manager_does_not_suppress_exceptions_and_closes():
     close_called = {"count": 0}
     with pytest.raises(RuntimeError):
-        with SnipeIT(url="https://test.snipeitapp.com", token="fake") as client:
+        with SnipeIT(url="https://snipe.example.test", token="fake") as client:
             def close_stub():
                 close_called["count"] += 1
             client._http.close = close_stub
@@ -186,9 +186,9 @@ def test_context_manager_does_not_suppress_exceptions_and_closes():
 def test_3xx_raises_api_error(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="GET",
-        url="https://test.snipeitapp.com/api/v1/hardware/1",
+        url="https://snipe.example.test/api/v1/hardware/1",
         status_code=302,
-        headers={"Location": "https://test.snipeitapp.com/login"},
+        headers={"Location": "https://snipe.example.test/login"},
     )
     with pytest.raises(SnipeITApiError) as excinfo:
         snipeit_client.get("hardware/1")
@@ -199,7 +199,7 @@ def test_3xx_raises_api_error(snipeit_client, httpx_mock):
 def test_get_by_tag_localized_404_raises_not_found(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="GET",
-        url="https://test.snipeitapp.com/api/v1/hardware/bytag/TAG1",
+        url="https://snipe.example.test/api/v1/hardware/bytag/TAG1",
         status_code=404,
         json={"messages": "L'actif n'existe pas"},
     )
@@ -211,7 +211,7 @@ def test_get_by_tag_localized_404_raises_not_found(snipeit_client, httpx_mock):
 def test_get_by_serial_localized_404_raises_not_found(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="GET",
-        url="https://test.snipeitapp.com/api/v1/hardware/byserial/SN999",
+        url="https://snipe.example.test/api/v1/hardware/byserial/SN999",
         status_code=404,
         json={"messages": "El activo no existe"},
     )
@@ -225,7 +225,7 @@ def test_get_by_tag_non_404_api_error_propagates(snipeit_client, httpx_mock):
     for _ in range(4):
         httpx_mock.add_response(
             method="GET",
-            url="https://test.snipeitapp.com/api/v1/hardware/bytag/TAG2",
+            url="https://snipe.example.test/api/v1/hardware/bytag/TAG2",
             status_code=500,
             json={"messages": "Internal Server Error"},
         )
@@ -254,7 +254,7 @@ def test_redact_headers_empty():
 def test_companies_create(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="POST",
-        url="https://test.snipeitapp.com/api/v1/companies",
+        url="https://snipe.example.test/api/v1/companies",
         json={"status": "success", "payload": {"id": 1, "name": "Acme"}},
     )
     c = snipeit_client.companies.create(name="Acme")
@@ -265,7 +265,7 @@ def test_companies_create(snipeit_client, httpx_mock):
 def test_suppliers_create(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="POST",
-        url="https://test.snipeitapp.com/api/v1/suppliers",
+        url="https://snipe.example.test/api/v1/suppliers",
         json={"status": "success", "payload": {"id": 1, "name": "Widgets Co"}},
     )
     s = snipeit_client.suppliers.create(name="Widgets Co")
@@ -276,7 +276,7 @@ def test_suppliers_create(snipeit_client, httpx_mock):
 def test_users_create(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="POST",
-        url="https://test.snipeitapp.com/api/v1/users",
+        url="https://snipe.example.test/api/v1/users",
         json={"status": "success", "payload": {"id": 5, "username": "jdoe"}},
     )
     u = snipeit_client.users.create(username="jdoe")
@@ -302,12 +302,12 @@ def test_retry_after_invalid_returns_none():
 def test_mark_dirty_forces_field_into_patch(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="GET",
-        url="https://test.snipeitapp.com/api/v1/hardware/1",
+        url="https://snipe.example.test/api/v1/hardware/1",
         json={"id": 1, "custom_fields": {"owner": "alice"}},
     )
     httpx_mock.add_response(
         method="PATCH",
-        url="https://test.snipeitapp.com/api/v1/hardware/1",
+        url="https://snipe.example.test/api/v1/hardware/1",
         json={"status": "success", "payload": {"id": 1}},
     )
     asset = snipeit_client.assets.get(1)

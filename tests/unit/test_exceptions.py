@@ -12,7 +12,7 @@ from snipeit.exceptions import (
 def test_401_raises_auth_error(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="GET",
-        url="https://test.snipeitapp.com/api/v1/hardware/1",
+        url="https://snipe.example.test/api/v1/hardware/1",
         status_code=401,
         json={"messages": "Unauthenticated."},
     )
@@ -25,7 +25,7 @@ def test_401_raises_auth_error(snipeit_client, httpx_mock):
 def test_404_raises_not_found_error(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="GET",
-        url="https://test.snipeitapp.com/api/v1/hardware/9999",
+        url="https://snipe.example.test/api/v1/hardware/9999",
         status_code=404,
         json={"messages": "Asset not found"},
     )
@@ -42,7 +42,7 @@ def test_422_raises_validation_error(snipeit_client, httpx_mock):
     }
     httpx_mock.add_response(
         method="POST",
-        url="https://test.snipeitapp.com/api/v1/hardware",
+        url="https://snipe.example.test/api/v1/hardware",
         status_code=422,
         json=error_payload,
     )
@@ -57,7 +57,7 @@ def test_500_raises_server_error(snipeit_client, httpx_mock):
     for _ in range(4):  # 1 initial + 3 retries
         httpx_mock.add_response(
             method="GET",
-            url="https://test.snipeitapp.com/api/v1/hardware/1",
+            url="https://snipe.example.test/api/v1/hardware/1",
             status_code=500,
         )
     with pytest.raises(SnipeITServerError):

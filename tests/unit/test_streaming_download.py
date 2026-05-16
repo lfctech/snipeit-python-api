@@ -10,7 +10,7 @@ def test_download_file_streams_and_writes(snipeit_client, httpx_mock, tmp_path):
     data = b"chunk1" + b"chunk2"
     httpx_mock.add_response(
         method="GET",
-        url="https://test.snipeitapp.com/api/v1/hardware/1/files/2",
+        url="https://snipe.example.test/api/v1/hardware/1/files/2",
         stream=IteratorStream([b"chunk1", b"chunk2"]),
         headers={"Content-Length": str(len(data))},
         status_code=200,
@@ -28,7 +28,7 @@ def test_download_file_progress_callback(snipeit_client, httpx_mock, tmp_path):
     total_bytes = sum(len(c) for c in chunks)
     httpx_mock.add_response(
         method="GET",
-        url="https://test.snipeitapp.com/api/v1/hardware/1/files/3",
+        url="https://snipe.example.test/api/v1/hardware/1/files/3",
         stream=IteratorStream(chunks),
         headers={"Content-Length": str(total_bytes)},
         status_code=200,
