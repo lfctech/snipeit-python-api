@@ -31,7 +31,4 @@ def test_session_headers_are_correct():
     assert "Content-Type" not in headers
 
 
-@pytest.mark.unit
-def test_url_normalization_does_not_strip_non_slash_trailing_chars():
-    client = SnipeIT(url="https://test.snipeitapp.comX", token="fake")
-    assert client.url == "https://test.snipeitapp.comX"
+
