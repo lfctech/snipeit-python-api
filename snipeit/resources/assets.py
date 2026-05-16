@@ -374,6 +374,12 @@ class AssetsManager(BaseResourceManager[Asset]):
     def delete_file(self, asset_id: int, file_id: int) -> None:
         """Delete a specific file via DELETE /hardware/:id/files/:file_id/delete.
 
+        Note: The trailing ``/delete`` segment is intentional — Snipe-IT's API
+        uses this non-standard suffix for all file deletions.
+        Verified against snipe-it/develop routes/api.php line ~1380
+        (Route::delete('{object_type}/{id}/files/{file_id}/delete', ...))
+        retrieved 2026-05-15.
+
         Args:
             asset_id (int): The asset identifier.
             file_id (int): The file identifier.
