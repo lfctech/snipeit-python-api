@@ -61,8 +61,6 @@ asset.mark_dirty("custom_fields")
 asset.save()
 ```
 
-## Installation
-
 ```bash
 # Using uv
 uv add git+https://github.com/lfctech/snipeit-python-api@main

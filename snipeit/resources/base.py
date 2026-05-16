@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 from typing import Any, ClassVar, Generic, Iterable, TypeVar
 
 from pydantic import BaseModel, ConfigDict, PrivateAttr
@@ -9,6 +10,27 @@ from pydantic import BaseModel, ConfigDict, PrivateAttr
 from ..exceptions import SnipeITApiError, SnipeITException
 
 _MISSING = object()  # sentinel for "attribute not yet set"
+
+
+def _safe_snapshot(d: dict[str, Any]) -> dict[str, Any]:
+    """Return a snapshot of ``d`` for diff-based dirty tracking.
+
+    Dicts and lists are deep-copied so that in-place mutations are detected.
+    Scalar values (str, int, float, bool, None) are stored as-is (they're
+    immutable, so no deepcopy needed). Other types are stored by reference;
+    for those, in-place mutation detection is not guaranteed, but
+    assignment-based tracking still works.
+    """
+    result: dict[str, Any] = {}
+    for k, v in d.items():
+        if isinstance(v, (dict, list)):
+            try:
+                result[k] = copy.deepcopy(v)
+            except Exception:
+                result[k] = v
+        else:
+            result[k] = v  # scalars and other types stored by reference
+    return result
 
 
 T = TypeVar("T", bound="ApiObject")
@@ -32,13 +54,17 @@ class ApiObject(BaseModel):
     Dirty tracking:
     * Declared fields: tracked via ``model_fields_set`` (pydantic built-in).
     * Extra (undeclared) fields: tracked via ``_extra_dirty`` private attr.
+    * Snapshot-and-diff: a deep copy of the loaded state is taken on every
+      ``_apply_server_data`` call. ``_dirty_set()`` compares the current
+      ``model_dump()`` against the snapshot to detect in-place mutations of
+      nested dicts/lists automatically.
     * Use ``mark_dirty(*fields)`` to force fields into the next PATCH payload
-      (e.g. after in-place mutation of a nested dict).
+      regardless of whether they appear changed (e.g. to trigger server-side
+      recomputation).
 
-    Note:
-        In-place mutation of nested objects (e.g. ``asset.custom_fields["x"] = 1``)
-        does NOT automatically mark the field dirty. Call ``mark_dirty("custom_fields")``
-        explicitly in that case.
+    Memory note:
+        The snapshot is a ``copy.deepcopy`` of the full model dump. For typical
+        Snipe-IT objects this is in the KB range and negligible.
     """
 
     model_config = ConfigDict(extra="allow", arbitrary_types_allowed=True)
@@ -47,6 +73,7 @@ class ApiObject(BaseModel):
     _manager: Any = PrivateAttr(default=None)
     _path: str = PrivateAttr(default="")
     _extra_dirty: set[str] = PrivateAttr(default_factory=set)
+    _loaded_state: dict[str, Any] | None = PrivateAttr(default=None)
     # Subclasses set this ClassVar to declare their API path.
     _resource_path: ClassVar[str] = ""
 
@@ -59,6 +86,8 @@ class ApiObject(BaseModel):
         # Clear pydantic's construction-time tracking so only post-init
         # attribute assignments are considered dirty.
         self.model_fields_set.clear()
+        # Snapshot the initial loaded state for diff-based dirty detection.
+        self._loaded_state = _safe_snapshot(self.model_dump())
 
     def __setattr__(self, name: str, value: Any) -> None:
         # Track mutations after init. Only mark dirty when value actually changes.
@@ -106,15 +135,34 @@ class ApiObject(BaseModel):
     # Dirty-field helpers
     # ------------------------------------------------------------------
     def _dirty_set(self) -> set[str]:
-        """Return the union of pydantic-tracked and extra-tracked dirty fields, excluding 'id'."""
-        return (self.model_fields_set | self._extra_dirty) - {"id"}
+        """Return the set of fields that need to be PATCHed.
+
+        Combines three sources:
+        1. ``model_fields_set`` — pydantic tracks direct attribute assignments.
+        2. ``_extra_dirty`` — extra (undeclared) fields explicitly marked dirty.
+        3. Snapshot diff — fields whose current value differs from the value
+           at last load/save, catching in-place mutations of nested dicts/lists.
+        """
+        dirty = (self.model_fields_set | self._extra_dirty) - {"id"}
+        if self._loaded_state is not None:
+            current = self.model_dump()
+            for key, loaded_value in self._loaded_state.items():
+                if key == "id":
+                    continue
+                try:
+                    changed = current.get(key) != loaded_value
+                except Exception:
+                    changed = True  # non-comparable value; assume dirty
+                if changed:
+                    dirty.add(key)
+        return dirty
 
     def mark_dirty(self, *fields: str) -> None:
         """Force ``fields`` into the next PATCH payload.
 
-        Useful after in-place mutation of nested objects::
+        Useful when you want to send a field to the server even if its value
+        hasn't changed (e.g. to trigger server-side recomputation)::
 
-            asset.custom_fields["owner"] = "alice"
             asset.mark_dirty("custom_fields")
             asset.save()
         """
@@ -123,10 +171,13 @@ class ApiObject(BaseModel):
     def _apply_server_data(self, data: dict[str, Any]) -> None:
         """Apply API data without marking fields dirty.
 
-        Pydantic stores undeclared fields in ``__pydantic_extra__``. Assigning
-        them with ``object.__setattr__`` creates shadow attributes that can make
-        attribute access and ``model_dump()`` disagree, so server data needs a
-        single Pydantic-aware update path.
+        PYDANTIC v2 INTERNALS WARNING:
+        We write directly to __pydantic_extra__ and __dict__ because pydantic
+        v2 stores undeclared fields in __pydantic_extra__ but a plain
+        setattr() can create a shadow entry in __dict__ that disagrees with
+        model_dump(). On any pydantic version bump, re-run the
+        ``test_apply_server_data_*`` regression suite. If pydantic ever exposes
+        a public "replace all extras" API, switch to it.
         """
         extra = self.__pydantic_extra__
         if extra is None:
@@ -143,6 +194,12 @@ class ApiObject(BaseModel):
 
         self.model_fields_set.clear()
         self._extra_dirty.clear()
+        # Refresh the snapshot so the next _dirty_set() diff is against the
+        # server's current state. We use model_dump() with a deepcopy so that
+        # subsequent in-place mutations of nested dicts/lists are detected.
+        # Non-deepcopy-able values (rare in practice) fall back to a no-snapshot
+        # state for that field — assignment-based tracking still works.
+        self._loaded_state = _safe_snapshot(self.model_dump())
 
     # ------------------------------------------------------------------
     # Active-record methods
@@ -151,6 +208,8 @@ class ApiObject(BaseModel):
         """Persist modified fields to the API via PATCH.
 
         Only fields that have been modified since the last load/save are sent.
+        In-place mutations of nested dicts/lists are detected automatically via
+        snapshot-and-diff tracking.
         """
         dirty = self._dirty_set()
         if not dirty:
