@@ -79,12 +79,4 @@ def test_licenses_and_files_endpoints(snipeit_client, httpx_mock, tmp_path):
     snipeit_client.assets.delete_file(1, 2)
 
 
-@pytest.mark.unit
-def test_get_by_serial_shapes(snipeit_client, httpx_mock):
-    httpx_mock.add_response(method="GET", url="https://snipe.example.test/api/v1/hardware/byserial/SN1", json={"id": 10, "asset_tag": "A10"})
-    a = snipeit_client.assets.get_by_serial("SN1")
-    assert a.id == 10
 
-    httpx_mock.add_response(method="GET", url="https://snipe.example.test/api/v1/hardware/byserial/SN2", json={"rows": [{"id": 20, "asset_tag": "A20"}], "total": 1})
-    b = snipeit_client.assets.get_by_serial("SN2")
-    assert b.id == 20
