@@ -1,6 +1,8 @@
 import pytest
 from snipeit import SnipeIT
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.mark.unit
 def test_manager_properties_are_cached():

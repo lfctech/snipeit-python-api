@@ -3,6 +3,8 @@ import pytest
 from snipeit.resources.assets import Asset
 from snipeit.exceptions import SnipeITNotFoundError
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.mark.unit
 def test_list_assets(snipeit_client, httpx_mock):

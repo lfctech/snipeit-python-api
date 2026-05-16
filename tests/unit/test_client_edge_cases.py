@@ -16,6 +16,8 @@ from snipeit.exceptions import (
     SnipeITTimeoutError,
 )
 
+pytestmark = pytest.mark.unit
+
 
 # ---------------------------------------------------------------------------
 # URL validation

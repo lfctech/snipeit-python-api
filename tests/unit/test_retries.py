@@ -5,6 +5,8 @@ from snipeit import SnipeIT
 from snipeit._retry import RetryTransport
 from snipeit.exceptions import SnipeITServerError
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.mark.unit
 def test_retry_defaults_configured():

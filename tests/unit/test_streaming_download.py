@@ -3,6 +3,8 @@
 import pytest
 from pytest_httpx import IteratorStream
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.mark.unit
 def test_download_file_streams_and_writes(snipeit_client, httpx_mock, tmp_path):

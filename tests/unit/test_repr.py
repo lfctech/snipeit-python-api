@@ -16,6 +16,8 @@ from snipeit.resources.suppliers import Supplier
 from snipeit.resources.users import User
 from snipeit.resources.status_labels import StatusLabel
 
+pytestmark = pytest.mark.unit
+
 
 class _MockManager:
     pass

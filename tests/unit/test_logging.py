@@ -9,6 +9,8 @@ import pytest
 from snipeit import SnipeIT
 from snipeit.exceptions import SnipeITException, SnipeITTimeoutError
 
+pytestmark = pytest.mark.unit
+
 
 SUPER_SECRET_TOKEN = "super-secret-token-abcdef1234567890"
 

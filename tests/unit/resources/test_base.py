@@ -2,6 +2,8 @@ import pytest
 from snipeit.resources.base import ApiObject
 from snipeit.exceptions import SnipeITApiError
 
+pytestmark = pytest.mark.unit
+
 
 class MockManager:
     def __init__(self):

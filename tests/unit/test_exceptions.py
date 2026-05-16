@@ -7,6 +7,8 @@ from snipeit.exceptions import (
     SnipeITApiError,
 )
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.mark.unit
 def test_401_raises_auth_error(snipeit_client, httpx_mock):

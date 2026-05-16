@@ -2,6 +2,8 @@ import pytest
 from hypothesis import given, strategies as st
 from snipeit.resources.base import ApiObject
 
+pytestmark = pytest.mark.unit
+
 
 class _ManagerStub:
     def __init__(self):

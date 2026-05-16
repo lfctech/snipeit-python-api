@@ -1,5 +1,7 @@
 import pytest
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.mark.unit
 def test_list_all_paginates_and_yields_all(snipeit_client, httpx_mock):

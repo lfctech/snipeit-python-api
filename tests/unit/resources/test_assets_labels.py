@@ -3,6 +3,8 @@ import pytest
 
 from snipeit.exceptions import SnipeITApiError
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.mark.unit
 def test_labels_pdf_content(snipeit_client, httpx_mock, tmp_path):
