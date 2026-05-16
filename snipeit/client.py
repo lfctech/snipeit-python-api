@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import contextlib
 import time
+from collections.abc import Generator
 from typing import Any
 from urllib.parse import urlsplit
 
@@ -260,6 +262,58 @@ class SnipeIT:
         Returns the parsed JSON body, or ``None`` for 204 No Content.
         """
         return self._request("DELETE", path)
+
+    # ------------------------------------------------------------------
+    # Raw / streaming helpers (for non-JSON payloads)
+    # ------------------------------------------------------------------
+    def _raw_request(self, method: str, path: str, **kwargs: Any) -> httpx.Response:
+        """Execute a request and apply error mapping, returning the raw Response.
+
+        Use this for non-JSON payloads (file uploads, binary downloads, PDF).
+        Callers MUST call ``self._raise_for_status(response)`` before reading
+        the body — this method does NOT call it automatically so that callers
+        can inspect headers (e.g. Content-Type) before deciding how to handle
+        the response.
+
+        For standard JSON endpoints, prefer ``_request``.
+        """
+        try:
+            return self._http.request(method, path, **kwargs)
+        except httpx.TimeoutException as e:
+            effective_timeout = kwargs.get("timeout", self.timeout)
+            raise SnipeITTimeoutError(
+                f"Request timed out after {effective_timeout} seconds."
+            ) from e
+        except httpx.RequestError as e:
+            raise SnipeITException(f"An unexpected error occurred: {e}") from e
+
+    @contextlib.contextmanager
+    def _stream_request(
+        self, method: str, path: str, **kwargs: Any
+    ) -> Generator[httpx.Response, None, None]:
+        """Context manager for streaming requests.
+
+        Wraps ``httpx.Client.stream`` with the same timeout/error mapping as
+        ``_raw_request``. Callers MUST call ``self._raise_for_status(response)``
+        before iterating the body.
+
+        Usage::
+
+            with self.api._stream_request("GET", url) as resp:
+                self.api._raise_for_status(resp)
+                for chunk in resp.iter_bytes():
+                    ...
+        """
+        try:
+            with self._http.stream(method, path, **kwargs) as response:
+                yield response
+        except httpx.TimeoutException as e:
+            effective_timeout = kwargs.get("timeout", self.timeout)
+            raise SnipeITTimeoutError(
+                f"Request timed out after {effective_timeout} seconds."
+            ) from e
+        except httpx.RequestError as e:
+            raise SnipeITException(f"An unexpected error occurred: {e}") from e
 
     @staticmethod
     def _require_body(method: str, body: dict[str, Any] | None) -> dict[str, Any]:
