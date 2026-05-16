@@ -312,33 +312,18 @@ class AssetsManager(BaseResourceManager[Asset]):
             data: dict[str, Any] = {}
             if notes is not None:
                 data["notes"] = notes
-            # httpx sets Content-Type: multipart/form-data automatically when
-            # files= is provided. No header manipulation needed.
-            import httpx
+            resp = self.api._raw_request("POST", url, files=files, data=data, timeout=self.api.timeout)
+            self.api._raise_for_status(resp)
             try:
-                resp = self.api.session.post(
-                    url,
-                    files=files,
-                    data=data,
-                    timeout=self.api.timeout,
-                )
-                self.api._raise_for_status(resp)
-                try:
-                    json_resp = resp.json()
-                    if isinstance(json_resp, dict) and json_resp.get("status") == "error":
-                        raise SnipeITApiError(
-                            json_resp.get("messages", "Unknown API error"),
-                            response=resp,
-                        )
-                    return json_resp
-                except ValueError:
-                    raise SnipeITApiError("Expected JSON response from file upload", response=resp)
-            except httpx.TimeoutException as e:
-                from ..exceptions import SnipeITTimeoutError
-                raise SnipeITTimeoutError(f"Request timed out after {self.api.timeout} seconds.") from e
-            except httpx.RequestError as e:
-                from ..exceptions import SnipeITException
-                raise SnipeITException(f"An unexpected error occurred: {e}") from e
+                json_resp = resp.json()
+                if isinstance(json_resp, dict) and json_resp.get("status") == "error":
+                    raise SnipeITApiError(
+                        json_resp.get("messages", "Unknown API error"),
+                        response=resp,
+                    )
+                return json_resp
+            except ValueError:
+                raise SnipeITApiError("Expected JSON response from file upload", response=resp)
         finally:
             for f in opened_files:
                 try:
@@ -366,32 +351,24 @@ class AssetsManager(BaseResourceManager[Asset]):
         Returns:
             str: The save_path where the file was written.
         """
-        import httpx
         url = f"{self.api.url}/api/v1/{self.path}/{asset_id}/files/{file_id}"
         directory = os.path.dirname(save_path)
         if directory:
             os.makedirs(directory, exist_ok=True)
-        try:
-            with self.api.session.stream("GET", url, timeout=self.api.timeout) as resp:
-                self.api._raise_for_status(resp)
-                total = (
-                    int(resp.headers["Content-Length"])
-                    if "Content-Length" in resp.headers
-                    else None
-                )
-                written = 0
-                with open(save_path, "wb") as fh:
-                    for chunk in resp.iter_bytes(chunk_size=65536):
-                        fh.write(chunk)
-                        written += len(chunk)
-                        if progress is not None:
-                            progress(written, total)
-        except httpx.TimeoutException as e:
-            from ..exceptions import SnipeITTimeoutError
-            raise SnipeITTimeoutError(f"Request timed out after {self.api.timeout} seconds.") from e
-        except httpx.RequestError as e:
-            from ..exceptions import SnipeITException
-            raise SnipeITException(f"An unexpected error occurred: {e}") from e
+        with self.api._stream_request("GET", url, timeout=self.api.timeout) as resp:
+            self.api._raise_for_status(resp)
+            total = (
+                int(resp.headers["Content-Length"])
+                if "Content-Length" in resp.headers
+                else None
+            )
+            written = 0
+            with open(save_path, "wb") as fh:
+                for chunk in resp.iter_bytes(chunk_size=65536):
+                    fh.write(chunk)
+                    written += len(chunk)
+                    if progress is not None:
+                        progress(written, total)
         return save_path
 
     def delete_file(self, asset_id: int, file_id: int) -> None:
@@ -447,7 +424,6 @@ class AssetsManager(BaseResourceManager[Asset]):
         if not tags:
             raise ValueError("No valid asset tags found")
 
-        import httpx
         # Perform request directly to allow binary PDF handling.
         # Passing headers= to the per-request call lets httpx merge them over
         # the client's default Accept header (application/json) with the
@@ -455,20 +431,14 @@ class AssetsManager(BaseResourceManager[Asset]):
         # plain dict first, since that would send duplicate Accept headers.
         url = f"{self.api.url}/api/v1/{self.path}/labels"
 
-        try:
-            resp = self.api.session.post(
-                url,
-                json={"asset_tags": tags},
-                headers={"Accept": "application/pdf"},
-                timeout=self.api.timeout,
-            )
-            self.api._raise_for_status(resp)
-        except httpx.TimeoutException as e:
-            from ..exceptions import SnipeITTimeoutError
-            raise SnipeITTimeoutError(f"Request timed out after {self.api.timeout} seconds.") from e
-        except httpx.RequestError as e:
-            from ..exceptions import SnipeITException
-            raise SnipeITException(f"An unexpected error occurred: {e}") from e
+        resp = self.api._raw_request(
+            "POST",
+            url,
+            json={"asset_tags": tags},
+            headers={"Accept": "application/pdf"},
+            timeout=self.api.timeout,
+        )
+        self.api._raise_for_status(resp)
 
         directory = os.path.dirname(save_path)
         if directory:
