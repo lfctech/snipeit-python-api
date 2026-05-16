@@ -13,12 +13,13 @@ concurrency:
 
 jobs:
   test:
-    name: test (py${{ matrix.python-version }})
+    name: test (py${{ matrix.python-version }}, pydantic${{ matrix.pydantic-version }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.11", "3.12", "3.13"]
+        pydantic-version: ["~=2.0.0", "~=2.10.0"]
 
     steps:
       - uses: actions/checkout@v4
@@ -34,6 +35,9 @@ jobs:
       - name: Install deps
         run: uv sync --all-extras --python ${{ matrix.python-version }}
 
+      - name: Pin pydantic version
+        run: uv pip install "pydantic${{ matrix.pydantic-version }}"
+
       - name: Lint
         run: uv run ruff check .
 
@@ -44,7 +48,7 @@ jobs:
         run: uv run pytest tests/unit tests/contract -q -m unit
 
       - name: Coverage
-        if: matrix.python-version == '3.13'
+        if: matrix.python-version == '3.13' && matrix.pydantic-version == '~=2.10.0'
         run: |
           uv run coverage run -m pytest tests/unit tests/contract -q -m unit
           uv run coverage report -m --fail-under=85
