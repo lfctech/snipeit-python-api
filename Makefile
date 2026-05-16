@@ -43,13 +43,22 @@ clean:
 	$(MAKE) docker-down
 
 # Start Snipe-IT stack
+# Ensure docker/api_key.txt exists as a regular empty file BEFORE docker compose
+# bind-mounts it. If the path doesn't exist (or is a directory), Docker will
+# auto-create it as a directory, breaking the seeder's `> /api_key.txt` redirect.
 docker-up:
+	@if [ ! -f docker/api_key.txt ] || [ -d docker/api_key.txt ]; then \
+		rm -rf docker/api_key.txt; \
+		touch docker/api_key.txt; \
+	fi
 	cd docker && docker compose up -d
 
-# Stop stack and delete volumes
+# Stop stack and delete volumes. Restore api_key.txt as an empty regular file
+# so the next `make docker-up` has a valid bind-mount target.
 docker-down:
 	cd docker && docker compose down -v
-	> docker/api_key.txt
+	rm -rf docker/api_key.txt
+	touch docker/api_key.txt
 
 # Run integration tests: bring up docker, wait for api_key.txt, then test
 test-integration:
@@ -59,6 +68,10 @@ test-integration:
 	while [ ! -s docker/api_key.txt ] && [ $$i -lt 120 ]; do \
 		sleep 1; i=$$((i+1)); \
 	done; \
+	if [ -d docker/api_key.txt ]; then \
+		echo "ERROR: docker/api_key.txt is a directory, not a file. Run 'make docker-down' to reset."; \
+		exit 1; \
+	fi; \
 	if [ ! -s docker/api_key.txt ]; then \
 		echo "Timed out waiting for docker/api_key.txt. Check 'docker compose logs --follow seeder'."; \
 		exit 1; \
