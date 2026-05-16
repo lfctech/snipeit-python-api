@@ -21,6 +21,14 @@ class ApiObject(BaseModel):
     API are stored as attributes without raising validation errors. This makes
     the model resilient to Snipe-IT version drift.
 
+    Note:
+        ``extra="allow"`` is a double-edged sword. A typo in an attribute name
+        (e.g. ``asset.serail = "X"``) silently creates a new extra field and
+        will be included in the next PATCH payload. The server may accept or
+        ignore it, but the intended field is never updated. Enable strict
+        type-checking (pyright/mypy) and rely on declared fields to catch this
+        class of bug. See the "Common Pitfalls" section in the README.
+
     Dirty tracking:
     * Declared fields: tracked via ``model_fields_set`` (pydantic built-in).
     * Extra (undeclared) fields: tracked via ``_extra_dirty`` private attr.

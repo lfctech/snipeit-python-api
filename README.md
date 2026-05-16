@@ -25,6 +25,42 @@ Groups, Reports, Settings, Audit log, Maintenances (asset-level
 `create_maintenance` is the only related method). Use the raw
 `client.get`/`client.post` verbs against those paths if needed.
 
+## Common Pitfalls
+
+### Typos on model attributes are silently accepted
+
+Pydantic models use `extra="allow"` so the client stays resilient to new
+fields added by future Snipe-IT versions. The downside is that a typo in an
+attribute name creates a new extra field instead of raising an error:
+
+```python
+asset.serail = "SN-001"  # typo — creates an extra field named "serail"
+asset.save()             # PATCHes {"serail": "SN-001"} — server ignores it
+```
+
+The real `serial` field is never updated. To catch this class of bug, enable
+strict type-checking in your editor (pyright or mypy) and rely on the declared
+fields (`asset_tag`, `name`, `serial`, `model`) which are type-checked. For
+fields not declared on the model, there is no static protection.
+
+### In-place mutation of nested objects
+
+Mutating a nested dict or list in-place is detected automatically via
+snapshot-and-diff tracking:
+
+```python
+asset.custom_fields["owner"] = "alice"
+asset.save()  # correctly PATCHes custom_fields
+```
+
+If you need to force a field into the PATCH payload regardless of whether it
+changed (e.g. to trigger server-side recomputation), use `mark_dirty()`:
+
+```python
+asset.mark_dirty("custom_fields")
+asset.save()
+```
+
 ## Installation
 
 ```bash
