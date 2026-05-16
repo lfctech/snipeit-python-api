@@ -1,5 +1,64 @@
 # Changelog
 
+## 0.3.0 (2026-05-15)
+
+### Breaking changes
+
+- **`client.session` removed**: The `session` back-compat alias pointing at the
+  internal `httpx.Client` is gone. If you were accessing `client.session`
+  directly, switch to `client._http` (private) or use the public verb helpers
+  (`client.get`, `client.post`, etc.).
+- **In-place mutation now PATCHes**: `asset.custom_fields["x"] = 1; asset.save()`
+  previously silently no-oped. It now correctly detects the mutation and includes
+  the field in the PATCH payload. Code that relied on the no-op behavior will
+  now send unexpected PATCH requests.
+- **Stale extra fields cleared on refresh**: `_apply_server_data` now clears all
+  extra fields before applying new data. Previously, extra fields not present in
+  the server response would persist on the object indefinitely.
+
+### New features
+
+- **Snapshot-and-diff dirty tracking**: In-place mutations of nested dicts and
+  lists are detected automatically. `mark_dirty()` is still available as an
+  explicit escape hatch.
+- **`_raw_request()` and `_stream_request()`**: New private helpers on the client
+  for non-JSON payloads (file uploads, binary downloads, PDF generation). All
+  timeout and connection-error handling is centralized here.
+
+### Bug fixes
+
+- **Stale extra fields**: `_apply_server_data` now calls `extra.clear()` before
+  applying new data, so fields removed by the server are no longer retained on
+  the local object.
+
+### Internal changes
+
+- `assets.py` split into a package: `snipeit/resources/assets/{model,manager,files,labels}.py`.
+  Public imports (`from snipeit.resources.assets import Asset, AssetsManager`) are unchanged.
+- `upload_files`, `download_file`, and `labels` now use `_raw_request()` /
+  `_stream_request()` — no more duplicated `try/except httpx.*` blocks.
+- `requests_mock` compatibility shim (`tests/_requests_mock_shim.py`) deleted.
+  All tests now use `pytest-httpx` (`httpx_mock`) directly.
+- CI matrix expanded: pydantic 2.0.x and 2.10.x tested across Python 3.11/3.12/3.13.
+- `delete_file` URL (`/hardware/:id/files/:file_id/delete`) verified against
+  snipe-it/develop `routes/api.php` (2026-05-15). The `/delete` suffix is correct.
+
+### Documentation
+
+- `LICENSE` (Apache 2.0) and `NOTICE` added. Copyright 2026 Wil Collier.
+- `pyproject.toml` now includes author, license, project URLs, keywords,
+  classifiers, and a `py.typed` marker (PEP 561).
+- README: "Common Pitfalls" section added (typo footgun, in-place mutation).
+- README: "Not yet supported" section clarifies scope (Groups, Reports, Settings,
+  Audit log, Maintenances are not wrapped).
+- `docker/.env` annotated as dev-only; `docker/README.md` added.
+- Unused `docs/*.json` schemas (groups, audit, maintenances, reports, settings)
+  and `docs/split_api.py` deleted.
+
+### Async
+
+Still sync-only. Async support is tracked for 0.4.
+
 ## 0.2.0 (2026-05-12)
 
 ### Breaking changes
