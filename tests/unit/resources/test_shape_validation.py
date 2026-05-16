@@ -3,10 +3,10 @@ from snipeit.exceptions import SnipeITException
 
 
 @pytest.mark.unit
-def test_list_non_dict_response_raises(snipeit_client, requests_mock):
-    # JSON-valid string; client will parse JSON successfully into a str
-    requests_mock.get(
-        "https://test.snipeitapp.com/api/v1/users",
+def test_list_non_dict_response_raises(snipeit_client, httpx_mock):
+    httpx_mock.add_response(
+        method="GET",
+        url="https://test.snipeitapp.com/api/v1/users",
         json="not-a-dict",
         status_code=200,
     )
@@ -16,9 +16,10 @@ def test_list_non_dict_response_raises(snipeit_client, requests_mock):
 
 
 @pytest.mark.unit
-def test_list_rows_not_list_raises(snipeit_client, requests_mock):
-    requests_mock.get(
-        "https://test.snipeitapp.com/api/v1/users",
+def test_list_rows_not_list_raises(snipeit_client, httpx_mock):
+    httpx_mock.add_response(
+        method="GET",
+        url="https://test.snipeitapp.com/api/v1/users",
         json={"rows": {}},
         status_code=200,
     )
@@ -28,9 +29,10 @@ def test_list_rows_not_list_raises(snipeit_client, requests_mock):
 
 
 @pytest.mark.unit
-def test_get_non_dict_response_raises(snipeit_client, requests_mock):
-    requests_mock.get(
-        "https://test.snipeitapp.com/api/v1/users/1",
+def test_get_non_dict_response_raises(snipeit_client, httpx_mock):
+    httpx_mock.add_response(
+        method="GET",
+        url="https://test.snipeitapp.com/api/v1/users/1",
         json=[{"id": 1}],
         status_code=200,
     )

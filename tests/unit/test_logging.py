@@ -1,11 +1,6 @@
-"""Tests for structured logging.
+"""Tests for structured logging."""
 
-Ensures:
-* ``snipeit.http`` emits a DEBUG line per request with method, path, status, elapsed.
-* The API token is never present in any log record, at any level.
-* Network errors (timeout, connection error) emit a WARNING on the ``snipeit`` logger.
-"""
-
+import json
 import logging
 import re
 
@@ -25,11 +20,10 @@ def client_with_token():
 
 
 @pytest.mark.unit
-def test_http_logger_emits_debug_on_request(
-    client_with_token, requests_mock, caplog
-):
-    requests_mock.get(
-        "https://test.snipeitapp.com/api/v1/hardware/1",
+def test_http_logger_emits_debug_on_request(client_with_token, httpx_mock, caplog):
+    httpx_mock.add_response(
+        method="GET",
+        url="https://test.snipeitapp.com/api/v1/hardware/1",
         json={"id": 1, "name": "x"},
         status_code=200,
     )
@@ -42,14 +36,14 @@ def test_http_logger_emits_debug_on_request(
     assert "GET" in msg
     assert "/api/v1/hardware/1" in msg
     assert "200" in msg
-    # Elapsed time present (milliseconds float, e.g. "0.5 ms")
     assert re.search(r"\d+\.\d+ ms", msg)
 
 
 @pytest.mark.unit
-def test_token_never_appears_in_logs(client_with_token, requests_mock, caplog):
-    requests_mock.get(
-        "https://test.snipeitapp.com/api/v1/hardware/1",
+def test_token_never_appears_in_logs(client_with_token, httpx_mock, caplog):
+    httpx_mock.add_response(
+        method="GET",
+        url="https://test.snipeitapp.com/api/v1/hardware/1",
         json={"id": 1},
         status_code=200,
     )
@@ -57,19 +51,17 @@ def test_token_never_appears_in_logs(client_with_token, requests_mock, caplog):
         client_with_token.get("hardware/1")
 
     for rec in caplog.records:
-        assert SUPER_SECRET_TOKEN not in rec.getMessage(), (
-            f"token leaked in log record from {rec.name!r}"
-        )
-        # Also check the raw message template and args.
+        assert SUPER_SECRET_TOKEN not in rec.getMessage()
         for arg in (rec.args or ()):
             assert SUPER_SECRET_TOKEN not in str(arg)
 
 
 @pytest.mark.unit
-def test_timeout_emits_warning(client_with_token, requests_mock, caplog):
-    requests_mock.get(
-        "https://test.snipeitapp.com/api/v1/hardware/1",
-        exc=httpx.TimeoutException("timed out"),
+def test_timeout_emits_warning(client_with_token, httpx_mock, caplog):
+    httpx_mock.add_exception(
+        httpx.TimeoutException("timed out"),
+        method="GET",
+        url="https://test.snipeitapp.com/api/v1/hardware/1",
     )
     with caplog.at_level(logging.WARNING, logger="snipeit"):
         with pytest.raises(SnipeITTimeoutError):
@@ -81,11 +73,14 @@ def test_timeout_emits_warning(client_with_token, requests_mock, caplog):
 
 
 @pytest.mark.unit
-def test_request_error_emits_warning(client_with_token, requests_mock, caplog):
-    requests_mock.get(
-        "https://test.snipeitapp.com/api/v1/hardware/1",
-        exc=httpx.ConnectError("connreset"),
-    )
+def test_request_error_emits_warning(client_with_token, httpx_mock, caplog):
+    # ConnectError is retried on GET; register enough for all attempts.
+    for _ in range(4):
+        httpx_mock.add_exception(
+            httpx.ConnectError("connreset"),
+            method="GET",
+            url="https://test.snipeitapp.com/api/v1/hardware/1",
+        )
     with caplog.at_level(logging.WARNING, logger="snipeit"):
         with pytest.raises(SnipeITException):
             client_with_token.get("hardware/1")

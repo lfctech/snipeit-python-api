@@ -1,14 +1,16 @@
 import os
+import json
 import pytest
 
 from snipeit.exceptions import SnipeITApiError
 
 
 @pytest.mark.unit
-def test_labels_pdf_content(snipeit_client, requests_mock, tmp_path):
+def test_labels_pdf_content(snipeit_client, httpx_mock, tmp_path):
     pdf_bytes = b"%PDF-1.4\n...binary..."
-    requests_mock.post(
-        "https://test.snipeitapp.com/api/v1/hardware/labels",
+    httpx_mock.add_response(
+        method="POST",
+        url="https://test.snipeitapp.com/api/v1/hardware/labels",
         content=pdf_bytes,
         headers={"Content-Type": "application/pdf"},
         status_code=200,
@@ -21,10 +23,10 @@ def test_labels_pdf_content(snipeit_client, requests_mock, tmp_path):
 
 
 @pytest.mark.unit
-def test_labels_rejects_non_pdf_content_type(snipeit_client, requests_mock, tmp_path):
-    # The API must return a PDF; JSON/HTML responses are a misconfiguration.
-    requests_mock.post(
-        "https://test.snipeitapp.com/api/v1/hardware/labels",
+def test_labels_rejects_non_pdf_content_type(snipeit_client, httpx_mock, tmp_path):
+    httpx_mock.add_response(
+        method="POST",
+        url="https://test.snipeitapp.com/api/v1/hardware/labels",
         json={"pdf_base64": "not-supported-anymore"},
         headers={"Content-Type": "application/json"},
         status_code=200,
@@ -37,10 +39,7 @@ def test_labels_rejects_non_pdf_content_type(snipeit_client, requests_mock, tmp_
 
 @pytest.mark.unit
 def test_labels_sends_exactly_one_accept_header(tmp_path):
-    """Regression: labels() previously copied client headers into a dict
-    (lowercasing keys) and then added ``Accept: application/pdf``, resulting
-    in two ``Accept`` headers sent to the server.
-    """
+    """Regression: labels() previously sent duplicate Accept headers."""
     import httpx
     from snipeit import SnipeIT
 
@@ -60,17 +59,12 @@ def test_labels_sends_exactly_one_accept_header(tmp_path):
     client = SnipeIT(url="https://test.snipeitapp.com", token="t")
     client._http = httpx.Client(
         base_url="https://test.snipeitapp.com/api/v1/",
-        headers={
-            "Authorization": "Bearer t",
-            "Accept": "application/json",
-            "User-Agent": "x",
-        },
+        headers={"Authorization": "Bearer t", "Accept": "application/json", "User-Agent": "x"},
         transport=CaptureTransport(),
     )
 
     out = client.assets.labels(str(tmp_path / "x.pdf"), ["TAG1"])
     assert out == str(tmp_path / "x.pdf")
-    # Exactly one Accept header, and it's the PDF one.
     assert captured["accept"] == ["application/pdf"], (
         f"expected a single Accept: application/pdf header, got {captured['accept']!r}"
     )

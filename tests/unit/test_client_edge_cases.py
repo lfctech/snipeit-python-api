@@ -1,5 +1,7 @@
 """Tests for client edge cases, T9 (3xx/localization), and coverage targets."""
 
+import json
+
 import httpx
 import pytest
 
@@ -55,18 +57,21 @@ def test_repr_redacts_token():
 # HTTP response handling
 # ---------------------------------------------------------------------------
 @pytest.mark.unit
-def test_delete_returns_none_on_204(snipeit_client, requests_mock):
-    requests_mock.delete(
-        "https://test.snipeitapp.com/api/v1/hardware/1", status_code=204
+def test_delete_returns_none_on_204(snipeit_client, httpx_mock):
+    httpx_mock.add_response(
+        method="DELETE",
+        url="https://test.snipeitapp.com/api/v1/hardware/1",
+        status_code=204,
     )
     result = snipeit_client.delete("hardware/1")
     assert result is None
 
 
 @pytest.mark.unit
-def test_delete_returns_body_on_200(snipeit_client, requests_mock):
-    requests_mock.delete(
-        "https://test.snipeitapp.com/api/v1/hardware/1",
+def test_delete_returns_body_on_200(snipeit_client, httpx_mock):
+    httpx_mock.add_response(
+        method="DELETE",
+        url="https://test.snipeitapp.com/api/v1/hardware/1",
         json={"status": "success", "messages": "Asset deleted"},
         status_code=200,
     )
@@ -76,9 +81,10 @@ def test_delete_returns_body_on_200(snipeit_client, requests_mock):
 
 
 @pytest.mark.unit
-def test_status_error_in_json_raises_api_error(snipeit_client, requests_mock):
-    requests_mock.post(
-        "https://test.snipeitapp.com/api/v1/hardware",
+def test_status_error_in_json_raises_api_error(snipeit_client, httpx_mock):
+    httpx_mock.add_response(
+        method="POST",
+        url="https://test.snipeitapp.com/api/v1/hardware",
         json={"status": "error", "messages": "Something went wrong"},
         status_code=200,
     )
@@ -88,9 +94,10 @@ def test_status_error_in_json_raises_api_error(snipeit_client, requests_mock):
 
 
 @pytest.mark.unit
-def test_non_json_2xx_raises_snipeit_exception(snipeit_client, requests_mock):
-    requests_mock.get(
-        "https://test.snipeitapp.com/api/v1/hardware/1",
+def test_non_json_2xx_raises_snipeit_exception(snipeit_client, httpx_mock):
+    httpx_mock.add_response(
+        method="GET",
+        url="https://test.snipeitapp.com/api/v1/hardware/1",
         text="this is not json",
         status_code=200,
     )
@@ -100,9 +107,10 @@ def test_non_json_2xx_raises_snipeit_exception(snipeit_client, requests_mock):
 
 
 @pytest.mark.unit
-def test_400_client_error_raises_SnipeITClientError(snipeit_client, requests_mock):
-    requests_mock.get(
-        "https://test.snipeitapp.com/api/v1/hardware/1",
+def test_400_client_error_raises_SnipeITClientError(snipeit_client, httpx_mock):
+    httpx_mock.add_response(
+        method="GET",
+        url="https://test.snipeitapp.com/api/v1/hardware/1",
         status_code=400,
         json={"messages": "Bad Request"},
     )
@@ -111,10 +119,11 @@ def test_400_client_error_raises_SnipeITClientError(snipeit_client, requests_moc
 
 
 @pytest.mark.unit
-def test_timeout_raises_SnipeITTimeoutError(snipeit_client, requests_mock):
-    requests_mock.get(
-        "https://test.snipeitapp.com/api/v1/hardware/1",
-        exc=httpx.TimeoutException("timed out"),
+def test_timeout_raises_SnipeITTimeoutError(snipeit_client, httpx_mock):
+    httpx_mock.add_exception(
+        httpx.TimeoutException("timed out"),
+        method="GET",
+        url="https://test.snipeitapp.com/api/v1/hardware/1",
     )
     with pytest.raises(SnipeITTimeoutError) as excinfo:
         snipeit_client.get("hardware/1")
@@ -122,22 +131,24 @@ def test_timeout_raises_SnipeITTimeoutError(snipeit_client, requests_mock):
 
 
 @pytest.mark.unit
-def test_generic_request_exception_raises_SnipeITException(
-    snipeit_client, requests_mock
-):
-    requests_mock.get(
-        "https://test.snipeitapp.com/api/v1/hardware/1",
-        exc=httpx.ConnectError("boom"),
-    )
+def test_generic_request_exception_raises_SnipeITException(snipeit_client, httpx_mock):
+    # ConnectError is retried on GET; register enough for all attempts.
+    for _ in range(4):  # 1 initial + 3 retries
+        httpx_mock.add_exception(
+            httpx.ConnectError("boom"),
+            method="GET",
+            url="https://test.snipeitapp.com/api/v1/hardware/1",
+        )
     with pytest.raises(SnipeITException) as excinfo:
         snipeit_client.get("hardware/1")
     assert str(excinfo.value) == "An unexpected error occurred: boom"
 
 
 @pytest.mark.unit
-def test_status_error_default_message(snipeit_client, requests_mock):
-    requests_mock.post(
-        "https://test.snipeitapp.com/api/v1/hardware",
+def test_status_error_default_message(snipeit_client, httpx_mock):
+    httpx_mock.add_response(
+        method="POST",
+        url="https://test.snipeitapp.com/api/v1/hardware",
         json={"status": "error"},
         status_code=200,
     )
@@ -172,9 +183,10 @@ def test_context_manager_does_not_suppress_exceptions_and_closes():
 # T9: 3xx redirect and localization-safe lookups
 # ---------------------------------------------------------------------------
 @pytest.mark.unit
-def test_3xx_raises_api_error(snipeit_client, requests_mock):
-    requests_mock.get(
-        "https://test.snipeitapp.com/api/v1/hardware/1",
+def test_3xx_raises_api_error(snipeit_client, httpx_mock):
+    httpx_mock.add_response(
+        method="GET",
+        url="https://test.snipeitapp.com/api/v1/hardware/1",
         status_code=302,
         headers={"Location": "https://test.snipeitapp.com/login"},
     )
@@ -184,9 +196,10 @@ def test_3xx_raises_api_error(snipeit_client, requests_mock):
 
 
 @pytest.mark.unit
-def test_get_by_tag_localized_404_raises_not_found(snipeit_client, requests_mock):
-    requests_mock.get(
-        "https://test.snipeitapp.com/api/v1/hardware/bytag/TAG1",
+def test_get_by_tag_localized_404_raises_not_found(snipeit_client, httpx_mock):
+    httpx_mock.add_response(
+        method="GET",
+        url="https://test.snipeitapp.com/api/v1/hardware/bytag/TAG1",
         status_code=404,
         json={"messages": "L'actif n'existe pas"},
     )
@@ -195,9 +208,10 @@ def test_get_by_tag_localized_404_raises_not_found(snipeit_client, requests_mock
 
 
 @pytest.mark.unit
-def test_get_by_serial_localized_404_raises_not_found(snipeit_client, requests_mock):
-    requests_mock.get(
-        "https://test.snipeitapp.com/api/v1/hardware/byserial/SN999",
+def test_get_by_serial_localized_404_raises_not_found(snipeit_client, httpx_mock):
+    httpx_mock.add_response(
+        method="GET",
+        url="https://test.snipeitapp.com/api/v1/hardware/byserial/SN999",
         status_code=404,
         json={"messages": "El activo no existe"},
     )
@@ -206,12 +220,15 @@ def test_get_by_serial_localized_404_raises_not_found(snipeit_client, requests_m
 
 
 @pytest.mark.unit
-def test_get_by_tag_non_404_api_error_propagates(snipeit_client, requests_mock):
-    requests_mock.get(
-        "https://test.snipeitapp.com/api/v1/hardware/bytag/TAG2",
-        status_code=500,
-        json={"messages": "Internal Server Error"},
-    )
+def test_get_by_tag_non_404_api_error_propagates(snipeit_client, httpx_mock):
+    # 500 triggers retries on GET; register enough for all attempts.
+    for _ in range(4):
+        httpx_mock.add_response(
+            method="GET",
+            url="https://test.snipeitapp.com/api/v1/hardware/bytag/TAG2",
+            status_code=500,
+            json={"messages": "Internal Server Error"},
+        )
     with pytest.raises(SnipeITServerError):
         snipeit_client.assets.get_by_tag("TAG2")
 
@@ -234,9 +251,10 @@ def test_redact_headers_empty():
 
 
 @pytest.mark.unit
-def test_companies_create(snipeit_client, requests_mock):
-    requests_mock.post(
-        "https://test.snipeitapp.com/api/v1/companies",
+def test_companies_create(snipeit_client, httpx_mock):
+    httpx_mock.add_response(
+        method="POST",
+        url="https://test.snipeitapp.com/api/v1/companies",
         json={"status": "success", "payload": {"id": 1, "name": "Acme"}},
     )
     c = snipeit_client.companies.create(name="Acme")
@@ -244,9 +262,10 @@ def test_companies_create(snipeit_client, requests_mock):
 
 
 @pytest.mark.unit
-def test_suppliers_create(snipeit_client, requests_mock):
-    requests_mock.post(
-        "https://test.snipeitapp.com/api/v1/suppliers",
+def test_suppliers_create(snipeit_client, httpx_mock):
+    httpx_mock.add_response(
+        method="POST",
+        url="https://test.snipeitapp.com/api/v1/suppliers",
         json={"status": "success", "payload": {"id": 1, "name": "Widgets Co"}},
     )
     s = snipeit_client.suppliers.create(name="Widgets Co")
@@ -254,9 +273,10 @@ def test_suppliers_create(snipeit_client, requests_mock):
 
 
 @pytest.mark.unit
-def test_users_create(snipeit_client, requests_mock):
-    requests_mock.post(
-        "https://test.snipeitapp.com/api/v1/users",
+def test_users_create(snipeit_client, httpx_mock):
+    httpx_mock.add_response(
+        method="POST",
+        url="https://test.snipeitapp.com/api/v1/users",
         json={"status": "success", "payload": {"id": 5, "username": "jdoe"}},
     )
     u = snipeit_client.users.create(username="jdoe")
@@ -279,18 +299,20 @@ def test_retry_after_invalid_returns_none():
 
 
 @pytest.mark.unit
-def test_mark_dirty_forces_field_into_patch(snipeit_client, requests_mock):
-    requests_mock.get(
-        "https://test.snipeitapp.com/api/v1/hardware/1",
+def test_mark_dirty_forces_field_into_patch(snipeit_client, httpx_mock):
+    httpx_mock.add_response(
+        method="GET",
+        url="https://test.snipeitapp.com/api/v1/hardware/1",
         json={"id": 1, "custom_fields": {"owner": "alice"}},
     )
-    requests_mock.patch(
-        "https://test.snipeitapp.com/api/v1/hardware/1",
+    httpx_mock.add_response(
+        method="PATCH",
+        url="https://test.snipeitapp.com/api/v1/hardware/1",
         json={"status": "success", "payload": {"id": 1}},
     )
     asset = snipeit_client.assets.get(1)
     asset.custom_fields["owner"] = "bob"
     asset.mark_dirty("custom_fields")
     asset.save()
-    body = requests_mock.last_request.json()
+    body = json.loads(httpx_mock.get_requests()[-1].content)
     assert "custom_fields" in body

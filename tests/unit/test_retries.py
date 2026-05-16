@@ -18,22 +18,23 @@ def test_retry_defaults_configured():
 
 
 @pytest.mark.unit
-def test_post_503_does_not_retry_by_default(requests_mock):
+def test_post_503_does_not_retry_by_default(httpx_mock):
     client = SnipeIT(
         url="https://test.snipeitapp.com",
         token="fake",
         max_retries=2,
         backoff_factor=0,
     )
-    requests_mock.post(
-        "https://test.snipeitapp.com/api/v1/hardware",
+    httpx_mock.add_response(
+        method="POST",
+        url="https://test.snipeitapp.com/api/v1/hardware",
         json={"messages": "Service Unavailable"},
         status_code=503,
     )
     with pytest.raises(SnipeITServerError):
         client.post("hardware", data={"x": 1})
     # POST is not in allowed_methods, so no retries — exactly 1 call.
-    assert requests_mock.call_count == 1
+    assert len(httpx_mock.get_requests()) == 1
 
 
 @pytest.mark.unit
@@ -56,7 +57,6 @@ def test_retry_transport_retries_get_on_503(httpx_mock):
     sleep_calls: list[float] = []
     rt = RetryTransport(max_retries=2, backoff_factor=0, sleep=lambda s: sleep_calls.append(s))
 
-    # Register 2 × 503 then a 200.
     httpx_mock.add_response(status_code=503, json={"messages": "down"})
     httpx_mock.add_response(status_code=503, json={"messages": "down"})
     httpx_mock.add_response(status_code=200, json={"id": 1})
@@ -76,7 +76,7 @@ def test_retry_transport_respects_retry_after(httpx_mock):
     sleep_calls: list[float] = []
     rt = RetryTransport(
         max_retries=1,
-        backoff_factor=99,  # would be huge without Retry-After
+        backoff_factor=99,
         sleep=lambda s: sleep_calls.append(s),
     )
     httpx_mock.add_response(
