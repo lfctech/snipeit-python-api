@@ -1,6 +1,5 @@
 """Tests for structured logging."""
 
-import json
 import logging
 import re
 
