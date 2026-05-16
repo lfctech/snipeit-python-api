@@ -324,3 +324,142 @@ def test_mark_dirty_forces_field_into_patch(snipeit_client, httpx_mock):
     asset.save()
     body = json.loads(httpx_mock.get_requests()[-1].content)
     assert "custom_fields" in body
+
+
+# ---------------------------------------------------------------------------
+# Task 9: URL/token validation gaps and _require_body 204 paths
+# ---------------------------------------------------------------------------
+
+@pytest.mark.unit
+def test_empty_token_raises():
+    with pytest.raises(ValueError, match="token"):
+        SnipeIT(url="https://snipe.example.test", token="")
+
+
+@pytest.mark.unit
+def test_whitespace_only_token_raises():
+    with pytest.raises(ValueError, match="token"):
+        SnipeIT(url="https://snipe.example.test", token="   ")
+
+
+@pytest.mark.unit
+def test_url_with_path_rejected():
+    with pytest.raises(ValueError):
+        SnipeIT(url="https://snipe.example.test/api", token="t")
+
+
+@pytest.mark.unit
+def test_post_204_raises_snipeit_exception(snipeit_client, httpx_mock):
+    """POST returning 204 must raise — callers always expect a JSON body."""
+    httpx_mock.add_response(
+        method="POST",
+        url="https://snipe.example.test/api/v1/hardware",
+        status_code=204,
+    )
+    with pytest.raises(SnipeITException) as excinfo:
+        snipeit_client.post("hardware", data={})
+    assert "POST" in str(excinfo.value)
+    assert "204" in str(excinfo.value)
+
+
+@pytest.mark.unit
+def test_put_204_raises_snipeit_exception(snipeit_client, httpx_mock):
+    """PUT returning 204 must raise — callers always expect a JSON body."""
+    httpx_mock.add_response(
+        method="PUT",
+        url="https://snipe.example.test/api/v1/hardware/1",
+        status_code=204,
+    )
+    with pytest.raises(SnipeITException) as excinfo:
+        snipeit_client.put("hardware/1", data={})
+    assert "PUT" in str(excinfo.value)
+
+
+@pytest.mark.unit
+def test_patch_204_raises_snipeit_exception(snipeit_client, httpx_mock):
+    """PATCH returning 204 must raise — callers always expect a JSON body."""
+    httpx_mock.add_response(
+        method="PATCH",
+        url="https://snipe.example.test/api/v1/hardware/1",
+        status_code=204,
+    )
+    with pytest.raises(SnipeITException) as excinfo:
+        snipeit_client.patch("hardware/1", data={})
+    assert "PATCH" in str(excinfo.value)
+
+
+# ---------------------------------------------------------------------------
+# Task 10: Error-message extraction paths
+# ---------------------------------------------------------------------------
+
+@pytest.mark.unit
+def test_4xx_with_non_json_body_uses_reason_phrase(snipeit_client, httpx_mock):
+    """When the error body is not JSON, the HTTP reason phrase is used as the message."""
+    httpx_mock.add_response(
+        method="GET",
+        url="https://snipe.example.test/api/v1/hardware/1",
+        status_code=503,
+        text="Service Unavailable",
+        headers={"Content-Type": "text/plain"},
+    )
+    # 503 retries on GET; register enough
+    for _ in range(3):
+        httpx_mock.add_response(
+            method="GET",
+            url="https://snipe.example.test/api/v1/hardware/1",
+            status_code=503,
+            text="Service Unavailable",
+            headers={"Content-Type": "text/plain"},
+        )
+    from snipeit.exceptions import SnipeITServerError
+    with pytest.raises(SnipeITServerError) as excinfo:
+        snipeit_client.get("hardware/1")
+    # Message should be non-empty (reason phrase or text)
+    assert str(excinfo.value)
+
+
+@pytest.mark.unit
+def test_4xx_with_messages_list_joins_with_semicolon(snipeit_client, httpx_mock):
+    """When messages is a list, items are joined with '; '."""
+    httpx_mock.add_response(
+        method="POST",
+        url="https://snipe.example.test/api/v1/hardware",
+        status_code=422,
+        json={"messages": ["name is required", "model_id is required"]},
+    )
+    from snipeit.exceptions import SnipeITValidationError
+    with pytest.raises(SnipeITValidationError) as excinfo:
+        snipeit_client.post("hardware", data={})
+    assert "name is required" in str(excinfo.value)
+    assert "model_id is required" in str(excinfo.value)
+    assert ";" in str(excinfo.value)
+
+
+@pytest.mark.unit
+def test_4xx_with_messages_dict_formats_as_key_value(snipeit_client, httpx_mock):
+    """When messages is a dict, it is formatted as 'key: value' pairs."""
+    httpx_mock.add_response(
+        method="POST",
+        url="https://snipe.example.test/api/v1/hardware",
+        status_code=422,
+        json={"messages": {"name": "The name field is required."}},
+    )
+    from snipeit.exceptions import SnipeITValidationError
+    with pytest.raises(SnipeITValidationError) as excinfo:
+        snipeit_client.post("hardware", data={})
+    assert "name" in str(excinfo.value)
+    assert "required" in str(excinfo.value)
+
+
+@pytest.mark.unit
+def test_4xx_with_null_messages_produces_empty_string(snipeit_client, httpx_mock):
+    """When messages is null, the exception message is empty (not a crash)."""
+    httpx_mock.add_response(
+        method="POST",
+        url="https://snipe.example.test/api/v1/hardware",
+        status_code=400,
+        json={"messages": None},
+    )
+    with pytest.raises(SnipeITClientError) as excinfo:
+        snipeit_client.post("hardware", data={})
+    assert str(excinfo.value) == ""

@@ -73,3 +73,25 @@ def test_api_error_preserves_response_and_status_code():
     exc = SnipeITApiError("I am a teapot", response=r)
     assert exc.response is r
     assert exc.status_code == 418
+
+
+# ---------------------------------------------------------------------------
+# Task 12: SnipeITValidationError body-parse failure
+# ---------------------------------------------------------------------------
+
+@pytest.mark.unit
+def test_validation_error_with_unparseable_body_sets_errors_none(caplog):
+    """When the 422 response body is not valid JSON, errors must be None and a warning logged."""
+    import logging
+    import httpx
+    from snipeit.exceptions import SnipeITValidationError
+
+    # Build a response whose .json() will raise ValueError
+    resp = httpx.Response(422, text="not json at all", headers={"Content-Type": "text/plain"})
+
+    with caplog.at_level(logging.WARNING, logger="snipeit"):
+        exc = SnipeITValidationError("validation failed", response=resp)
+
+    assert exc.errors is None
+    warnings = [r for r in caplog.records if r.levelno == logging.WARNING]
+    assert warnings, "expected a WARNING when validation error body cannot be parsed"
