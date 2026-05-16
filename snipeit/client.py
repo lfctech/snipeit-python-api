@@ -125,8 +125,6 @@ class SnipeIT:
             follow_redirects=False,
             transport=self._retry_transport,
         )
-        # Back-compat alias: historical callers used client.session.
-        self.session = self._http
 
         # Eagerly instantiate all resource managers.
         self.accessories = AccessoriesManager(self)

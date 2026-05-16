@@ -152,7 +152,7 @@ def test_context_manager_calls_close_on_exit():
     with SnipeIT(url="https://test.snipeitapp.com", token="fake") as client:
         def close_stub():
             close_called["count"] += 1
-        client.session.close = close_stub
+        client._http.close = close_stub
     assert close_called["count"] == 1
 
 
@@ -163,7 +163,7 @@ def test_context_manager_does_not_suppress_exceptions_and_closes():
         with SnipeIT(url="https://test.snipeitapp.com", token="fake") as client:
             def close_stub():
                 close_called["count"] += 1
-            client.session.close = close_stub
+            client._http.close = close_stub
             raise RuntimeError("boom")
     assert close_called["count"] == 1
 

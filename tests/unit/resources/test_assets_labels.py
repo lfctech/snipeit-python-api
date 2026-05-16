@@ -67,7 +67,6 @@ def test_labels_sends_exactly_one_accept_header(tmp_path):
         },
         transport=CaptureTransport(),
     )
-    client.session = client._http
 
     out = client.assets.labels(str(tmp_path / "x.pdf"), ["TAG1"])
     assert out == str(tmp_path / "x.pdf")

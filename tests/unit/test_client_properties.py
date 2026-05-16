@@ -23,7 +23,7 @@ def test_manager_properties_are_cached():
 @pytest.mark.unit
 def test_session_headers_are_correct():
     client = SnipeIT(url="https://test.snipeitapp.com", token="fake-token")
-    headers = client.session.headers
+    headers = client._http.headers
     assert headers["Authorization"] == "Bearer fake-token"
     assert headers["Accept"] == "application/json"
     # Content-Type is NOT set at the session level; httpx sets it per-request
