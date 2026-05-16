@@ -183,6 +183,10 @@ class ApiObject(BaseModel):
         if extra is None:
             extra = {}
             object.__setattr__(self, "__pydantic_extra__", extra)
+        else:
+            # Clear all existing extra fields so stale keys don't persist
+            # after a server response that omits them.
+            extra.clear()
         instance_dict = object.__getattribute__(self, "__dict__")
 
         for key, value in data.items():

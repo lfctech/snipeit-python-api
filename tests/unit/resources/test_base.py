@@ -164,3 +164,103 @@ def test_extra_fields_refresh_and_save_use_pydantic_extra_storage():
     assert mgr.calls == [("hardware/1", {"custom_extra": "local"})]
     assert asset.custom_extra == "server"
     assert asset.model_dump()["custom_extra"] == "server"
+
+
+# ---------------------------------------------------------------------------
+# Regression tests for _apply_server_data (Task 17)
+# These lock in the pydantic-internals behavior so upgrades fail loudly.
+# ---------------------------------------------------------------------------
+
+@pytest.mark.unit
+def test_apply_server_data_replaces_extra_fields_not_appends():
+    """After _apply_server_data, old extra fields are gone and new ones present."""
+    mgr = MockManager()
+    obj = ApiObject(mgr, {"id": 1, "a": 1})
+    obj._path = "test_objects"
+    obj._apply_server_data({"id": 1, "b": 2})
+    dump = obj.model_dump()
+    assert "a" not in dump, "old extra field 'a' should be gone after _apply_server_data"
+    assert dump.get("b") == 2
+
+
+@pytest.mark.unit
+def test_apply_server_data_clears_dirty_state():
+    """After _apply_server_data, the dirty set must be empty."""
+    mgr = MockManager()
+    obj = ApiObject(mgr, {"id": 1, "name": "A"})
+    obj._path = "test_objects"
+    obj.name = "B"  # mark dirty
+    assert "name" in obj._dirty_set()
+    obj._apply_server_data({"id": 1, "name": "B"})
+    assert not obj._dirty_set()
+
+
+@pytest.mark.unit
+def test_apply_server_data_handles_declared_and_extra_fields_simultaneously():
+    """Mix of declared (id) and extra fields should both be applied correctly."""
+    mgr = MockManager()
+    obj = ApiObject(mgr, {"id": 1})
+    obj._path = "test_objects"
+    obj._apply_server_data({"id": 2, "extra_field": "hello"})
+    assert obj.id == 2
+    assert obj.model_dump().get("extra_field") == "hello"
+
+
+@pytest.mark.unit
+def test_apply_server_data_starts_with_no_extra_dict():
+    """Should not crash when __pydantic_extra__ is None (no extras on init)."""
+    mgr = MockManager()
+    # ApiObject with only declared fields — __pydantic_extra__ may be None or {}
+    obj = ApiObject(mgr, {"id": 1})
+    obj._path = "test_objects"
+    # Force __pydantic_extra__ to None to test the None-guard path
+    object.__setattr__(obj, "__pydantic_extra__", None)
+    obj._apply_server_data({"id": 1, "new_extra": "value"})
+    assert obj.model_dump().get("new_extra") == "value"
+
+
+@pytest.mark.unit
+def test_in_place_mutation_of_dict_field_is_detected():
+    """Snapshot-and-diff: mutating a nested dict in-place is detected on save."""
+    mgr = MockManager()
+    obj = ApiObject(mgr, {"id": 1, "custom_fields": {"owner": "alice"}})
+    obj._path = "test_objects"
+    obj.custom_fields["owner"] = "bob"  # in-place mutation, no setattr
+    dirty = obj._dirty_set()
+    assert "custom_fields" in dirty, "in-place dict mutation should be detected via snapshot diff"
+
+
+@pytest.mark.unit
+def test_in_place_mutation_of_list_field_is_detected():
+    """Snapshot-and-diff: mutating a list in-place is detected on save."""
+    mgr = MockManager()
+    obj = ApiObject(mgr, {"id": 1, "tags": ["a", "b"]})
+    obj._path = "test_objects"
+    obj.tags.append("c")  # in-place mutation
+    dirty = obj._dirty_set()
+    assert "tags" in dirty, "in-place list mutation should be detected via snapshot diff"
+
+
+@pytest.mark.unit
+def test_unchanged_object_after_load_does_not_save():
+    """An object loaded from the server with no changes should not PATCH."""
+    mgr = MockManager()
+    obj = ApiObject(mgr, {"id": 1, "name": "unchanged"})
+    obj._path = "test_objects"
+    result = obj.save()
+    assert result is obj
+    assert mgr._patched_path is None
+
+
+@pytest.mark.unit
+def test_save_refreshes_loaded_state():
+    """After save, the snapshot is updated so a second mutation is still detected."""
+    mgr = MockManager()
+    obj = ApiObject(mgr, {"id": 1, "custom_fields": {"x": 1}})
+    obj._path = "test_objects"
+    obj.custom_fields["x"] = 2
+    obj.save()  # snapshot updated to {"x": 2}
+    # Now mutate again
+    obj.custom_fields["x"] = 3
+    dirty = obj._dirty_set()
+    assert "custom_fields" in dirty
