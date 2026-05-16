@@ -68,3 +68,9 @@ mutants/
 *.lock
 *.html
 *.tmp
+
+# Tool caches
+.ruff_cache/
+
+# Docker dev secrets (generated at runtime)
+docker/api_key.txt
