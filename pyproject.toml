@@ -35,7 +35,7 @@ Issues = "https://github.com/lfctech/snipeit-python-api/issues"
 Changelog = "https://github.com/lfctech/snipeit-python-api/blob/main/CHANGELOG.md"
 
 [tool.setuptools]
-packages = ["snipeit", "snipeit.resources"]
+packages = ["snipeit", "snipeit.resources", "snipeit.resources.assets"]
 
 [tool.setuptools.package-data]
 snipeit = ["py.typed"]
