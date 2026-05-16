@@ -18,6 +18,13 @@ Accessories, Assets, Categories, Companies, Components, Consumables,
 Departments, Fields, Fieldsets, Licenses, Locations, Manufacturers,
 Models, Status Labels, Suppliers, Users.
 
+### Not yet supported
+
+The following Snipe-IT API endpoints are **not** wrapped by this client:
+Groups, Reports, Settings, Audit log, Maintenances (asset-level
+`create_maintenance` is the only related method). Use the raw
+`client.get`/`client.post` verbs against those paths if needed.
+
 ## Installation
 
 ```bash
