@@ -52,3 +52,63 @@ jobs:
         run: |
           uv run coverage run -m pytest tests/unit tests/contract -q -m unit
           uv run coverage report -m --fail-under=95
+
+  integration:
+    name: integration tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.13
+
+      - name: Install deps
+        run: uv sync --all-extras --python 3.13
+
+      - name: Start Snipe-IT stack
+        run: |
+          rm -rf docker/api_key.txt
+          touch docker/api_key.txt
+          cd docker && docker compose up -d
+
+      - name: Wait for API key
+        run: |
+          echo "Waiting for docker/api_key.txt (up to ~120s)..."
+          for i in $(seq 1 120); do
+            if [ -s docker/api_key.txt ]; then break; fi
+            sleep 1
+          done
+          if [ ! -s docker/api_key.txt ]; then
+            echo "Timed out waiting for docker/api_key.txt"
+            cd docker && docker compose logs seeder
+            exit 1
+          fi
+
+      - name: Wait for API readiness
+        run: |
+          TOKEN=$(cat docker/api_key.txt)
+          echo "Waiting for Snipe-IT API (up to ~120s)..."
+          for i in $(seq 1 120); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" -m 5 \
+              -H "Authorization: Bearer $TOKEN" \
+              -H "Accept: application/json" \
+              http://localhost:8000/api/v1/users/me 2>/dev/null || echo "000")
+            if [ "$code" = "200" ]; then
+              echo "API is ready"
+              break
+            fi
+            sleep 1
+          done
+          if [ "$code" != "200" ]; then
+            echo "Timed out. Last status: $code"
+            cd docker && docker compose logs app
+            exit 1
+          fi
+
+      - name: Integration tests
+        run: uv run pytest tests/integration -q -m integration
