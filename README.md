@@ -51,9 +51,11 @@ display label:
 ```python
 asset = api.assets.get(1)
 
-owner = asset.get_custom_field("Owner")        # read
+owner = asset.get_custom_field("Owner")        # read server value
 asset.set_custom_field("Owner", "alice")       # stage
+asset.pending_custom_fields()                  # {"Owner": "alice"}
 asset.save()                                   # persist
+asset.get_custom_field("Owner")                # "alice"
 ```
 
 `set_custom_field()` raises `KeyError` if the label is not defined on the
@@ -68,6 +70,28 @@ asset.set_custom_field("Owner", "alice")
 asset.save()  # PATCH {"name": "Renamed", "_snipeit_owner_3": "alice"}
 ```
 
+You can stage and save repeatedly on the same in-memory instance — no
+`refresh()` needed in between:
+
+```python
+asset = api.assets.get(1)
+asset.set_custom_field("Owner", "alice").save()
+asset.set_custom_field("Owner", "bob").save()    # works without refresh()
+```
+
+Setting a custom field back to its current server value cancels any pending
+stage for that label (no PATCH is issued):
+
+```python
+asset.set_custom_field("Owner", "alice")         # stages "alice"
+asset.set_custom_field("Owner", asset.get_custom_field("Owner"))  # cancels
+asset.pending_custom_fields()                    # {}
+```
+
+**Read semantics:** `get_custom_field(label)` always returns the server's
+last-known value. Staged-but-unsaved changes are visible only via
+`pending_custom_fields()`. Call `save()` to persist them.
+
 #### Why the helpers exist
 
 Snipe-IT's REST API uses two different shapes for custom fields:
@@ -77,16 +101,15 @@ Snipe-IT's REST API uses two different shapes for custom fields:
 * **Write shape** — PATCH expects the underlying column name as a **top-level
   key**: `{"_snipeit_owner_3": "alice"}`. The nested `custom_fields` shape is
   silently ignored on the versions tested in CI.
+* **PATCH response quirk** — Snipe-IT returns `custom_fields: null` on PATCH
+  responses and echoes column-name keys at the top level instead. The helpers
+  fold those back into the local nested shape, so subsequent
+  `set_custom_field()` calls on the same in-memory asset work correctly.
 
-The helpers exist because the manual write path has two surprises stacked
-on top of each other: you need the column name (not the label), and the
-library's dirty tracker treats any attribute starting with `_` as private and
-skips it — so a plain `setattr(asset, "_snipeit_owner_3", "alice")` is
-dropped from the PATCH unless followed by `mark_dirty()`. The helpers handle
-both for you.
-
-If you ever need to do it by hand (e.g. you only have the column name and not
-the label), the manual pattern is:
+`set_custom_field()` handles the label → column-name translation for you.
+If you only have the column name and not the label, you can still use the
+manual pattern, but mind the leading underscore — pydantic v2's attribute
+heuristic treats `_*` names as private:
 
 ```python
 column_name = asset.custom_fields["Owner"]["field"]   # "_snipeit_owner_3"
@@ -96,9 +119,8 @@ asset.save()
 ```
 
 Mutating the nested response shape directly
-(`asset.custom_fields["Owner"]["value"] = "alice"`) *is* detected by the
-dirty tracker, but Snipe-IT's PATCH endpoint silently ignores the resulting
-`{"custom_fields": {...}}` payload. Stick with `set_custom_field()`.
+(`asset.custom_fields["Owner"]["value"] = "alice"`) is silently ignored by
+Snipe-IT's PATCH endpoint. Stick with `set_custom_field()`.
 
 ### In-place mutation of nested objects
 

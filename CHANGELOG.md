@@ -2,6 +2,36 @@
 
 ## Unreleased
 
+## 0.4.0 (2026-05-16)
+
+### Custom-field staging refactor
+
+- **Added** `Asset.pending_custom_fields()` — returns a dict of custom field
+  values staged for the next `save()` (label → value). Defensive copy.
+- **Bug fix**: `Asset.set_custom_field()` followed by `save()` no longer
+  requires a manual `refresh()` before subsequent `set_custom_field()` calls
+  on the same in-memory instance. Snipe-IT's PATCH response sets
+  `custom_fields: null` and echoes column-name keys (`_snipeit_<col>`) at
+  the top level instead. `Asset._apply_server_data` now folds those values
+  back into the local nested shape and strips stray column-name keys, so
+  the read shape survives across saves.
+- **Behavior change**: `Asset.get_custom_field(label)` now returns the
+  server's last-known value, not the staged-but-unsaved value. Use
+  `pending_custom_fields()` to inspect staging state. Previously, the
+  staged value was mirrored into `custom_fields[label]["value"]` for
+  read-after-stage convenience; the mirror was a side effect of the
+  pydantic-internals coupling and is no longer needed.
+- **Behavior change**: Setting a custom field back to its current server
+  value now cancels any pending stage for that label (no PATCH issued).
+  Previously, a redundant stage was preserved.
+- **Internal**: `Asset.set_custom_field` no longer reads or writes
+  `__pydantic_extra__`, no longer manipulates the dirty-tracker snapshot,
+  and no longer mirrors staged values into the response shape. Staging
+  lives entirely in a dedicated `_pending_custom_fields: dict[str, Any]`
+  PrivateAttr; `Asset.save()` and `Asset._apply_server_data` are overridden
+  to manage its lifecycle. The only remaining pydantic-internals coupling
+  is in `ApiObject._apply_server_data`, which is documented and tested.
+
 ### Test suite overhaul
 
 - **Removed 13 duplicated per-resource test files** (~500 LoC) and replaced them
