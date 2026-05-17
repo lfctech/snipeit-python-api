@@ -61,11 +61,11 @@ env/
 
 # Local
 GEMINI.md
+.kiro/
 .mutmut-cache
 .mutmut-cache/
 mutants/
 *.bak
-*.lock
 *.html
 *.tmp
 
