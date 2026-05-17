@@ -141,6 +141,7 @@ def test_asset_object_methods() -> None:
         "restore",
         "get_custom_field",
         "set_custom_field",
+        "pending_custom_fields",
     ):
         assert callable(getattr(Asset, meth)), f"Asset.{meth} missing"
 
