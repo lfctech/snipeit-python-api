@@ -25,7 +25,7 @@ services:
         condition: service_healthy
     env_file:
       - .env
-    command: ["sh", "-c", "if [ ! -f /var/lib/snipeit/seeded.txt ]; then php -d memory_limit=512M artisan migrate --force && php -d memory_limit=512M artisan db:seed --force && touch /var/lib/snipeit/seeded.txt && php -d memory_limit=512M artisan passport:install -n && php -d memory_limit=512M artisan snipeit:make-api-key --user_id 1 --name testing -n --key-only > /api_key.txt; fi"]
+    command: ["sh", "-c", "if [ ! -f /var/lib/snipeit/seeded.txt ]; then php -d memory_limit=512M artisan migrate --force && php -d memory_limit=512M artisan db:seed --force && touch /var/lib/snipeit/seeded.txt && php -d memory_limit=512M artisan passport:install -n && php -d memory_limit=512M artisan snipeit:make-api-key --user_id 1 --name testing -n --key-only > /api_key.txt && php -d memory_limit=512M artisan tinker --execute='\\App\\Models\\Setting::where(\"id\", 1)->update([\"label2_enable\" => 1]);'; fi"]
     restart: "no"
     volumes:
       - storage:/var/lib/snipeit

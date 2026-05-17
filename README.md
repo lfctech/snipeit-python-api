@@ -45,25 +45,60 @@ fields not declared on the model, there is no static protection.
 
 ### Setting custom field values
 
-Snipe-IT's REST API expects custom field values as **top-level keys** named
-`_snipeit_<slug>_<id>` (the column name), not as nested entries under
-`custom_fields`. The library's dirty tracker treats any attribute starting
-with `_` as a private internal attribute and skips it, which means a plain
-`setattr(asset, "_snipeit_owner_3", "alice")` is silently dropped from the
-PATCH payload. Use `mark_dirty()` to force the column into the PATCH:
+Use the dedicated helpers on `Asset` to read and write custom fields by their
+display label:
 
 ```python
 asset = api.assets.get(1)
-column_name = asset.custom_fields["Owner"]["field"]   # e.g. "_snipeit_owner_3"
+
+owner = asset.get_custom_field("Owner")        # read
+asset.set_custom_field("Owner", "alice")       # stage
+asset.save()                                   # persist
+```
+
+`set_custom_field()` raises `KeyError` if the label is not defined on the
+asset (most often because the asset hasn't been fetched yet, or the field is
+not associated with the asset's model fieldset). The methods chain, so
+`asset.set_custom_field("Owner", "alice").save()` works too. You can also
+combine custom and regular field updates in one save:
+
+```python
+asset.name = "Renamed"
+asset.set_custom_field("Owner", "alice")
+asset.save()  # PATCH {"name": "Renamed", "_snipeit_owner_3": "alice"}
+```
+
+#### Why the helpers exist
+
+Snipe-IT's REST API uses two different shapes for custom fields:
+
+* **Read shape** — GET responses return them under `custom_fields` keyed by
+  display label: `custom_fields["Owner"] == {"field": "_snipeit_owner_3", "value": "alice", ...}`.
+* **Write shape** — PATCH expects the underlying column name as a **top-level
+  key**: `{"_snipeit_owner_3": "alice"}`. The nested `custom_fields` shape is
+  silently ignored on the versions tested in CI.
+
+The helpers exist because the manual write path has two surprises stacked
+on top of each other: you need the column name (not the label), and the
+library's dirty tracker treats any attribute starting with `_` as private and
+skips it — so a plain `setattr(asset, "_snipeit_owner_3", "alice")` is
+dropped from the PATCH unless followed by `mark_dirty()`. The helpers handle
+both for you.
+
+If you ever need to do it by hand (e.g. you only have the column name and not
+the label), the manual pattern is:
+
+```python
+column_name = asset.custom_fields["Owner"]["field"]   # "_snipeit_owner_3"
 setattr(asset, column_name, "alice")
 asset.mark_dirty(column_name)
 asset.save()
 ```
 
-Mutating the nested response shape directly (`asset.custom_fields["Owner"]["value"] = "alice"`)
-*is* detected by the dirty tracker, but Snipe-IT's PATCH endpoint silently
-ignores the nested `{"custom_fields": {...}}` form on the versions tested in
-CI. Stick with the column-name + `mark_dirty()` pattern above.
+Mutating the nested response shape directly
+(`asset.custom_fields["Owner"]["value"] = "alice"`) *is* detected by the
+dirty tracker, but Snipe-IT's PATCH endpoint silently ignores the resulting
+`{"custom_fields": {...}}` payload. Stick with `set_custom_field()`.
 
 ### In-place mutation of nested objects
 

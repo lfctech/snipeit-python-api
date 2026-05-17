@@ -1,6 +1,6 @@
 # Simple local entrypoints
 
-PY ?= python3
+PY ?= .venv/bin/python
 
 .PHONY: test test-unit check cov cov-html property mut mut-quick mut-report mut-reset clean docker-up docker-down test-integration test-all
 

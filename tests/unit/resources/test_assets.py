@@ -319,3 +319,281 @@ def test_asset_checkout_passes_extra_kwargs_to_request(snipeit_client, httpx_moc
     assert body["note"] == "deploying to alice"
     assert body["expected_checkin"] == "2026-12-31"
     assert body["assigned_user"] == 5
+
+
+# ---------------------------------------------------------------------------
+# Custom field helpers: get_custom_field / set_custom_field
+# ---------------------------------------------------------------------------
+
+
+def _asset_with_custom_field(snipeit_client, httpx_mock, *, asset_id=20, label="Owner",
+                             column="_snipeit_owner_3", value="bob"):
+    """Helper: GET an asset that has a single custom field defined."""
+    httpx_mock.add_response(
+        method="GET",
+        url=f"https://snipe.example.test/api/v1/hardware/{asset_id}",
+        json={
+            "id": asset_id,
+            "name": "Test Asset",
+            "asset_tag": f"TAG-{asset_id}",
+            "custom_fields": {
+                label: {"field": column, "value": value, "field_format": "ANY"},
+            },
+        },
+    )
+    return snipeit_client.assets.get(asset_id)
+
+
+@pytest.mark.unit
+def test_get_custom_field_returns_value(snipeit_client, httpx_mock):
+    asset = _asset_with_custom_field(snipeit_client, httpx_mock)
+    assert asset.get_custom_field("Owner") == "bob"
+
+
+@pytest.mark.unit
+def test_get_custom_field_returns_default_when_label_missing(snipeit_client, httpx_mock):
+    asset = _asset_with_custom_field(snipeit_client, httpx_mock)
+    assert asset.get_custom_field("Nope") is None
+    assert asset.get_custom_field("Nope", default="fallback") == "fallback"
+
+
+@pytest.mark.unit
+def test_get_custom_field_returns_default_when_no_custom_fields(snipeit_client, httpx_mock):
+    httpx_mock.add_response(
+        method="GET",
+        url="https://snipe.example.test/api/v1/hardware/21",
+        json={"id": 21, "name": "Plain Asset"},
+    )
+    asset = snipeit_client.assets.get(21)
+    assert asset.get_custom_field("Owner") is None
+    assert asset.get_custom_field("Owner", default="x") == "x"
+
+
+@pytest.mark.unit
+def test_set_custom_field_patches_column_name_only(snipeit_client, httpx_mock):
+    """set_custom_field + save() must send {column_name: value} as a top-level
+    PATCH key — not the nested custom_fields shape.
+    """
+    asset = _asset_with_custom_field(snipeit_client, httpx_mock, asset_id=22)
+    httpx_mock.add_response(
+        method="PATCH",
+        url="https://snipe.example.test/api/v1/hardware/22",
+        json={
+            "status": "success",
+            "payload": {
+                "id": 22,
+                "custom_fields": {
+                    "Owner": {"field": "_snipeit_owner_3", "value": "alice", "field_format": "ANY"},
+                },
+            },
+        },
+    )
+
+    result = asset.set_custom_field("Owner", "alice")
+    # Returns self for chaining.
+    assert result is asset
+    # The column-name field is queued for PATCH.
+    assert "_snipeit_owner_3" in asset._dirty_set()
+    # The nested custom_fields blob is NOT in the dirty set (we kept the
+    # snapshot in sync to avoid wasting a PATCH on a server-ignored shape).
+    assert "custom_fields" not in asset._dirty_set()
+    # Local read reflects the staged value before save().
+    assert asset.get_custom_field("Owner") == "alice"
+
+    asset.save()
+
+    body = json.loads(httpx_mock.get_requests()[-1].content)
+    assert body == {"_snipeit_owner_3": "alice"}
+    # Dirty set is cleared after save.
+    assert not asset._dirty_set()
+
+
+@pytest.mark.unit
+def test_set_custom_field_chains_with_save(snipeit_client, httpx_mock):
+    asset = _asset_with_custom_field(snipeit_client, httpx_mock, asset_id=23)
+    httpx_mock.add_response(
+        method="PATCH",
+        url="https://snipe.example.test/api/v1/hardware/23",
+        json={"status": "success", "payload": {"id": 23}},
+    )
+    asset.set_custom_field("Owner", "carol").save()
+    body = json.loads(httpx_mock.get_requests()[-1].content)
+    assert body == {"_snipeit_owner_3": "carol"}
+
+
+@pytest.mark.unit
+def test_set_custom_field_combined_with_regular_field(snipeit_client, httpx_mock):
+    """A custom field and a regular field set in the same save() should both
+    appear in the PATCH body.
+    """
+    asset = _asset_with_custom_field(snipeit_client, httpx_mock, asset_id=24)
+    httpx_mock.add_response(
+        method="PATCH",
+        url="https://snipe.example.test/api/v1/hardware/24",
+        json={"status": "success", "payload": {"id": 24}},
+    )
+    asset.name = "Renamed"
+    asset.set_custom_field("Owner", "dave")
+    asset.save()
+    body = json.loads(httpx_mock.get_requests()[-1].content)
+    assert body == {"name": "Renamed", "_snipeit_owner_3": "dave"}
+
+
+@pytest.mark.unit
+def test_set_custom_field_unknown_label_raises_keyerror(snipeit_client, httpx_mock):
+    asset = _asset_with_custom_field(snipeit_client, httpx_mock, asset_id=25)
+    with pytest.raises(KeyError) as excinfo:
+        asset.set_custom_field("Unknown", "x")
+    # Error message lists the label and is informative.
+    assert "Unknown" in str(excinfo.value)
+    assert "Owner" in str(excinfo.value)
+
+
+@pytest.mark.unit
+def test_set_custom_field_no_custom_fields_raises_keyerror(snipeit_client, httpx_mock):
+    httpx_mock.add_response(
+        method="GET",
+        url="https://snipe.example.test/api/v1/hardware/26",
+        json={"id": 26, "name": "Plain Asset"},
+    )
+    asset = snipeit_client.assets.get(26)
+    with pytest.raises(KeyError):
+        asset.set_custom_field("Owner", "x")
+
+
+@pytest.mark.unit
+def test_set_custom_field_no_op_when_value_unchanged(snipeit_client, httpx_mock):
+    """Staging the field to its current value should not queue a PATCH —
+    matches the no-op behaviour of plain attribute assignment on declared
+    fields (e.g. ``asset.name = asset.name`` does not mark dirty).
+    """
+    asset = _asset_with_custom_field(
+        snipeit_client, httpx_mock, asset_id=27, value="bob"
+    )
+    # set to the value that's already there.
+    asset.set_custom_field("Owner", "bob")
+    # Nothing queued.
+    assert "_snipeit_owner_3" not in asset._dirty_set()
+    assert not asset._dirty_set()
+    # save() is a no-op (no PATCH issued).
+    asset.save()
+    patch_requests = [r for r in httpx_mock.get_requests() if r.method == "PATCH"]
+    assert patch_requests == []
+
+
+@pytest.mark.unit
+def test_set_custom_field_no_op_skip_does_not_clear_existing_pending(
+    snipeit_client, httpx_mock
+):
+    """If the column is already pending from a prior call, setting it to the
+    same value again should not silently drop the pending state.
+    """
+    asset = _asset_with_custom_field(
+        snipeit_client, httpx_mock, asset_id=28, value="bob"
+    )
+    httpx_mock.add_response(
+        method="PATCH",
+        url="https://snipe.example.test/api/v1/hardware/28",
+        json={"status": "success", "payload": {"id": 28}},
+    )
+    asset.set_custom_field("Owner", "alice")  # queues
+    asset.set_custom_field("Owner", "alice")  # same value, but already queued
+    assert "_snipeit_owner_3" in asset._dirty_set()
+    asset.save()
+    body = json.loads(httpx_mock.get_requests()[-1].content)
+    assert body == {"_snipeit_owner_3": "alice"}
+
+
+@pytest.mark.unit
+def test_set_custom_field_twice_before_save_uses_latest_value(
+    snipeit_client, httpx_mock
+):
+    """Two consecutive set_custom_field calls on the same label before a
+    single save() should send only the latest value.
+    """
+    asset = _asset_with_custom_field(
+        snipeit_client, httpx_mock, asset_id=29, value="bob"
+    )
+    httpx_mock.add_response(
+        method="PATCH",
+        url="https://snipe.example.test/api/v1/hardware/29",
+        json={"status": "success", "payload": {"id": 29}},
+    )
+    asset.set_custom_field("Owner", "alice")
+    asset.set_custom_field("Owner", "carol")
+    assert asset.get_custom_field("Owner") == "carol"
+    asset.save()
+    body = json.loads(httpx_mock.get_requests()[-1].content)
+    assert body == {"_snipeit_owner_3": "carol"}
+
+
+@pytest.mark.unit
+def test_set_custom_field_refresh_discards_staged_change(snipeit_client, httpx_mock):
+    """refresh() should drop staged custom-field changes cleanly, leaving the
+    object in a clean, non-dirty state with no leftover column-name PATCH.
+    """
+    asset = _asset_with_custom_field(
+        snipeit_client, httpx_mock, asset_id=30, value="bob"
+    )
+    asset.set_custom_field("Owner", "alice")
+    assert "_snipeit_owner_3" in asset._dirty_set()
+
+    # refresh: server still says "bob".
+    httpx_mock.add_response(
+        method="GET",
+        url="https://snipe.example.test/api/v1/hardware/30",
+        json={
+            "id": 30,
+            "name": "Test Asset",
+            "asset_tag": "TAG-30",
+            "custom_fields": {
+                "Owner": {"field": "_snipeit_owner_3", "value": "bob", "field_format": "ANY"},
+            },
+        },
+    )
+    asset.refresh()
+
+    # Staged change is gone.
+    assert not asset._dirty_set()
+    assert asset.get_custom_field("Owner") == "bob"
+    # A subsequent save() must not issue a PATCH.
+    asset.save()
+    patch_requests = [r for r in httpx_mock.get_requests() if r.method == "PATCH"]
+    assert patch_requests == []
+
+
+@pytest.mark.unit
+def test_set_custom_field_does_not_leak_into_instance_dict(snipeit_client, httpx_mock):
+    """Regression guard: the staged column-name must live in
+    ``__pydantic_extra__``, not in ``self.__dict__`` — otherwise it would
+    linger across save()/refresh() cycles since the base lifecycle code only
+    cleans __pydantic_extra__.
+    """
+    asset = _asset_with_custom_field(
+        snipeit_client, httpx_mock, asset_id=31, value="bob"
+    )
+    asset.set_custom_field("Owner", "alice")
+    # Stored in extras, not in __dict__.
+    assert "_snipeit_owner_3" in (asset.__pydantic_extra__ or {})
+    assert "_snipeit_owner_3" not in asset.__dict__
+
+    httpx_mock.add_response(
+        method="PATCH",
+        url="https://snipe.example.test/api/v1/hardware/31",
+        json={
+            "status": "success",
+            "payload": {
+                "id": 31,
+                "name": "Test Asset",
+                "asset_tag": "TAG-31",
+                "custom_fields": {
+                    "Owner": {"field": "_snipeit_owner_3", "value": "alice", "field_format": "ANY"},
+                },
+            },
+        },
+    )
+    asset.save()
+    # After save, the staged column has been cleared by _apply_server_data's
+    # extra.clear() — no lingering state in either bucket.
+    assert "_snipeit_owner_3" not in (asset.__pydantic_extra__ or {})
+    assert "_snipeit_owner_3" not in asset.__dict__

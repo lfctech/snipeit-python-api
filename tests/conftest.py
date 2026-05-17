@@ -41,3 +41,23 @@ def real_snipeit_client():
     )
     yield client
     client.close()
+
+
+@pytest.fixture(scope="session")
+def real_snipeit_client_no_retry():
+    """A real SnipeIT client with retries disabled.
+
+    Use this for tests that probe endpoints which may not be available on
+    every Snipe-IT build (e.g. ``/hardware/labels`` requires the new label
+    engine). The default ``real_snipeit_client`` retries 5xx on POST up to
+    5 times with exponential backoff, which can take ~70s before the
+    ``pytest.skip(...)`` branch fires — long enough to look like a hang.
+    With ``max_retries=0`` the failure surfaces immediately.
+    """
+    url = os.environ.get("SNIPEIT_TEST_URL")
+    token = os.environ.get("SNIPEIT_TEST_TOKEN")
+    if not url or not token:
+        pytest.skip("SNIPEIT_TEST_URL and SNIPEIT_TEST_TOKEN must be set for integration tests")
+    client = SnipeIT(url=url, token=token, max_retries=0)
+    yield client
+    client.close()

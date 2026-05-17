@@ -131,7 +131,17 @@ def test_all_expected_managers_present() -> None:
 def test_asset_object_methods() -> None:
     from snipeit.resources.assets import Asset
 
-    for meth in ("save", "refresh", "delete", "checkout", "checkin", "audit", "restore"):
+    for meth in (
+        "save",
+        "refresh",
+        "delete",
+        "checkout",
+        "checkin",
+        "audit",
+        "restore",
+        "get_custom_field",
+        "set_custom_field",
+    ):
         assert callable(getattr(Asset, meth)), f"Asset.{meth} missing"
 
 
