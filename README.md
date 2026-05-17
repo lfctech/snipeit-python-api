@@ -146,26 +146,3 @@ make test-all        # Both
 make check           # ruff + pyright
 make cov             # Coverage (≥85% enforced)
 ```
-
-## What's New in 0.3
-
-- **In-place mutation detected**: `asset.custom_fields["x"] = 1; asset.save()` now correctly PATCHes. No more silent no-ops.
-- **`client.session` removed**: Use `client._http` or the public verb helpers.
-- **`assets` package**: `snipeit/resources/assets/` split into `model`, `manager`, `files`, `labels` — public imports unchanged.
-- **`_raw_request()` / `_stream_request()`**: Centralized non-JSON request helpers; no more duplicated error handling.
-- **Apache 2.0 license** added.
-- **pydantic CI matrix**: tested against 2.0.x and 2.10.x.
-- **`requests_mock` shim deleted**: tests use `pytest-httpx` directly.
-
-See [CHANGELOG.md](CHANGELOG.md) for the full list.
-
-## What's New in 0.2
-
-- **httpx** replaces `requests` as the HTTP backend.
-- **Pydantic v2** models with `extra="allow"` and proper dirty tracking.
-- **Streaming downloads** — large files no longer load into memory.
-- **3xx redirects raise** `SnipeITApiError` instead of silently returning HTML.
-- **Localization-safe** `get_by_tag` / `get_by_serial` — works on any Snipe-IT locale.
-- **Exceptions at top level** — `from snipeit import SnipeITNotFoundError`.
-- **`repr(client)`** redacts the token.
-- **CI** on Python 3.11, 3.12, 3.13.
