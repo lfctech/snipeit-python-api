@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 from pathlib import Path
 import pytest
 
@@ -16,18 +15,16 @@ from snipeit import SnipeIT
 def _configure_integration_env():
     """Configure environment for integration tests.
 
+    Uses pytest.MonkeyPatch so env-var changes are restored after the session,
+    preventing leakage if unit and integration tests ever run in the same process.
+
     - Sets SNIPEIT_TEST_URL to the local Docker URL.
     - Reads SNIPEIT_TEST_TOKEN from docker/api_key.txt.
     - Skips the integration suite if api_key.txt is missing or empty.
     """
-    # Project root = tests/integration/../../
     root = Path(__file__).resolve().parents[2]
     api_key_file = root / "docker" / "api_key.txt"
 
-    # URL for local Snipe-IT in docker-compose
-    os.environ["SNIPEIT_TEST_URL"] = "http://localhost:8000"
-
-    # Ensure API key exists and is non-empty; otherwise skip integration suite
     if not api_key_file.exists():
         pytest.skip(
             "Integration tests require docker/api_key.txt. "
@@ -41,7 +38,10 @@ def _configure_integration_env():
             "Run 'make test-integration' to start the local Snipe-IT and generate a token."
         )
 
-    os.environ["SNIPEIT_TEST_TOKEN"] = token
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setenv("SNIPEIT_TEST_URL", "http://localhost:8000")
+        mp.setenv("SNIPEIT_TEST_TOKEN", token)
+        yield
 
 
 # ---------------------------

@@ -16,7 +16,7 @@ class Manufacturer(ApiObject):
             m = api.manufacturers.get(1)
             print(m)
     """
-    _path = "manufacturers"
+    _resource_path = "manufacturers"
 
     def __repr__(self) -> str:
         """Return a concise string representation.
@@ -24,7 +24,7 @@ class Manufacturer(ApiObject):
         Returns:
             str: The manufacturer id and name.
         """
-        return f"<Manufacturer {getattr(self, 'id', 'N/A')}: {getattr(self, 'name', 'N/A')}>"
+        return f"<Manufacturer {(self.id if self.id is not None else 'N/A')}: {getattr(self, 'name', 'N/A')}>"
 
 
 class ManufacturersManager(BaseResourceManager[Manufacturer]):
@@ -37,7 +37,7 @@ class ManufacturersManager(BaseResourceManager[Manufacturer]):
     """
 
     resource_cls = Manufacturer
-    path = Manufacturer._path
+    path = Manufacturer._resource_path
 
     def create(self, name: str, **kwargs: Any) -> 'Manufacturer':
         """Create a new manufacturer.

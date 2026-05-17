@@ -16,7 +16,7 @@ class StatusLabel(ApiObject):
             sl = api.status_labels.get(1)
             print(sl)
     """
-    _path = "statuslabels"
+    _resource_path = "statuslabels"
 
     def __repr__(self) -> str:
         """Return a concise string representation.
@@ -24,7 +24,7 @@ class StatusLabel(ApiObject):
         Returns:
             str: The status label id, name, and type.
         """
-        return f"<StatusLabel {getattr(self, 'id', 'N/A')}: {getattr(self, 'name', 'N/A')} (Type: {getattr(self, 'type', 'N/A')})>"
+        return f"<StatusLabel {(self.id if self.id is not None else 'N/A')}: {getattr(self, 'name', 'N/A')} (Type: {getattr(self, 'type', 'N/A')})>"
 
 
 class StatusLabelsManager(BaseResourceManager[StatusLabel]):
@@ -37,7 +37,7 @@ class StatusLabelsManager(BaseResourceManager[StatusLabel]):
     """
 
     resource_cls = StatusLabel
-    path = StatusLabel._path
+    path = StatusLabel._resource_path
 
     def create(self, name: str, type: str, **kwargs: Any) -> 'StatusLabel':
         """Create a new status label.

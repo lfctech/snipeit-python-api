@@ -1,0 +1,44 @@
+name: Mutation (advisory)
+
+on:
+  pull_request:
+    branches: [main, dev]
+  workflow_dispatch:
+
+# Advisory job — never blocks merges.
+# Results are uploaded as an artifact for review.
+
+jobs:
+  mutation:
+    name: mutmut (advisory)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.13
+
+      - name: Install deps
+        run: uv sync --all-extras --python 3.13
+
+      - name: Run mut-quick
+        run: uv run make mut-quick
+        continue-on-error: true
+
+      - name: Print mutation summary
+        run: uv run mutmut results || true
+
+      - name: Upload mutation cache
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mutmut-results
+          path: .mutmut-cache
+          retention-days: 7

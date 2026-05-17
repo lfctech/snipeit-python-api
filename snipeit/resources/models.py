@@ -16,7 +16,7 @@ class Model(ApiObject):
             mdl = api.models.get(1)
             print(mdl)
     """
-    _path = "models"
+    _resource_path = "models"
 
     def __repr__(self) -> str:
         """Return a concise string representation.
@@ -24,7 +24,7 @@ class Model(ApiObject):
         Returns:
             str: The model id, name, and model number.
         """
-        return f"<Model {getattr(self, 'id', 'N/A')}: {getattr(self, 'name', 'N/A')} ({getattr(self, 'model_number', 'N/A')})>"
+        return f"<Model {(self.id if self.id is not None else 'N/A')}: {getattr(self, 'name', 'N/A')} ({getattr(self, 'model_number', 'N/A')})>"
 
 
 class ModelsManager(BaseResourceManager[Model]):
@@ -37,7 +37,7 @@ class ModelsManager(BaseResourceManager[Model]):
     """
 
     resource_cls = Model
-    path = Model._path
+    path = Model._resource_path
 
     def create(self, name: str, category_id: int, manufacturer_id: int, **kwargs: Any) -> 'Model':
         """Create a new asset model.

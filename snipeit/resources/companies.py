@@ -17,7 +17,7 @@ class Company(ApiObject):
             print(comp)
     """
 
-    _path = "companies"
+    _resource_path = "companies"
 
     def __repr__(self) -> str:
         """Return a concise string representation.
@@ -25,7 +25,7 @@ class Company(ApiObject):
         Returns:
             str: The company id and name.
         """
-        return f"<Company {getattr(self, 'id', 'N/A')}: {getattr(self, 'name', 'N/A')}>"
+        return f"<Company {(self.id if self.id is not None else 'N/A')}: {getattr(self, 'name', 'N/A')}>"
 
 
 class CompaniesManager(BaseResourceManager[Company]):
@@ -38,7 +38,7 @@ class CompaniesManager(BaseResourceManager[Company]):
     """
 
     resource_cls = Company
-    path = Company._path
+    path = Company._resource_path
 
     def create(self, name: str, **kwargs: Any) -> "Company":
         """Create a new company.

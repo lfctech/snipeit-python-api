@@ -43,15 +43,16 @@ class SnipeITApiError(SnipeITException):
 
     Args:
         message (str): Human-readable error message.
-        response (requests.Response | None): Original HTTP response, if any.
+        response: The HTTP response associated with the error, if any
+            (a ``httpx.Response``). Attached as ``self.response`` so
+            callers can inspect status code, headers, and body.
 
     Attributes:
-        response (requests.Response | None): The HTTP response associated with
-            the error.
-        status_code (int | None): The HTTP status code if available.
+        response: The HTTP response associated with the error.
+        status_code (int | None): The HTTP status code, if available.
 
     Examples:
-        Inspect response details when available:
+        Inspect response details when available::
 
             try:
                 api.assets.get(0)
@@ -89,14 +90,14 @@ class SnipeITValidationError(SnipeITApiError):
 
     Args:
         message (str): Human-readable error message.
-        response (requests.Response | None): Original HTTP response, if any.
+        response: The HTTP response, if any.
 
     Attributes:
         errors (dict | None): Parsed validation errors from the API response,
             if available.
 
     Examples:
-        Access validation details:
+        Access validation details::
 
             try:
                 api.assets.create(status_id=1, model_id=1, asset_tag="")
@@ -106,13 +107,15 @@ class SnipeITValidationError(SnipeITApiError):
     def __init__(self, message: str, response=None):
         super().__init__(message, response=response)
         self.errors = None
-        # Attempt to parse detailed errors from JSON body
         try:
             if response is not None:
                 body = response.json()
                 self.errors = body.get("errors")
-        except Exception:
-            self.errors = None
+        except Exception as exc:
+            import logging
+            logging.getLogger("snipeit").warning(
+                "SnipeITValidationError: failed to parse error body: %s", exc
+            )
 
 
 class SnipeITClientError(SnipeITApiError):

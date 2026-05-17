@@ -16,7 +16,15 @@ from snipeit.exceptions import (
 pytestmark = pytest.mark.integration
 
 
-def test_assets_full_flow(real_snipeit_client: SnipeIT, base, run_id: str, tmp_path: Path, _n, id_int):
+def test_assets_full_flow(
+    real_snipeit_client: SnipeIT,
+    real_snipeit_client_no_retry: SnipeIT,
+    base,
+    run_id: str,
+    tmp_path: Path,
+    _n,
+    id_int,
+):
     c = real_snipeit_client
 
     a = c.assets.create(
@@ -54,14 +62,19 @@ def test_assets_full_flow(real_snipeit_client: SnipeIT, base, run_id: str, tmp_p
         # audit
         a = a.audit(note=f"audit-{run_id}")
 
-        # labels to PDF (this endpoint may not be enabled in some Snipe-IT builds)
+        # labels to PDF (this endpoint may not be enabled in some Snipe-IT
+        # builds — the new label engine is opt-in). Use a non-retrying client
+        # so that an unavailable/misconfigured endpoint surfaces immediately
+        # instead of looping for ~70s through the default retry budget on
+        # POST + 5xx (max_retries=5, exponential backoff).
         pdf_path = tmp_path / f"labels-{a.asset_tag}.pdf"
         try:
-            saved = c.assets.labels(str(pdf_path), [a.asset_tag])
+            saved = real_snipeit_client_no_retry.assets.labels(
+                str(pdf_path), [a.asset_tag]
+            )
             assert Path(saved).exists() and Path(saved).stat().st_size > 0
-        except SnipeITApiError as e:
-            # Accept error path but assert we captured an error string
-            assert str(e)
+        except SnipeITApiError:
+            pytest.skip("labels endpoint not available on this Snipe-IT instance")
 
         # list smoke
         listed = c.assets.list()

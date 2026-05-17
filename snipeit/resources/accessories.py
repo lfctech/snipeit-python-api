@@ -4,7 +4,7 @@ Provides Accessory model and AccessoriesManager for interacting with
 Snipe-IT accessory endpoints.
 """
 
-from typing import Any, Dict
+from typing import Any
 from .base import ApiObject, BaseResourceManager
 
 
@@ -17,7 +17,7 @@ class Accessory(ApiObject):
             acc = api.accessories.get(1)
             print(acc)
     """
-    _path = "accessories"
+    _resource_path = "accessories"
 
     def __repr__(self) -> str:
         """Return a concise string representation.
@@ -25,7 +25,7 @@ class Accessory(ApiObject):
         Returns:
             str: The accessory id and name.
         """
-        return f"<Accessory {getattr(self, 'id', 'N/A')}: {getattr(self, 'name', 'N/A')}>"
+        return f"<Accessory {(self.id if self.id is not None else 'N/A')}: {getattr(self, 'name', 'N/A')}>"
 
 
 class AccessoriesManager(BaseResourceManager[Accessory]):
@@ -38,7 +38,7 @@ class AccessoriesManager(BaseResourceManager[Accessory]):
     """
 
     resource_cls = Accessory
-    path = Accessory._path
+    path = Accessory._resource_path
 
     def create(self, name: str, qty: int, category_id: int, **kwargs: Any) -> 'Accessory':
         """Create a new accessory.
@@ -65,7 +65,7 @@ class AccessoriesManager(BaseResourceManager[Accessory]):
         data.update(kwargs)
         return super().create(**data)
 
-    def checkin_from_user(self, accessory_user_id: int) -> Dict[str, Any]:
+    def checkin_from_user(self, accessory_user_id: int) -> dict[str, Any]:
         """Check in an accessory currently assigned to a user.
 
         Note:

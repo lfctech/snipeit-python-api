@@ -16,7 +16,7 @@ class Location(ApiObject):
             loc = api.locations.get(1)
             print(loc)
     """
-    _path = "locations"
+    _resource_path = "locations"
 
     def __repr__(self) -> str:
         """Return a concise string representation.
@@ -24,7 +24,7 @@ class Location(ApiObject):
         Returns:
             str: The location id and name.
         """
-        return f"<Location {getattr(self, 'id', 'N/A')}: {getattr(self, 'name', 'N/A')}>"
+        return f"<Location {(self.id if self.id is not None else 'N/A')}: {getattr(self, 'name', 'N/A')}>"
 
 
 class LocationsManager(BaseResourceManager[Location]):
@@ -37,7 +37,7 @@ class LocationsManager(BaseResourceManager[Location]):
     """
 
     resource_cls = Location
-    path = Location._path
+    path = Location._resource_path
 
     def create(self, name: str, **kwargs: Any) -> 'Location':
         """Create a new location.

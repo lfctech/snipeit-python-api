@@ -16,7 +16,7 @@ class Field(ApiObject):
             fld = api.fields.get(1)
             print(fld)
     """
-    _path = "fields"
+    _resource_path = "fields"
 
     def __repr__(self) -> str:
         """Return a concise string representation.
@@ -24,7 +24,7 @@ class Field(ApiObject):
         Returns:
             str: The field id, name, and element.
         """
-        return f"<Field {getattr(self, 'id', 'N/A')}: {getattr(self, 'name', 'N/A')} (Element: {getattr(self, 'element', 'N/A')})>"
+        return f"<Field {(self.id if self.id is not None else 'N/A')}: {getattr(self, 'name', 'N/A')} (Element: {getattr(self, 'element', 'N/A')})>"
 
 
 class FieldsManager(BaseResourceManager[Field]):
@@ -37,7 +37,7 @@ class FieldsManager(BaseResourceManager[Field]):
     """
 
     resource_cls = Field
-    path = Field._path
+    path = Field._resource_path
 
     def create(self, name: str, element: str, **kwargs: Any) -> 'Field':
         """Create a new custom field.

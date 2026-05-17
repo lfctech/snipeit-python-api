@@ -16,7 +16,7 @@ class Category(ApiObject):
             cat = api.categories.get(1)
             print(cat)
     """
-    _path = "categories"
+    _resource_path = "categories"
 
     def __repr__(self) -> str:
         """Return a concise string representation.
@@ -24,7 +24,7 @@ class Category(ApiObject):
         Returns:
             str: The category id, name, and type.
         """
-        return f"<Category {getattr(self, 'id', 'N/A')}: {getattr(self, 'name', 'N/A')} (Type: {getattr(self, 'category_type', 'N/A')})>"
+        return f"<Category {(self.id if self.id is not None else 'N/A')}: {getattr(self, 'name', 'N/A')} (Type: {getattr(self, 'category_type', 'N/A')})>"
 
 
 class CategoriesManager(BaseResourceManager[Category]):
@@ -37,7 +37,7 @@ class CategoriesManager(BaseResourceManager[Category]):
     """
 
     resource_cls = Category
-    path = Category._path
+    path = Category._resource_path
 
     def create(self, name: str, category_type: str, **kwargs: Any) -> 'Category':
         """Create a new category.

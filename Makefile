@@ -1,16 +1,16 @@
 # Simple local entrypoints
 
-PY ?= python3
+PY ?= .venv/bin/python
 
-.PHONY: test test-unit check cov cov-html property mut mut-report mut-reset clean docker-up docker-down test-integration test-all
+.PHONY: test test-unit check cov cov-html property mut mut-quick mut-report mut-reset clean docker-up docker-down test-integration test-all
 
 # Run unit tests only
 test:
-	$(PY) -m pytest tests/unit -q -m unit
+	$(PY) -m pytest tests/unit tests/contract -q -m unit
 
 # Run unit tests only (alias)
 test-unit:
-	$(PY) -m pytest tests/unit -q -m unit
+	$(PY) -m pytest tests/unit tests/contract -q -m unit
 
 # Lint and type check
 check:
@@ -19,12 +19,18 @@ check:
 
 # Run tests with coverage (branch coverage) and enforce 95%
 cov:
-	$(PY) -m coverage run -m pytest -q && \
+	$(PY) -m coverage run -m pytest tests/unit tests/contract -q -m unit && \
 	$(PY) -m coverage report -m --fail-under=95
 
 # Mutation testing (can be slow)
 mut:
 	$(PY) -m mutmut run --paths-to-mutate snipeit --tests-dir tests || true
+
+# Quick mutation run scoped to the highest-value source files (used in CI)
+mut-quick:
+	$(PY) -m mutmut run \
+		--paths-to-mutate snipeit/client.py,snipeit/_retry.py,snipeit/resources/base.py \
+		--tests-dir tests/unit tests/contract || true
 
 mut-report:
 	$(PY) -m mutmut results
@@ -37,15 +43,31 @@ clean:
 	$(MAKE) docker-down
 
 # Start Snipe-IT stack
+# Ensure docker/api_key.txt exists as a regular empty file BEFORE docker compose
+# bind-mounts it. If the path doesn't exist (or is a directory), Docker will
+# auto-create it as a directory, breaking the seeder's `> /api_key.txt` redirect.
 docker-up:
+	@if [ ! -f docker/api_key.txt ] || [ -d docker/api_key.txt ]; then \
+		rm -rf docker/api_key.txt; \
+		touch docker/api_key.txt; \
+	fi
 	cd docker && docker compose up -d
 
-# Stop stack and delete volumes
+# Stop stack and delete volumes. Restore api_key.txt as an empty regular file
+# so the next `make docker-up` has a valid bind-mount target.
 docker-down:
 	cd docker && docker compose down -v
-	> docker/api_key.txt
+	rm -rf docker/api_key.txt
+	touch docker/api_key.txt
 
-# Run integration tests: bring up docker, wait for api_key.txt, then test
+# Run integration tests: bring up docker, wait for api_key.txt AND for the API
+# to actually respond to authenticated requests, then test.
+#
+# Two-stage wait is required because the seeder writes the token to
+# api_key.txt as soon as it generates one, but the Snipe-IT app container is
+# usually still booting Apache/PHP at that point. Hitting the API before it's
+# ready causes ECONNRESET on the first few requests, which manifests as
+# "flaky" test failures that disappear on a re-run once the app is warm.
 test-integration:
 	$(MAKE) docker-up
 	@echo "Waiting for docker/api_key.txt (up to ~120s)..."
@@ -53,11 +75,33 @@ test-integration:
 	while [ ! -s docker/api_key.txt ] && [ $$i -lt 120 ]; do \
 		sleep 1; i=$$((i+1)); \
 	done; \
+	if [ -d docker/api_key.txt ]; then \
+		echo "ERROR: docker/api_key.txt is a directory, not a file. Run 'make docker-down' to reset."; \
+		exit 1; \
+	fi; \
 	if [ ! -s docker/api_key.txt ]; then \
 		echo "Timed out waiting for docker/api_key.txt. Check 'docker compose logs --follow seeder'."; \
 		exit 1; \
 	fi
-	.venv/bin/python -m pytest -q -m integration
+	@echo "Waiting for Snipe-IT API to accept authenticated requests (up to ~120s)..."
+	@TOKEN=$$(cat docker/api_key.txt); \
+	i=0; \
+	while [ $$i -lt 120 ]; do \
+		code=$$(curl -s -o /dev/null -w "%{http_code}" -m 5 \
+			-H "Authorization: Bearer $$TOKEN" \
+			-H "Accept: application/json" \
+			http://localhost:8000/api/v1/users/me 2>/dev/null || echo "000"); \
+		if [ "$$code" = "200" ]; then \
+			echo "API is ready (HTTP 200 on /users/me)"; \
+			break; \
+		fi; \
+		sleep 1; i=$$((i+1)); \
+	done; \
+	if [ "$$code" != "200" ]; then \
+		echo "Timed out waiting for Snipe-IT API. Last status: $$code. Check 'docker compose logs --follow app'."; \
+		exit 1; \
+	fi
+	.venv/bin/python -m pytest tests/integration -q -m integration
 	
 
 # Run both unit and integration tests

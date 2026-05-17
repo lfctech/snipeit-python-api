@@ -17,7 +17,7 @@ class Supplier(ApiObject):
             print(sup)
     """
 
-    _path = "suppliers"
+    _resource_path = "suppliers"
 
     def __repr__(self) -> str:
         """Return a concise string representation.
@@ -26,7 +26,7 @@ class Supplier(ApiObject):
             str: The supplier id and name.
         """
         return (
-            f"<Supplier {getattr(self, 'id', 'N/A')}: {getattr(self, 'name', 'N/A')}>"
+            f"<Supplier {(self.id if self.id is not None else 'N/A')}: {getattr(self, 'name', 'N/A')}>"
         )
 
 
@@ -40,7 +40,7 @@ class SuppliersManager(BaseResourceManager[Supplier]):
     """
 
     resource_cls = Supplier
-    path = Supplier._path
+    path = Supplier._resource_path
 
     def create(self, name: str, **kwargs: Any) -> "Supplier":
         """Create a new supplier.

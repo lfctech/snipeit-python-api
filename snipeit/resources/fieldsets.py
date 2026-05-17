@@ -16,7 +16,7 @@ class Fieldset(ApiObject):
             fs = api.fieldsets.get(1)
             print(fs)
     """
-    _path = "fieldsets"
+    _resource_path = "fieldsets"
 
     def __repr__(self) -> str:
         """Return a concise string representation.
@@ -24,7 +24,7 @@ class Fieldset(ApiObject):
         Returns:
             str: The fieldset id and name.
         """
-        return f"<Fieldset {getattr(self, 'id', 'N/A')}: {getattr(self, 'name', 'N/A')}>"
+        return f"<Fieldset {(self.id if self.id is not None else 'N/A')}: {getattr(self, 'name', 'N/A')}>"
 
 
 class FieldsetsManager(BaseResourceManager[Fieldset]):
@@ -37,7 +37,7 @@ class FieldsetsManager(BaseResourceManager[Fieldset]):
     """
 
     resource_cls = Fieldset
-    path = Fieldset._path
+    path = Fieldset._resource_path
 
     def create(self, name: str, **kwargs: Any) -> 'Fieldset':
         """Create a new fieldset.

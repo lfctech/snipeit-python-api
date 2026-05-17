@@ -2,6 +2,8 @@ import pytest
 from hypothesis import given, strategies as st
 from snipeit.resources.base import ApiObject
 
+pytestmark = pytest.mark.unit
+
 
 class _ManagerStub:
     def __init__(self):
@@ -50,7 +52,7 @@ def test_apiobject_property_only_sends_changed_fields(initial, updates):
     if not changed:
         # Force at least one change if all updates were same as before
         k = next(iter(updates.keys()))
-        setattr(obj, k, object())  # make it definitely different
+        setattr(obj, k, ("__forced__",))  # deterministic sentinel, never equal to real values
         changed[k] = getattr(obj, k)
 
     obj.save()
@@ -58,4 +60,4 @@ def test_apiobject_property_only_sends_changed_fields(initial, updates):
     assert mgr._patched_path == "props/1"
     assert mgr._patched_data == changed
     # Dirty fields cleared
-    assert not getattr(obj, "_dirty_fields")
+    assert not obj._dirty_set()

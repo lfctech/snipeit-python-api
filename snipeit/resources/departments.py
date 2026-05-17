@@ -16,7 +16,7 @@ class Department(ApiObject):
             dept = api.departments.get(1)
             print(dept)
     """
-    _path = "departments"
+    _resource_path = "departments"
 
     def __repr__(self) -> str:
         """Return a concise string representation.
@@ -24,7 +24,7 @@ class Department(ApiObject):
         Returns:
             str: The department id and name.
         """
-        return f"<Department {getattr(self, 'id', 'N/A')}: {getattr(self, 'name', 'N/A')}>"
+        return f"<Department {(self.id if self.id is not None else 'N/A')}: {getattr(self, 'name', 'N/A')}>"
 
 
 class DepartmentsManager(BaseResourceManager[Department]):
@@ -37,7 +37,7 @@ class DepartmentsManager(BaseResourceManager[Department]):
     """
 
     resource_cls = Department
-    path = Department._path
+    path = Department._resource_path
 
     def create(self, name: str, **kwargs: Any) -> 'Department':
         """Create a new department.
