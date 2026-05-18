@@ -47,15 +47,15 @@ dev = [
     "pytest-httpx>=0.30",
     "coverage",
     "hypothesis",
-    "mutmut<3",
+    "mutmut>=3,<4",
     "ruff",
     "pyright",
 ]
 
 [tool.mutmut]
-paths_to_mutate = "snipeit"
-tests_dir = "tests"
-runner = "python -m pytest -q"
+paths_to_mutate = ["snipeit"]
+tests_dir = ["tests/unit", "tests/contract"]
+mutate_only_covered_lines = true
 
 [tool.ruff]
 line-length = 120
