@@ -13,20 +13,52 @@ from ..exceptions import SnipeITApiError, SnipeITException
 _MISSING = object()  # sentinel for "attribute not yet set"
 
 
+def _fast_json_copy(v: Any) -> Any:
+    """Recursive copy specialised for JSON-shaped values.
+
+    Snipe-IT API responses are pure JSON: ``dict``/``list`` of
+    ``str``/``int``/``float``/``bool``/``None``. For these types, this
+    hand-written recursive copy avoids the per-call overhead of
+    ``copy.deepcopy`` (memo tables and ``copy._deepcopy_dispatch``),
+    which dominates ``ApiObject`` construction time when iterating large
+    ``list_all`` results.
+
+    For unexpected types, fall back to ``copy.deepcopy`` to preserve
+    semantics; if even that fails the caller of ``_safe_snapshot`` keeps
+    the value by reference (assignment-based dirty tracking still works).
+    """
+    if isinstance(v, dict):
+        # New dict — comprehension is C-implemented and much faster than a loop.
+        return {k: _fast_json_copy(val) for k, val in v.items()}
+    if isinstance(v, list):
+        return [_fast_json_copy(item) for item in v]
+    if v is None or isinstance(v, (str, int, float, bool)):
+        # Scalars are immutable; safe to alias.
+        return v
+    # Unknown type (datetime, Decimal, custom class, ...): fall back to
+    # the general-purpose deep copy.
+    return copy.deepcopy(v)
+
+
 def _safe_snapshot(d: dict[str, Any]) -> dict[str, Any]:
     """Return a snapshot of ``d`` for diff-based dirty tracking.
 
-    Dicts and lists are deep-copied so that in-place mutations are detected.
-    Scalar values (str, int, float, bool, None) are stored as-is (they're
-    immutable, so no deepcopy needed). Other types are stored by reference;
-    for those, in-place mutation detection is not guaranteed, but
+    Dicts and lists are recursively copied so that in-place mutations are
+    detected. Scalar values (``str``/``int``/``float``/``bool``/``None``)
+    are stored as-is (they're immutable, so no copy is needed). Other types
+    are stored by reference if even ``copy.deepcopy`` fails on them; for
+    those, in-place mutation detection is not guaranteed, but
     assignment-based tracking still works.
+
+    The hot path uses :func:`_fast_json_copy`, which is several times
+    faster than ``copy.deepcopy`` for JSON-shaped payloads (the only shape
+    Snipe-IT returns).
     """
     result: dict[str, Any] = {}
     for k, v in d.items():
         if isinstance(v, (dict, list)):
             try:
-                result[k] = copy.deepcopy(v)
+                result[k] = _fast_json_copy(v)
             except Exception:
                 result[k] = v
         else:
@@ -311,19 +343,25 @@ class BaseResourceManager(Manager, Generic[T]):
             raise SnipeITException("Unexpected response shape: 'rows' must be a list")
         return [self._make(item) for item in rows]
 
-    def list_all(self, *, limit: int | None = None, page_size: int = 50, **params: Any) -> Iterable[T]:
+    def list_all(self, *, limit: int | None = None, page_size: int = 100, **params: Any) -> Iterable[T]:
         if "offset" in params:
             raise ValueError(
                 "Do not pass 'offset' as a filter param to list_all() — it controls "
                 "internal pagination and would break page iteration. "
                 "Use 'limit' to cap total results."
             )
-        page = 1
         yielded = 0
         while True:
+            # When the caller passes a small ``limit``, never request more rows
+            # from the server than we still need. ``list_all(limit=5,
+            # page_size=500)`` would otherwise pull 500 rows just to use 5.
+            remaining = None if limit is None else max(0, limit - yielded)
+            if remaining == 0:
+                return
+            per_page = page_size if remaining is None else min(page_size, remaining)
             resp = self._get(
                 f"{self.path}",
-                **{**params, "limit": page_size, "offset": (page - 1) * page_size},
+                **{**params, "limit": per_page, "offset": yielded},
             )
             if not isinstance(resp, dict):
                 raise SnipeITException(
@@ -342,7 +380,6 @@ class BaseResourceManager(Manager, Generic[T]):
             total = resp.get("total")
             if isinstance(total, int) and yielded >= total:
                 break
-            page += 1
 
     def get(self, obj_id: int, **params: Any) -> T:
         data = self._get(f"{self.path}/{obj_id}", **params)

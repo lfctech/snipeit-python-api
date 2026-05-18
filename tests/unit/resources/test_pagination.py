@@ -52,7 +52,7 @@ def test_list_all_terminates_when_rows_empty_and_no_total(snipeit_client, httpx_
     """
     httpx_mock.add_response(
         method="GET",
-        url="https://snipe.example.test/api/v1/users?limit=50&offset=0",
+        url="https://snipe.example.test/api/v1/users?limit=100&offset=0",
         json={"rows": []},  # no 'total' key
     )
     items = list(snipeit_client.users.list_all())
