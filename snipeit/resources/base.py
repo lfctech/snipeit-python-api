@@ -293,7 +293,7 @@ class BaseResourceManager(Manager, Generic[T]):
     def __init__(self, api: Any) -> None:
         super().__init__(api)
         if self.path is None:
-            self.path = getattr(self.resource_cls, "_resource_path", "")  # type: ignore[assignment]
+            self.path = getattr(self.resource_cls, "_resource_path", "")
 
     def _make(self, data: dict[str, Any]) -> T:
         return self.resource_cls(self, data)

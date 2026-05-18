@@ -62,7 +62,7 @@ class AssetsManager(AssetFilesMixin, AssetLabelsMixin, BaseResourceManager[Asset
         try:
             return self._make(self._get(f"{self.path}/bytag/{asset_tag}", **kwargs))
         except SnipeITNotFoundError:
-            raise SnipeITNotFoundError(f"Asset with tag {asset_tag!r} not found.")
+            raise SnipeITNotFoundError(f"Asset with tag {asset_tag!r} not found.") from None
 
     def get_by_serial(self, serial: str, **kwargs: Any) -> Asset:
         """Get a single asset by serial number.
@@ -72,7 +72,7 @@ class AssetsManager(AssetFilesMixin, AssetLabelsMixin, BaseResourceManager[Asset
         try:
             response = self._get(f"{self.path}/byserial/{serial}", **kwargs)
         except SnipeITNotFoundError:
-            raise SnipeITNotFoundError(f"Asset with serial {serial!r} not found.")
+            raise SnipeITNotFoundError(f"Asset with serial {serial!r} not found.") from None
 
         if isinstance(response, dict) and "rows" in response:
             if "total" not in response:

@@ -21,7 +21,7 @@ def test_locations_crud_and_parenting(real_snipeit_client: SnipeIT, run_id: str,
         if isinstance(parent_obj, dict) and "id" in parent_obj:
             assert int(parent_obj["id"]) == id_int(root)
         else:
-            assert int(getattr(got_child, "parent_id")) == id_int(root)
+            assert int(got_child.parent_id) == id_int(root)
 
         # Update name
         new_child_name = _n("loc-child2-upd", run_id)
