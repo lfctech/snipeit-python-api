@@ -25,7 +25,10 @@ class StatusLabel(ApiObject):
         Returns:
             str: The status label id, name, and type.
         """
-        return f"<StatusLabel {(self.id if self.id is not None else 'N/A')}: {getattr(self, 'name', 'N/A')} (Type: {getattr(self, 'type', 'N/A')})>"
+        id_ = self.id if self.id is not None else "N/A"
+        name = getattr(self, "name", "N/A")
+        type_ = getattr(self, "type", "N/A")
+        return f"<StatusLabel {id_}: {name} (Type: {type_})>"
 
 
 class StatusLabelsManager(BaseResourceManager[StatusLabel]):

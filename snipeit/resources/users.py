@@ -25,7 +25,10 @@ class User(ApiObject):
         Returns:
             str: The user id, name, and username.
         """
-        return f"<User {(self.id if self.id is not None else 'N/A')}: {getattr(self, 'name', 'N/A')} ({getattr(self, 'username', 'N/A')})>"
+        id_ = self.id if self.id is not None else "N/A"
+        name = getattr(self, "name", "N/A")
+        username = getattr(self, "username", "N/A")
+        return f"<User {id_}: {name} ({username})>"
 
 
 class UsersManager(BaseResourceManager[User]):

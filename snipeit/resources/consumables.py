@@ -25,7 +25,10 @@ class Consumable(ApiObject):
         Returns:
             str: The consumable id, name, and quantity.
         """
-        return f"<Consumable {(self.id if self.id is not None else 'N/A')}: {getattr(self, 'name', 'N/A')} (Qty: {getattr(self, 'qty', 'N/A')})>"
+        id_ = self.id if self.id is not None else "N/A"
+        name = getattr(self, "name", "N/A")
+        qty = getattr(self, "qty", "N/A")
+        return f"<Consumable {id_}: {name} (Qty: {qty})>"
 
 
 class ConsumablesManager(BaseResourceManager[Consumable]):
