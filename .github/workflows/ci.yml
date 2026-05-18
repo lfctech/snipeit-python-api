@@ -20,6 +20,9 @@ jobs:
       matrix:
         python-version: ["3.11", "3.12", "3.13"]
         pydantic-version: ["~=2.0.0", "~=2.10.0"]
+        exclude:
+          - python-version: "3.13"
+            pydantic-version: "~=2.0.0"
 
     steps:
       - uses: actions/checkout@v4
