@@ -1,8 +1,28 @@
+import multiprocessing
 import os
 
 import pytest
 
 from snipeit import SnipeIT
+
+# ---------------------------------------------------------------------------
+# Workaround: mutmut 3.5.0 calls ``set_start_method('fork')`` at module level
+# in ``mutmut/__main__.py``. On Python 3.14 the multiprocessing context is
+# already set by the time the trampoline triggers that import, causing
+# ``RuntimeError: context has already been set``. Patch the function to
+# tolerate redundant calls.
+# ---------------------------------------------------------------------------
+_original_set_start_method = multiprocessing.set_start_method
+
+
+def _safe_set_start_method(method, force=False):  # type: ignore[no-untyped-def]
+    try:
+        _original_set_start_method(method, force=force)
+    except RuntimeError:
+        pass
+
+
+multiprocessing.set_start_method = _safe_set_start_method  # type: ignore[assignment]
 
 
 @pytest.fixture
