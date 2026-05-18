@@ -12,9 +12,9 @@ from snipeit.resources.licenses import License
 from snipeit.resources.locations import Location
 from snipeit.resources.manufacturers import Manufacturer
 from snipeit.resources.models import Model
+from snipeit.resources.status_labels import StatusLabel
 from snipeit.resources.suppliers import Supplier
 from snipeit.resources.users import User
-from snipeit.resources.status_labels import StatusLabel
 
 pytestmark = pytest.mark.unit
 

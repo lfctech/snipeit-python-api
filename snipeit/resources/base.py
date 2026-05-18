@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import copy
-from typing import Any, ClassVar, Generic, Iterable, TypeVar
+from collections.abc import Iterable
+from typing import Any, ClassVar, Generic, TypeVar
 
 from pydantic import BaseModel, ConfigDict, PrivateAttr
 

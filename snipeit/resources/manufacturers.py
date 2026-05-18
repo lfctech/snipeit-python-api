@@ -4,6 +4,7 @@ Provides Manufacturer model and ManufacturersManager for Snipe-IT manufacturers.
 """
 
 from typing import Any
+
 from .base import ApiObject, BaseResourceManager
 
 

@@ -4,6 +4,7 @@ Provides Field model and FieldsManager for Snipe-IT custom fields.
 """
 
 from typing import Any
+
 from .base import ApiObject, BaseResourceManager
 
 

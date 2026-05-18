@@ -4,6 +4,7 @@ Provides Component model and ComponentsManager for Snipe-IT components.
 """
 
 from typing import Any
+
 from .base import ApiObject, BaseResourceManager
 
 

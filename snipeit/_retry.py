@@ -13,13 +13,12 @@ from __future__ import annotations
 
 import time
 from collections.abc import Callable, Iterable
+from datetime import UTC, datetime
 from email.utils import parsedate_to_datetime
-from datetime import datetime, timezone
 
 import httpx
 
 from ._log import logger
-
 
 DEFAULT_STATUS_FORCELIST: frozenset[int] = frozenset({429, 500, 502, 503, 504})
 DEFAULT_ALLOWED_METHODS: frozenset[str] = frozenset({"HEAD", "GET", "OPTIONS"})
@@ -67,7 +66,7 @@ class RetryTransport(httpx.BaseTransport):
         self._sleep = sleep if sleep is not None else time.sleep
 
     # httpx.BaseTransport API
-    def handle_request(self, request: httpx.Request) -> httpx.Response:  # noqa: D401
+    def handle_request(self, request: httpx.Request) -> httpx.Response:
         method = request.method.upper()
         retryable = method in self.allowed_methods
         last_error: Exception | None = None
@@ -150,6 +149,6 @@ class RetryTransport(httpx.BaseTransport):
         if dt is None:
             return None
         if dt.tzinfo is None:
-            dt = dt.replace(tzinfo=timezone.utc)
-        delta = (dt - datetime.now(timezone.utc)).total_seconds()
+            dt = dt.replace(tzinfo=UTC)
+        delta = (dt - datetime.now(UTC)).total_seconds()
         return max(0.0, delta)

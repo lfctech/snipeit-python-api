@@ -4,6 +4,7 @@ Provides Fieldset model and FieldsetsManager for Snipe-IT fieldsets.
 """
 
 from typing import Any
+
 from .base import ApiObject, BaseResourceManager
 
 

@@ -1,7 +1,9 @@
 import json
+
 import pytest
-from snipeit.resources.assets import Asset
+
 from snipeit.exceptions import SnipeITNotFoundError
+from snipeit.resources.assets import Asset
 
 pytestmark = pytest.mark.unit
 

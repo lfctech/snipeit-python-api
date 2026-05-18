@@ -89,6 +89,7 @@ def test_licenses_and_files_endpoints(snipeit_client, httpx_mock, tmp_path):
 def test_upload_files_timeout_raises_snipeit_timeout_error(snipeit_client, httpx_mock, tmp_path):
     """A timeout during file upload must surface as SnipeITTimeoutError."""
     import httpx
+
     from snipeit.exceptions import SnipeITTimeoutError
 
     f = tmp_path / "file.txt"

@@ -4,6 +4,7 @@ Provides StatusLabel model and StatusLabelsManager for Snipe-IT status labels.
 """
 
 from typing import Any
+
 from .base import ApiObject, BaseResourceManager
 
 

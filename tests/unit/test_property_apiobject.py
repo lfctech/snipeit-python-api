@@ -1,5 +1,7 @@
 import pytest
-from hypothesis import given, strategies as st
+from hypothesis import given
+from hypothesis import strategies as st
+
 from snipeit.resources.base import ApiObject
 
 pytestmark = pytest.mark.unit

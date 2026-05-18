@@ -49,7 +49,7 @@ class Asset(ApiObject):
         model_name = model.get("name", "N/A") if isinstance(model, dict) else "N/A"
         return f"<Asset {asset_tag} ({name} - {serial} - {model_name})>"
 
-    def checkout(self, checkout_to_type: str, assigned_to_id: int, **kwargs: Any) -> "Asset":
+    def checkout(self, checkout_to_type: str, assigned_to_id: int, **kwargs: Any) -> Asset:
         """Check out this asset to a user, asset, or location.
 
         Args:
@@ -77,17 +77,17 @@ class Asset(ApiObject):
         self._manager._create(path, data)
         return self.refresh()
 
-    def checkin(self, **kwargs: Any) -> "Asset":
+    def checkin(self, **kwargs: Any) -> Asset:
         """Check in this asset."""
         self._manager._create(f"{self._path}/{self.id}/checkin", kwargs)
         return self.refresh()
 
-    def audit(self, **kwargs: Any) -> "Asset":
+    def audit(self, **kwargs: Any) -> Asset:
         """Audit this asset via POST /hardware/{id}/audit."""
         self._manager._create(f"{self._path}/{self.id}/audit", kwargs)
         return self.refresh()
 
-    def restore(self) -> "Asset":
+    def restore(self) -> Asset:
         """Restore a soft-deleted asset."""
         self._manager._create(f"{self._path}/{self.id}/restore", {})
         return self.refresh()
@@ -95,7 +95,7 @@ class Asset(ApiObject):
     # ------------------------------------------------------------------
     # Persistence
     # ------------------------------------------------------------------
-    def save(self) -> "Asset":
+    def save(self) -> Asset:
         """Persist regular dirty fields **and** any staged custom fields.
 
         Extends :meth:`ApiObject.save` to also flush ``_pending_custom_fields``.

@@ -4,6 +4,7 @@ Provides License model and LicensesManager for Snipe-IT licenses.
 """
 
 from typing import Any
+
 from .base import ApiObject, BaseResourceManager
 
 

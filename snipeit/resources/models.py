@@ -4,6 +4,7 @@ Provides Model (asset model) and ModelsManager for Snipe-IT models.
 """
 
 from typing import Any
+
 from .base import ApiObject, BaseResourceManager
 
 

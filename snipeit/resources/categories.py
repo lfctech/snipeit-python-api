@@ -4,6 +4,7 @@ Provides Category model and CategoriesManager for Snipe-IT categories.
 """
 
 from typing import Any
+
 from .base import ApiObject, BaseResourceManager
 
 

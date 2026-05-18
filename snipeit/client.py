@@ -151,7 +151,7 @@ class SnipeIT:
         """Close the underlying HTTP session."""
         self._http.close()
 
-    def __enter__(self) -> "SnipeIT":
+    def __enter__(self) -> SnipeIT:
         return self
 
     def __exit__(self, exc_type, exc, tb) -> bool | None:

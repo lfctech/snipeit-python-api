@@ -4,6 +4,7 @@ Provides User model and UsersManager for Snipe-IT users.
 """
 
 from typing import Any
+
 from .base import ApiObject, BaseResourceManager
 
 

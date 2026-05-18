@@ -4,6 +4,7 @@ Provides Consumable model and ConsumablesManager for Snipe-IT consumables.
 """
 
 from typing import Any
+
 from .base import ApiObject, BaseResourceManager
 
 

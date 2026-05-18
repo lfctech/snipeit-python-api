@@ -1,6 +1,7 @@
 """Tests for the RetryTransport and SnipeIT retry configuration."""
 
 import pytest
+
 from snipeit import SnipeIT
 from snipeit._retry import RetryTransport
 from snipeit.exceptions import SnipeITServerError
@@ -54,6 +55,7 @@ def test_retry_allows_post_when_configured():
 def test_retry_transport_retries_get_on_503(httpx_mock):
     """GET on 503 should be retried up to max_retries times."""
     import httpx
+
     from snipeit._retry import RetryTransport
 
     sleep_calls: list[float] = []
@@ -72,8 +74,9 @@ def test_retry_transport_retries_get_on_503(httpx_mock):
 @pytest.mark.unit
 def test_retry_transport_respects_retry_after(httpx_mock):
     """Retry-After header should override backoff sleep."""
-    from snipeit._retry import RetryTransport
     import httpx
+
+    from snipeit._retry import RetryTransport
 
     sleep_calls: list[float] = []
     rt = RetryTransport(
@@ -120,8 +123,10 @@ def test_retry_transport_does_not_retry_post_read_error_by_default():
 def test_retry_after_future_http_date_sleeps_for_correct_duration(httpx_mock):
     """A Retry-After HTTP-date 30 seconds in the future must produce a sleep of ~30s."""
     import time
-    import httpx
     from email.utils import formatdate
+
+    import httpx
+
     from snipeit._retry import RetryTransport
 
     future_date = formatdate(time.time() + 30, usegmt=True)
@@ -154,6 +159,7 @@ def test_retry_after_future_http_date_sleeps_for_correct_duration(httpx_mock):
 def test_retry_after_false_uses_backoff_not_header(httpx_mock):
     """When respect_retry_after=False, the Retry-After header must be ignored and backoff used."""
     import httpx
+
     from snipeit._retry import RetryTransport
 
     sleep_calls: list[float] = []
