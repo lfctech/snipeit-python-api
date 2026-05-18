@@ -4,8 +4,8 @@ import pytest
 
 from snipeit import SnipeIT
 from snipeit.exceptions import (
-    SnipeITNotFoundError,
     SnipeITApiError,
+    SnipeITNotFoundError,
 )
 
 pytestmark = pytest.mark.integration

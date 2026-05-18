@@ -1,10 +1,11 @@
 import pytest
+
 from snipeit.exceptions import (
+    SnipeITApiError,
     SnipeITAuthenticationError,
     SnipeITNotFoundError,
-    SnipeITValidationError,
     SnipeITServerError,
-    SnipeITApiError,
+    SnipeITValidationError,
 )
 
 pytestmark = pytest.mark.unit
@@ -83,7 +84,9 @@ def test_api_error_preserves_response_and_status_code():
 def test_validation_error_with_unparseable_body_sets_errors_none(caplog):
     """When the 422 response body is not valid JSON, errors must be None and a warning logged."""
     import logging
+
     import httpx
+
     from snipeit.exceptions import SnipeITValidationError
 
     # Build a response whose .json() will raise ValueError

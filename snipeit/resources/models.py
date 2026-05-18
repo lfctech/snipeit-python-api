@@ -4,6 +4,7 @@ Provides Model (asset model) and ModelsManager for Snipe-IT models.
 """
 
 from typing import Any
+
 from .base import ApiObject, BaseResourceManager
 
 
@@ -24,7 +25,10 @@ class Model(ApiObject):
         Returns:
             str: The model id, name, and model number.
         """
-        return f"<Model {(self.id if self.id is not None else 'N/A')}: {getattr(self, 'name', 'N/A')} ({getattr(self, 'model_number', 'N/A')})>"
+        id_ = self.id if self.id is not None else "N/A"
+        name = getattr(self, "name", "N/A")
+        model_number = getattr(self, "model_number", "N/A")
+        return f"<Model {id_}: {name} ({model_number})>"
 
 
 class ModelsManager(BaseResourceManager[Model]):

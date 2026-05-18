@@ -50,6 +50,7 @@ def test_download_file_progress_callback(snipeit_client, httpx_mock, tmp_path):
 def test_download_file_timeout_raises_snipeit_timeout_error(snipeit_client, httpx_mock, tmp_path):
     """A timeout during streaming must surface as SnipeITTimeoutError, not a raw httpx error."""
     import httpx
+
     from snipeit.exceptions import SnipeITTimeoutError
 
     httpx_mock.add_exception(
@@ -65,6 +66,7 @@ def test_download_file_timeout_raises_snipeit_timeout_error(snipeit_client, http
 def test_download_file_connect_error_raises_snipeit_exception(snipeit_client, httpx_mock, tmp_path):
     """A connection error during streaming must surface as SnipeITException."""
     import httpx
+
     from snipeit.exceptions import SnipeITException
 
     # ConnectError on GET is retried (default max_retries=3); register 4 exceptions.

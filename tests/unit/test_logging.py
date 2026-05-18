@@ -17,7 +17,11 @@ SUPER_SECRET_TOKEN = "super-secret-token-abcdef1234567890"
 
 @pytest.fixture
 def client_with_token():
-    return SnipeIT(url="https://snipe.example.test", token=SUPER_SECRET_TOKEN)
+    client = SnipeIT(url="https://snipe.example.test", token=SUPER_SECRET_TOKEN)
+    # No-op the retry sleep so tests exhausting retries don't pay real backoff.
+    # See tests/conftest.py::snipeit_client for rationale.
+    client._retry_transport._sleep = lambda _s: None
+    return client
 
 
 @pytest.mark.unit

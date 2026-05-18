@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "snipeit-api"
-version = "0.4.0"
+version = "0.5.0"
 description = "A Python client for the Snipe-IT API"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -47,12 +47,21 @@ dev = [
     "pytest-httpx>=0.30",
     "coverage",
     "hypothesis",
-    "mutmut<3",
+    "mutmut>=3,<4",
     "ruff",
     "pyright",
 ]
 
 [tool.mutmut]
-paths_to_mutate = "snipeit"
-tests_dir = "tests"
-runner = "python -m pytest -q"
+paths_to_mutate = ["snipeit"]
+tests_dir = ["tests/unit", "tests/contract"]
+mutate_only_covered_lines = true
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "I", "UP", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["E501"]

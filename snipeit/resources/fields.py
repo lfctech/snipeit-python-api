@@ -4,6 +4,7 @@ Provides Field model and FieldsManager for Snipe-IT custom fields.
 """
 
 from typing import Any
+
 from .base import ApiObject, BaseResourceManager
 
 
@@ -24,7 +25,10 @@ class Field(ApiObject):
         Returns:
             str: The field id, name, and element.
         """
-        return f"<Field {(self.id if self.id is not None else 'N/A')}: {getattr(self, 'name', 'N/A')} (Element: {getattr(self, 'element', 'N/A')})>"
+        id_ = self.id if self.id is not None else "N/A"
+        name = getattr(self, "name", "N/A")
+        element = getattr(self, "element", "N/A")
+        return f"<Field {id_}: {name} (Element: {element})>"
 
 
 class FieldsManager(BaseResourceManager[Field]):

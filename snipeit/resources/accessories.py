@@ -5,6 +5,7 @@ Snipe-IT accessory endpoints.
 """
 
 from typing import Any
+
 from .base import ApiObject, BaseResourceManager
 
 

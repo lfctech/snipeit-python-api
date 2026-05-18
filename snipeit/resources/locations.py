@@ -4,6 +4,7 @@ Provides Location model and LocationsManager for Snipe-IT locations.
 """
 
 from typing import Any
+
 from .base import ApiObject, BaseResourceManager
 
 

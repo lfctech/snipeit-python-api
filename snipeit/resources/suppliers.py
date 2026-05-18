@@ -4,6 +4,7 @@ Provides Supplier model and SuppliersManager for Snipe-IT suppliers.
 """
 
 from typing import Any
+
 from .base import ApiObject, BaseResourceManager
 
 

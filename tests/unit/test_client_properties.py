@@ -1,4 +1,5 @@
 import pytest
+
 from snipeit import SnipeIT
 
 pytestmark = pytest.mark.unit

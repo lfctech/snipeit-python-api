@@ -49,16 +49,30 @@ class Asset(ApiObject):
         model_name = model.get("name", "N/A") if isinstance(model, dict) else "N/A"
         return f"<Asset {asset_tag} ({name} - {serial} - {model_name})>"
 
-    def checkout(self, checkout_to_type: str, assigned_to_id: int, **kwargs: Any) -> "Asset":
+    def checkout(
+        self,
+        checkout_to_type: str,
+        assigned_to_id: int,
+        *,
+        refresh: bool = True,
+        **kwargs: Any,
+    ) -> Asset:
         """Check out this asset to a user, asset, or location.
 
         Args:
             checkout_to_type (str): One of "user", "asset", or "location".
             assigned_to_id (int): The id of the user/asset/location to assign.
+            refresh: When ``True`` (default), issue a follow-up ``GET`` to
+                refresh this object's local state from the server. Pass
+                ``False`` for bulk operations where you do not need the
+                updated fields locally — this halves the round trips per
+                checkout. The local state will be stale until you call
+                :meth:`refresh` yourself.
             **kwargs: Additional optional fields such as expected_checkin, note, etc.
 
         Returns:
-            Asset: The updated Asset object.
+            Asset: The updated Asset object (or this object unchanged when
+            ``refresh=False``).
 
         Raises:
             ValueError: If checkout_to_type is not one of "user", "asset", or "location".
@@ -75,27 +89,54 @@ class Asset(ApiObject):
             raise ValueError("checkout_to_type must be one of 'user', 'asset', or 'location'")
         data.update(kwargs)
         self._manager._create(path, data)
-        return self.refresh()
+        if refresh:
+            return self.refresh()
+        return self
 
-    def checkin(self, **kwargs: Any) -> "Asset":
-        """Check in this asset."""
+    def checkin(self, *, refresh: bool = True, **kwargs: Any) -> Asset:
+        """Check in this asset.
+
+        Args:
+            refresh: When ``True`` (default), refetch the asset after the
+                check-in. Pass ``False`` to skip the GET round trip when
+                you don't need the updated local state.
+            **kwargs: Optional check-in fields (``note``, ``location_id`` etc).
+        """
         self._manager._create(f"{self._path}/{self.id}/checkin", kwargs)
-        return self.refresh()
+        if refresh:
+            return self.refresh()
+        return self
 
-    def audit(self, **kwargs: Any) -> "Asset":
-        """Audit this asset via POST /hardware/{id}/audit."""
+    def audit(self, *, refresh: bool = True, **kwargs: Any) -> Asset:
+        """Audit this asset via POST /hardware/{id}/audit.
+
+        Args:
+            refresh: When ``True`` (default), refetch the asset after the
+                audit. Pass ``False`` for bulk audit jobs where the local
+                state is not needed.
+            **kwargs: Optional audit fields.
+        """
         self._manager._create(f"{self._path}/{self.id}/audit", kwargs)
-        return self.refresh()
+        if refresh:
+            return self.refresh()
+        return self
 
-    def restore(self) -> "Asset":
-        """Restore a soft-deleted asset."""
+    def restore(self, *, refresh: bool = True) -> Asset:
+        """Restore a soft-deleted asset.
+
+        Args:
+            refresh: When ``True`` (default), refetch the asset after the
+                restore. Pass ``False`` to skip the GET.
+        """
         self._manager._create(f"{self._path}/{self.id}/restore", {})
-        return self.refresh()
+        if refresh:
+            return self.refresh()
+        return self
 
     # ------------------------------------------------------------------
     # Persistence
     # ------------------------------------------------------------------
-    def save(self) -> "Asset":
+    def save(self) -> Asset:
         """Persist regular dirty fields **and** any staged custom fields.
 
         Extends :meth:`ApiObject.save` to also flush ``_pending_custom_fields``.

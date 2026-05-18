@@ -2,6 +2,39 @@
 
 ## Unreleased
 
+## 0.5.0 (2026-05-17)
+
+### New features
+
+- **Retry jitter**: `RetryTransport` now applies full-jitter
+  (`uniform(0, base)`) to exponential-backoff delays, desynchronising
+  retries across concurrent clients (thundering-herd mitigation).
+  `Retry-After` headers are still honoured verbatim. Pass `jitter=` to
+  override the strategy.
+- **`refresh=False` on asset actions**: `checkout()`, `checkin()`,
+  `audit()`, and `restore()` accept `refresh=False` to skip the follow-up
+  GET, halving round trips in bulk workflows.
+
+### Performance
+
+- **`_fast_json_copy`**: Snapshot-based dirty tracking now uses a
+  JSON-specialised recursive copy instead of `copy.deepcopy`, significantly
+  reducing `ApiObject` construction time on large `list_all` results.
+- **`list_all` page-size cap**: When the caller's remaining `limit` is
+  smaller than `page_size`, only the needed rows are requested from the
+  server. Default `page_size` raised from 50 to 100.
+
+### Internal / testing
+
+- **No-op retry sleep in test fixtures**: The shared `snipeit_client`
+  fixture and `test_logging`'s `client_with_token` now stub out the retry
+  transport's sleep, eliminating ~2 s of real backoff per retry-exhausting
+  test.
+- **Property tests**: Added property-based tests for core resource manager
+  and `ApiObject` logic.
+- **Lint hardening**: Strengthened ruff and pyright configuration; applied
+  isort, pyupgrade, and bugbear auto-fixes.
+
 ## 0.4.0 (2026-05-16)
 
 ### Custom-field staging refactor

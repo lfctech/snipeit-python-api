@@ -4,6 +4,7 @@ Provides Department model and DepartmentsManager for Snipe-IT departments.
 """
 
 from typing import Any
+
 from .base import ApiObject, BaseResourceManager
 
 

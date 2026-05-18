@@ -1,4 +1,5 @@
 import os
+
 import pytest
 
 from snipeit.exceptions import SnipeITApiError
@@ -42,6 +43,7 @@ def test_labels_rejects_non_pdf_content_type(snipeit_client, httpx_mock, tmp_pat
 def test_labels_sends_exactly_one_accept_header(tmp_path):
     """Regression: labels() previously sent duplicate Accept headers."""
     import httpx
+
     from snipeit import SnipeIT
 
     captured: dict[str, list[str]] = {"accept": []}
@@ -93,6 +95,7 @@ def test_labels_all_blank_strings_raises_value_error(snipeit_client, tmp_path):
 def test_labels_with_asset_objects_sends_only_valid_tags(snipeit_client, httpx_mock, tmp_path):
     """labels() accepts Asset objects; only assets with a non-None asset_tag are sent."""
     import json as _json
+
     from snipeit.resources.assets import Asset
 
     class _Mgr:

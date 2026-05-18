@@ -1,6 +1,28 @@
+import multiprocessing
 import os
+
 import pytest
+
 from snipeit import SnipeIT
+
+# ---------------------------------------------------------------------------
+# Workaround: mutmut 3.5.0 calls ``set_start_method('fork')`` at module level
+# in ``mutmut/__main__.py``. On Python 3.14 the multiprocessing context is
+# already set by the time the trampoline triggers that import, causing
+# ``RuntimeError: context has already been set``. Patch the function to
+# tolerate redundant calls.
+# ---------------------------------------------------------------------------
+_original_set_start_method = multiprocessing.set_start_method
+
+
+def _safe_set_start_method(method, force=False):  # type: ignore[no-untyped-def]
+    try:
+        _original_set_start_method(method, force=force)
+    except RuntimeError:
+        pass
+
+
+multiprocessing.set_start_method = _safe_set_start_method  # type: ignore[assignment]
 
 
 @pytest.fixture
@@ -9,8 +31,17 @@ def snipeit_client():
 
     Uses snipe.example.test — an RFC 6761 reserved domain that will never
     resolve in DNS, preventing accidental real network calls if a mock is missed.
+
+    The retry transport's sleep callable is replaced with a no-op so tests
+    that exhaust retries (e.g. asserting 5xx error mapping or transport-error
+    paths) don't incur the real backoff delay — ~2.1s per test with the
+    default ``backoff_factor=0.3`` and ``max_retries=3``. Tests that need to
+    verify retry timing construct their own ``RetryTransport`` with an
+    explicit ``sleep=`` callable; see ``tests/unit/test_retries.py``.
     """
-    return SnipeIT(url="https://snipe.example.test", token="fake-token")
+    client = SnipeIT(url="https://snipe.example.test", token="fake-token")
+    client._retry_transport._sleep = lambda _s: None
+    return client
 
 
 @pytest.fixture(scope="session")

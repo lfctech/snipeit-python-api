@@ -4,6 +4,7 @@ Provides Component model and ComponentsManager for Snipe-IT components.
 """
 
 from typing import Any
+
 from .base import ApiObject, BaseResourceManager
 
 
@@ -24,7 +25,10 @@ class Component(ApiObject):
         Returns:
             str: The component id, name, and quantity.
         """
-        return f"<Component {(self.id if self.id is not None else 'N/A')}: {getattr(self, 'name', 'N/A')} (Qty: {getattr(self, 'qty', 'N/A')})>"
+        id_ = self.id if self.id is not None else "N/A"
+        name = getattr(self, "name", "N/A")
+        qty = getattr(self, "qty", "N/A")
+        return f"<Component {id_}: {name} (Qty: {qty})>"
 
 
 class ComponentsManager(BaseResourceManager[Component]):

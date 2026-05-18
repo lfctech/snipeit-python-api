@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import os
 import warnings
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from ...exceptions import SnipeITApiError
 
@@ -69,13 +70,13 @@ class AssetFilesMixin:
                     raise SnipeITApiError(json_resp.get("messages", "Unknown API error"), response=resp)
                 return json_resp
             except ValueError:
-                raise SnipeITApiError("Expected JSON response from file upload", response=resp)
+                raise SnipeITApiError("Expected JSON response from file upload", response=resp) from None
         finally:
             for f in opened_files:
                 try:
                     f.close()
                 except Exception as e:
-                    warnings.warn(f"Failed to close file {getattr(f, 'name', '<unknown>')}: {e}")
+                    warnings.warn(f"Failed to close file {getattr(f, 'name', '<unknown>')}: {e}", stacklevel=2)
 
     def download_file(
         self,

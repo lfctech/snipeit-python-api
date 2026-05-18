@@ -4,6 +4,7 @@ Provides License model and LicensesManager for Snipe-IT licenses.
 """
 
 from typing import Any
+
 from .base import ApiObject, BaseResourceManager
 
 
@@ -24,7 +25,10 @@ class License(ApiObject):
         Returns:
             str: The license id, name, and seats.
         """
-        return f"<License {(self.id if self.id is not None else 'N/A')}: {getattr(self, 'name', 'N/A')} (Seats: {getattr(self, 'seats', 'N/A')})>"
+        id_ = self.id if self.id is not None else "N/A"
+        name = getattr(self, "name", "N/A")
+        seats = getattr(self, "seats", "N/A")
+        return f"<License {id_}: {name} (Seats: {seats})>"
 
 
 class LicensesManager(BaseResourceManager[License]):

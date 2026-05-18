@@ -11,18 +11,32 @@ semantics to outgoing requests whose HTTP method is in ``allowed_methods``.
 
 from __future__ import annotations
 
+import random
 import time
 from collections.abc import Callable, Iterable
+from datetime import UTC, datetime
 from email.utils import parsedate_to_datetime
-from datetime import datetime, timezone
 
 import httpx
 
 from ._log import logger
 
-
 DEFAULT_STATUS_FORCELIST: frozenset[int] = frozenset({429, 500, 502, 503, 504})
 DEFAULT_ALLOWED_METHODS: frozenset[str] = frozenset({"HEAD", "GET", "OPTIONS"})
+
+
+def _full_jitter(base: float) -> float:
+    """Default jitter strategy: pick a delay uniformly in ``[0, base]``.
+
+    "Full jitter" desynchronises retries across many concurrent clients
+    (`https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/`),
+    avoiding the thundering-herd problem when a single Snipe-IT instance
+    starts returning 5xx and every client retries on the same backoff
+    schedule. ``base`` is the un-jittered exponential-backoff delay.
+    """
+    if base <= 0:
+        return 0.0
+    return random.uniform(0.0, base)
 
 
 class RetryTransport(httpx.BaseTransport):
@@ -37,14 +51,22 @@ class RetryTransport(httpx.BaseTransport):
         max_retries: Maximum retry attempts after the initial request.
             ``max_retries=0`` disables retries.
         backoff_factor: Exponential backoff multiplier. Sleep between
-            attempts is ``backoff_factor * (2 ** attempt)``.
+            attempts is ``backoff_factor * (2 ** attempt)``, then passed
+            through ``jitter`` to spread retries across concurrent clients.
         status_forcelist: HTTP status codes that trigger a retry.
         allowed_methods: HTTP methods (upper-case) that are considered safe
             to retry. POST/PATCH/PUT are excluded by default.
         respect_retry_after: When ``True`` (default), honor the
             ``Retry-After`` response header on 429/503 by sleeping for the
             indicated duration. Supports integer seconds and HTTP-date.
+            ``Retry-After`` delays are *not* jittered: the server gave us
+            an explicit instruction.
         sleep: Override for :func:`time.sleep`, used by tests.
+        jitter: Callable mapping the un-jittered backoff base (seconds) to
+            an actual sleep duration. Defaults to :func:`_full_jitter`,
+            which picks ``uniform(0, base)``. Pass ``lambda base: base`` to
+            disable jitter, or another strategy (decorrelated jitter, etc.).
+            Only applied when ``Retry-After`` is not used.
     """
 
     def __init__(
@@ -57,6 +79,7 @@ class RetryTransport(httpx.BaseTransport):
         allowed_methods: Iterable[str] = DEFAULT_ALLOWED_METHODS,
         respect_retry_after: bool = True,
         sleep: Callable[[float], None] | None = None,
+        jitter: Callable[[float], float] | None = None,
     ) -> None:
         self._wrapped = wrapped if wrapped is not None else httpx.HTTPTransport()
         self.max_retries = int(max_retries)
@@ -65,9 +88,10 @@ class RetryTransport(httpx.BaseTransport):
         self.allowed_methods = frozenset(m.upper() for m in allowed_methods)
         self.respect_retry_after = bool(respect_retry_after)
         self._sleep = sleep if sleep is not None else time.sleep
+        self._jitter = jitter if jitter is not None else _full_jitter
 
     # httpx.BaseTransport API
-    def handle_request(self, request: httpx.Request) -> httpx.Response:  # noqa: D401
+    def handle_request(self, request: httpx.Request) -> httpx.Response:
         method = request.method.upper()
         retryable = method in self.allowed_methods
         last_error: Exception | None = None
@@ -126,9 +150,12 @@ class RetryTransport(httpx.BaseTransport):
 
     # Helpers ---------------------------------------------------------------
     def _backoff(self, attempt: int, *, retry_after: float | None) -> None:
-        delay = retry_after if retry_after is not None else self.backoff_factor * (
-            2**attempt
-        )
+        if retry_after is not None:
+            # Server told us how long to wait. Don't second-guess with jitter.
+            delay = retry_after
+        else:
+            base = self.backoff_factor * (2**attempt)
+            delay = self._jitter(base)
         if delay > 0:
             self._sleep(delay)
 
@@ -150,6 +177,6 @@ class RetryTransport(httpx.BaseTransport):
         if dt is None:
             return None
         if dt.tzinfo is None:
-            dt = dt.replace(tzinfo=timezone.utc)
-        delta = (dt - datetime.now(timezone.utc)).total_seconds()
+            dt = dt.replace(tzinfo=UTC)
+        delta = (dt - datetime.now(UTC)).total_seconds()
         return max(0.0, delta)

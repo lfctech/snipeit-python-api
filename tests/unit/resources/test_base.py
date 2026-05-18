@@ -1,6 +1,7 @@
 import pytest
-from snipeit.resources.base import ApiObject
+
 from snipeit.exceptions import SnipeITApiError
+from snipeit.resources.base import ApiObject
 
 pytestmark = pytest.mark.unit
 

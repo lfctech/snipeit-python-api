@@ -4,6 +4,7 @@ Provides Category model and CategoriesManager for Snipe-IT categories.
 """
 
 from typing import Any
+
 from .base import ApiObject, BaseResourceManager
 
 
@@ -24,7 +25,10 @@ class Category(ApiObject):
         Returns:
             str: The category id, name, and type.
         """
-        return f"<Category {(self.id if self.id is not None else 'N/A')}: {getattr(self, 'name', 'N/A')} (Type: {getattr(self, 'category_type', 'N/A')})>"
+        id_ = self.id if self.id is not None else "N/A"
+        name = getattr(self, "name", "N/A")
+        cat_type = getattr(self, "category_type", "N/A")
+        return f"<Category {id_}: {name} (Type: {cat_type})>"
 
 
 class CategoriesManager(BaseResourceManager[Category]):

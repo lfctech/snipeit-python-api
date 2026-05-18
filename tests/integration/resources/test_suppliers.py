@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 
 from snipeit import SnipeIT
-from snipeit.exceptions import SnipeITNotFoundError, SnipeITApiError
+from snipeit.exceptions import SnipeITApiError, SnipeITNotFoundError
 
 pytestmark = pytest.mark.integration
 

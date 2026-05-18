@@ -1,4 +1,5 @@
 import pytest
+
 from snipeit.exceptions import SnipeITException
 
 pytestmark = pytest.mark.unit

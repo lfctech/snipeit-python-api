@@ -4,10 +4,10 @@ import pytest
 
 from snipeit import SnipeIT
 from snipeit.exceptions import (
+    SnipeITApiError,
+    SnipeITClientError,
     SnipeITNotFoundError,
     SnipeITValidationError,
-    SnipeITClientError,
-    SnipeITApiError,
 )
 
 pytestmark = pytest.mark.integration

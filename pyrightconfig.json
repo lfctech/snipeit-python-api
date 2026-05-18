@@ -2,9 +2,13 @@
   "venvPath": ".",
   "venv": ".venv",
   "pythonVersion": "3.11",
-  "typeCheckingMode": "basic",
+  "typeCheckingMode": "standard",
   "reportMissingImports": "warning",
   "reportMissingModuleSource": "warning",
+  "reportIncompatibleMethodOverride": false,
+  "reportIncompatibleVariableOverride": false,
+  "reportPrivateUsage": false,
+  "reportUnnecessaryTypeIgnoreComment": true,
   "include": [
     "snipeit"
   ],

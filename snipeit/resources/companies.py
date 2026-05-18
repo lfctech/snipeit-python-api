@@ -4,6 +4,7 @@ Provides Company model and CompaniesManager for Snipe-IT companies.
 """
 
 from typing import Any
+
 from .base import ApiObject, BaseResourceManager
 
 

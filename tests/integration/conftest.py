@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from pathlib import Path
-import pytest
-
 # Additional imports for shared fixtures
 import time
 import uuid
-from typing import Dict, Any
+from pathlib import Path
+from typing import Any
+
+import pytest
 
 from snipeit import SnipeIT
 
@@ -125,7 +125,7 @@ def base(real_snipeit_client: SnipeIT, run_id: str):
         password_confirmation="Pass1234!",
     )
 
-    data: Dict[str, Any] = {
+    data: dict[str, Any] = {
         "manufacturer": mfg,
         "categories": {
             "asset": cat_asset,

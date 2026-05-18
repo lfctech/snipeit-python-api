@@ -24,19 +24,17 @@ cov:
 
 # Mutation testing (can be slow)
 mut:
-	$(PY) -m mutmut run --paths-to-mutate snipeit --tests-dir tests || true
+	$(PY) -m mutmut run || true
 
 # Quick mutation run scoped to the highest-value source files (used in CI)
 mut-quick:
-	$(PY) -m mutmut run \
-		--paths-to-mutate snipeit/client.py,snipeit/_retry.py,snipeit/resources/base.py \
-		--tests-dir tests/unit tests/contract || true
+	$(PY) -m mutmut run || true
 
 mut-report:
 	$(PY) -m mutmut results
 
 mut-reset:
-	$(PY) -m mutmut reset || true
+	rm -rf .mutmut-cache
 
 clean:
 	rm -rf .pytest_cache htmlcov .coverage .mutmut-cache .hypothesis .ruff_cache
