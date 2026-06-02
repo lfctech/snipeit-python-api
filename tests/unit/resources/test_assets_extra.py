@@ -3,7 +3,6 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
-@pytest.mark.unit
 def test_asset_repr_model_none(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="GET",

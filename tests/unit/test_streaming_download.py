@@ -6,7 +6,6 @@ from pytest_httpx import IteratorStream
 pytestmark = pytest.mark.unit
 
 
-@pytest.mark.unit
 def test_download_file_streams_and_writes(snipeit_client, httpx_mock, tmp_path):
     """download_file writes streamed chunks to disk."""
     data = b"chunk1" + b"chunk2"
@@ -23,7 +22,6 @@ def test_download_file_streams_and_writes(snipeit_client, httpx_mock, tmp_path):
     assert dest.read_bytes() == data
 
 
-@pytest.mark.unit
 def test_download_file_progress_callback(snipeit_client, httpx_mock, tmp_path):
     """progress callback receives (bytes_written, total) on each chunk."""
     chunks = [b"a" * 100, b"b" * 200]
@@ -47,7 +45,6 @@ def test_download_file_progress_callback(snipeit_client, httpx_mock, tmp_path):
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.unit
 def test_download_file_timeout_raises_snipeit_timeout_error(snipeit_client, httpx_mock, tmp_path):
     """A timeout during streaming must surface as SnipeITTimeoutError, not a raw httpx error."""
     import httpx
@@ -63,7 +60,6 @@ def test_download_file_timeout_raises_snipeit_timeout_error(snipeit_client, http
         snipeit_client.assets.download_file(1, 9, str(tmp_path / "out.bin"))
 
 
-@pytest.mark.unit
 def test_download_file_connect_error_raises_snipeit_exception(snipeit_client, httpx_mock, tmp_path):
     """A connection error during streaming must surface as SnipeITException."""
     import httpx
@@ -86,7 +82,6 @@ def test_download_file_connect_error_raises_snipeit_exception(snipeit_client, ht
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.unit
 def test_download_file_progress_without_content_length(snipeit_client, httpx_mock, tmp_path):
     """When Content-Length is absent, progress callback receives total=None."""
     from pytest_httpx import IteratorStream

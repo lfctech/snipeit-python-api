@@ -14,7 +14,6 @@ pytestmark = pytest.mark.unit
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.unit
 @given(st.text())
 @settings(suppress_health_check=[HealthCheck.too_slow])
 def test_parse_retry_after_never_raises(value):
@@ -23,14 +22,12 @@ def test_parse_retry_after_never_raises(value):
     assert result is None or isinstance(result, float)
 
 
-@pytest.mark.unit
 @given(st.none())
 def test_parse_retry_after_none_returns_none(value):
     """Property: None input always returns None."""
     assert RetryTransport._parse_retry_after(value) is None
 
 
-@pytest.mark.unit
 @given(st.integers(min_value=0, max_value=3600))
 def test_parse_retry_after_integer_seconds(n):
     """Property: integer-seconds form returns max(0.0, n) as a float."""
@@ -38,7 +35,6 @@ def test_parse_retry_after_integer_seconds(n):
     assert result == max(0.0, float(n))
 
 
-@pytest.mark.unit
 @given(st.floats(min_value=0.0, max_value=3600.0, allow_nan=False, allow_infinity=False))
 def test_parse_retry_after_result_is_non_negative(value):
     """Property: any valid numeric Retry-After value produces a non-negative float."""
@@ -64,7 +60,6 @@ _json_val = st.recursive(
 )
 
 
-@pytest.mark.unit
 @given(_json_val)
 @settings(suppress_health_check=[HealthCheck.too_slow])
 def test_stringify_messages_always_returns_str(msg):

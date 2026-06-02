@@ -23,7 +23,6 @@ class _MockManager:
     pass
 
 
-@pytest.mark.unit
 @pytest.mark.parametrize(
     "cls,data,expected_parts",
     [
@@ -50,7 +49,6 @@ def test_repr_for_resources(cls, data, expected_parts):
     assert all(part in rep for part in expected_parts)
 
 
-@pytest.mark.unit
 def test_repr_fallbacks_exact_strings():
     # Objects with no data should fall back to 'N/A' placeholders in __repr__
     assert repr(Accessory(_MockManager(), {})) == "<Accessory N/A: N/A>"

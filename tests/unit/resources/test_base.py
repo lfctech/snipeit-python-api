@@ -33,13 +33,11 @@ def api_object(mock_manager):
     return obj
 
 
-@pytest.mark.unit
 def test_delete_object(api_object, mock_manager):
     api_object.delete()
     assert mock_manager._deleted_path == "test_objects/1"
 
 
-@pytest.mark.unit
 def test_save_object(api_object, mock_manager):
     api_object.name = "Updated Name"
     api_object.new_field = "New Value"
@@ -50,14 +48,12 @@ def test_save_object(api_object, mock_manager):
     assert not api_object._dirty_set()
 
 
-@pytest.mark.unit
 def test_repr_uses_id(api_object):
     rep = repr(api_object)
     assert "ApiObject" in rep
     assert "1" in rep
 
 
-@pytest.mark.unit
 def test_save_no_changes_returns_self_and_no_patch(api_object, mock_manager):
     saved = api_object.save()
     assert saved is api_object
@@ -65,7 +61,6 @@ def test_save_no_changes_returns_self_and_no_patch(api_object, mock_manager):
     assert mock_manager._patched_data is None
 
 
-@pytest.mark.unit
 def test_save_unsuccessful_raises_and_keeps_dirty_fields():
     class FailingManager:
         def __init__(self):
@@ -89,7 +84,6 @@ def test_save_unsuccessful_raises_and_keeps_dirty_fields():
     assert "name" in obj._dirty_set()
 
 
-@pytest.mark.unit
 def test_declared_field_identical_reassignment_preserves_dirty_flag():
     """Regression: a no-op re-assignment must NOT clear a prior genuine change.
 
@@ -122,7 +116,6 @@ def test_declared_field_identical_reassignment_preserves_dirty_flag():
     assert mgr.calls == [("hardware/1", {"name": "NewName"})]
 
 
-@pytest.mark.unit
 def test_declared_field_identical_to_loaded_value_stays_clean():
     """Complementary regression: if the user sets a field to its loaded value
     (no prior change), the field should remain clean."""
@@ -144,7 +137,6 @@ def test_declared_field_identical_to_loaded_value_stays_clean():
     assert mgr.calls == []  # nothing to PATCH
 
 
-@pytest.mark.unit
 def test_extra_fields_refresh_and_save_use_pydantic_extra_storage():
     from snipeit.resources.assets import Asset
 
@@ -181,7 +173,6 @@ def test_extra_fields_refresh_and_save_use_pydantic_extra_storage():
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.unit
 def test_apply_server_data_replaces_extra_fields_not_appends():
     """After _apply_server_data, old extra fields are gone and new ones present."""
     mgr = MockManager()
@@ -193,7 +184,6 @@ def test_apply_server_data_replaces_extra_fields_not_appends():
     assert dump.get("b") == 2
 
 
-@pytest.mark.unit
 def test_apply_server_data_clears_dirty_state():
     """After _apply_server_data, the dirty set must be empty."""
     mgr = MockManager()
@@ -205,7 +195,6 @@ def test_apply_server_data_clears_dirty_state():
     assert not obj._dirty_set()
 
 
-@pytest.mark.unit
 def test_apply_server_data_handles_declared_and_extra_fields_simultaneously():
     """Mix of declared (id) and extra fields should both be applied correctly."""
     mgr = MockManager()
@@ -216,7 +205,6 @@ def test_apply_server_data_handles_declared_and_extra_fields_simultaneously():
     assert obj.model_dump().get("extra_field") == "hello"
 
 
-@pytest.mark.unit
 def test_apply_server_data_starts_with_no_extra_dict():
     """Should not crash when __pydantic_extra__ is None (no extras on init)."""
     mgr = MockManager()
@@ -229,7 +217,6 @@ def test_apply_server_data_starts_with_no_extra_dict():
     assert obj.model_dump().get("new_extra") == "value"
 
 
-@pytest.mark.unit
 def test_in_place_mutation_of_dict_field_is_detected():
     """Snapshot-and-diff: mutating a nested dict in-place is detected on save."""
     mgr = MockManager()
@@ -240,7 +227,6 @@ def test_in_place_mutation_of_dict_field_is_detected():
     assert "custom_fields" in dirty, "in-place dict mutation should be detected via snapshot diff"
 
 
-@pytest.mark.unit
 def test_in_place_mutation_of_list_field_is_detected():
     """Snapshot-and-diff: mutating a list in-place is detected on save."""
     mgr = MockManager()
@@ -251,7 +237,6 @@ def test_in_place_mutation_of_list_field_is_detected():
     assert "tags" in dirty, "in-place list mutation should be detected via snapshot diff"
 
 
-@pytest.mark.unit
 def test_unchanged_object_after_load_does_not_save():
     """An object loaded from the server with no changes should not PATCH."""
     mgr = MockManager()
@@ -262,7 +247,6 @@ def test_unchanged_object_after_load_does_not_save():
     assert mgr._patched_path is None
 
 
-@pytest.mark.unit
 def test_save_refreshes_loaded_state():
     """After save, the snapshot is updated so a second mutation is still detected."""
     mgr = MockManager()
@@ -281,7 +265,6 @@ def test_save_refreshes_loaded_state():
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.unit
 def test_fast_json_copy_deepcopy_fallback():
     """Verify _fast_json_copy falls back to copy.deepcopy for non-JSON objects."""
     import datetime
@@ -293,7 +276,6 @@ def test_fast_json_copy_deepcopy_fallback():
     assert copied == now
 
 
-@pytest.mark.unit
 def test_safe_snapshot_exception_handler():
     """Verify _safe_snapshot falls back to referencing the object when copying raises Exception."""
     from snipeit.resources.base import _safe_snapshot
@@ -309,7 +291,6 @@ def test_safe_snapshot_exception_handler():
     assert snapshot["nested"] is data["nested"]  # stored by reference
 
 
-@pytest.mark.unit
 def test_api_object_setattr_getattr_exception():
     """Verify __setattr__ handles property/getattr exceptions gracefully."""
 
@@ -329,7 +310,6 @@ def test_api_object_setattr_getattr_exception():
     obj.other_field = "fixed"
 
 
-@pytest.mark.unit
 def test_api_object_dirty_set_comparison_exception():
     """Verify _dirty_set treats non-comparable values as dirty instead of crashing."""
 
@@ -347,7 +327,6 @@ def test_api_object_dirty_set_comparison_exception():
     assert "value" in obj._dirty_set()
 
 
-@pytest.mark.unit
 def test_extract_payload_edge_cases():
     """Verify _extract_payload handles non-dict payloads and raw dictionary payloads."""
     from snipeit.resources.base import _extract_payload
@@ -360,7 +339,6 @@ def test_extract_payload_edge_cases():
     assert _extract_payload(raw) is raw
 
 
-@pytest.mark.unit
 def test_base_resource_manager_default_path():
     """Verify BaseResourceManager uses resource_cls._resource_path if path is None."""
     from snipeit.resources.base import BaseResourceManager
@@ -376,7 +354,6 @@ def test_base_resource_manager_default_path():
     assert mgr.path == "dummies"
 
 
-@pytest.mark.unit
 def test_base_resource_manager_list_none_rows(snipeit_client, httpx_mock):
     """list() returns [] if response lacks 'rows' key or 'rows' is None."""
     # 1. Missing rows key
@@ -388,7 +365,6 @@ def test_base_resource_manager_list_none_rows(snipeit_client, httpx_mock):
     assert snipeit_client.assets.list() == []
 
 
-@pytest.mark.unit
 def test_base_resource_manager_list_all_error_shapes(snipeit_client, httpx_mock):
     """list_all() raises SnipeITException if response is not a dict or 'rows' is not a list."""
     from snipeit.exceptions import SnipeITException

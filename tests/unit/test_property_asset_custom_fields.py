@@ -41,7 +41,6 @@ def _asset_with_custom_fields(draw):
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.unit
 @given(_asset_with_custom_fields())
 @settings(suppress_health_check=[HealthCheck.too_slow])
 def test_set_custom_field_stages_value(args):
@@ -57,7 +56,6 @@ def test_set_custom_field_stages_value(args):
     assert asset.pending_custom_fields()[label] == new_val
 
 
-@pytest.mark.unit
 @given(_asset_with_custom_fields())
 @settings(suppress_health_check=[HealthCheck.too_slow])
 def test_set_custom_field_to_server_value_cancels_stage(args):
@@ -75,7 +73,6 @@ def test_set_custom_field_to_server_value_cancels_stage(args):
     assert label not in asset.pending_custom_fields()
 
 
-@pytest.mark.unit
 @given(_asset_with_custom_fields())
 @settings(suppress_health_check=[HealthCheck.too_slow])
 def test_save_clears_pending_custom_fields(args):
@@ -89,7 +86,6 @@ def test_save_clears_pending_custom_fields(args):
     assert asset.pending_custom_fields() == {}
 
 
-@pytest.mark.unit
 @given(_asset_with_custom_fields())
 @settings(suppress_health_check=[HealthCheck.too_slow])
 def test_unknown_label_raises_key_error(args):

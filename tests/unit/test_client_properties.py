@@ -5,7 +5,6 @@ from snipeit import SnipeIT
 pytestmark = pytest.mark.unit
 
 
-@pytest.mark.unit
 def test_manager_properties_are_cached():
     client = SnipeIT(url="https://snipe.example.test/", token="fake")
 
@@ -35,7 +34,6 @@ def test_manager_properties_are_cached():
         assert mgr is getattr(client, name), f"{name} not cached"
 
 
-@pytest.mark.unit
 def test_request_headers_are_correct(httpx_mock):
     """The client must send Authorization, Accept, and a snipeit-api User-Agent on every request."""
     httpx_mock.add_response(

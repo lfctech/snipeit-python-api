@@ -34,7 +34,6 @@ class _ItemManager(BaseResourceManager[_Item]):
     path = "items"
 
 
-@pytest.mark.unit
 @given(
     total=st.integers(min_value=0, max_value=50),
     page_size=st.integers(min_value=1, max_value=10),
@@ -51,7 +50,6 @@ def test_list_all_yields_all_items_no_limit(total, page_size):
     assert [r.id for r in result] == list(range(total))
 
 
-@pytest.mark.unit
 @given(
     total=st.integers(min_value=1, max_value=50),
     page_size=st.integers(min_value=1, max_value=10),
@@ -69,7 +67,6 @@ def test_list_all_respects_limit(total, page_size, limit):
     assert [r.id for r in result] == list(range(min(total, limit)))
 
 
-@pytest.mark.unit
 @given(
     total=st.integers(min_value=0, max_value=30),
     page_size=st.integers(min_value=1, max_value=8),
@@ -106,7 +103,6 @@ class _RecordingApi:
         return {"total": len(self._items), "rows": self._items[offset : offset + limit]}
 
 
-@pytest.mark.unit
 def test_list_all_caps_per_page_to_remaining_limit():
     """`list_all(limit=5, page_size=50)` must request 5 rows, not 50."""
     items = [{"id": i} for i in range(100)]
@@ -120,7 +116,6 @@ def test_list_all_caps_per_page_to_remaining_limit():
     assert api.requests == [{"limit": 5, "offset": 0}]
 
 
-@pytest.mark.unit
 def test_list_all_caps_last_page_when_limit_straddles_page_boundary():
     """`limit=15, page_size=10` issues page 1 (limit=10) then page 2 (limit=5)."""
     items = [{"id": i} for i in range(100)]
@@ -136,7 +131,6 @@ def test_list_all_caps_last_page_when_limit_straddles_page_boundary():
     ]
 
 
-@pytest.mark.unit
 def test_list_all_no_limit_uses_page_size_each_request():
     """Without `limit`, each request asks for `page_size` rows."""
     items = [{"id": i} for i in range(25)]
@@ -154,7 +148,6 @@ def test_list_all_no_limit_uses_page_size_each_request():
     ]
 
 
-@pytest.mark.unit
 def test_list_all_default_page_size_is_100():
     """Default page_size is 100 (matches README quick-start example)."""
     items = [{"id": i} for i in range(5)]
@@ -166,7 +159,6 @@ def test_list_all_default_page_size_is_100():
     assert api.requests == [{"limit": 100, "offset": 0}]
 
 
-@pytest.mark.unit
 def test_list_all_with_limit_zero_makes_no_requests():
     """`limit=0` is a degenerate but valid input — no requests, no items."""
     items = [{"id": i} for i in range(5)]

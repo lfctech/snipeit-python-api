@@ -9,7 +9,6 @@ from snipeit.exceptions import SnipeITServerError
 pytestmark = pytest.mark.unit
 
 
-@pytest.mark.unit
 def test_retry_defaults_configured():
     client = SnipeIT(url="https://snipe.example.test", token="fake")
     assert client.timeout == 10
@@ -20,7 +19,6 @@ def test_retry_defaults_configured():
     assert rt.status_forcelist == frozenset({429, 500, 502, 503, 504})
 
 
-@pytest.mark.unit
 def test_post_503_does_not_retry_by_default(httpx_mock):
     client = SnipeIT(
         url="https://snipe.example.test",
@@ -40,7 +38,6 @@ def test_post_503_does_not_retry_by_default(httpx_mock):
     assert len(httpx_mock.get_requests()) == 1
 
 
-@pytest.mark.unit
 def test_retry_allows_post_when_configured():
     client = SnipeIT(
         url="https://snipe.example.test",
@@ -51,7 +48,6 @@ def test_retry_allows_post_when_configured():
     assert "POST" in rt.allowed_methods
 
 
-@pytest.mark.unit
 def test_retry_transport_retries_get_on_503(httpx_mock):
     """GET on 503 should be retried up to max_retries times."""
     import httpx
@@ -71,7 +67,6 @@ def test_retry_transport_retries_get_on_503(httpx_mock):
     assert len(httpx_mock.get_requests()) == 3
 
 
-@pytest.mark.unit
 def test_retry_transport_respects_retry_after(httpx_mock):
     """Retry-After header should override backoff sleep."""
     import httpx
@@ -97,7 +92,6 @@ def test_retry_transport_respects_retry_after(httpx_mock):
     assert sleep_calls == [2.0]
 
 
-@pytest.mark.unit
 def test_retry_transport_does_not_retry_post_read_error_by_default():
     import httpx
 
@@ -119,7 +113,6 @@ def test_retry_transport_does_not_retry_post_read_error_by_default():
     assert wrapped.calls == 1
 
 
-@pytest.mark.unit
 def test_retry_after_future_http_date_sleeps_for_correct_duration(httpx_mock):
     """A Retry-After HTTP-date 30 seconds in the future must produce a sleep of ~30s."""
     import time
@@ -156,7 +149,6 @@ def test_retry_after_future_http_date_sleeps_for_correct_duration(httpx_mock):
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.unit
 def test_retry_after_false_uses_backoff_not_header(httpx_mock):
     """When respect_retry_after=False, the Retry-After header must be ignored and backoff used."""
     import httpx
@@ -184,7 +176,6 @@ def test_retry_after_false_uses_backoff_not_header(httpx_mock):
     assert sleep_calls == []
 
 
-@pytest.mark.unit
 def test_patch_503_does_not_retry_by_default(httpx_mock):
     """PATCH is not in DEFAULT_ALLOWED_METHODS, so a 503 must not be retried."""
     client = SnipeIT(
@@ -204,7 +195,6 @@ def test_patch_503_does_not_retry_by_default(httpx_mock):
     assert len(httpx_mock.get_requests()) == 1
 
 
-@pytest.mark.unit
 def test_delete_503_does_not_retry_by_default(httpx_mock):
     """DELETE is not in DEFAULT_ALLOWED_METHODS, so a 503 must not be retried."""
     client = SnipeIT(
@@ -229,7 +219,6 @@ def test_delete_503_does_not_retry_by_default(httpx_mock):
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.unit
 def test_backoff_uses_jitter_callable_for_status_retries(httpx_mock):
     """The jitter callable receives the un-jittered base delay and its
     return value is what gets passed to ``sleep``."""
@@ -262,7 +251,6 @@ def test_backoff_uses_jitter_callable_for_status_retries(httpx_mock):
     assert sleep_calls == [0.5, 1.0]
 
 
-@pytest.mark.unit
 def test_retry_after_bypasses_jitter(httpx_mock):
     """When the server sends ``Retry-After``, the explicit instruction
     must be used verbatim — jitter is not applied."""
@@ -298,7 +286,6 @@ def test_retry_after_bypasses_jitter(httpx_mock):
     assert jitter_called is False
 
 
-@pytest.mark.unit
 def test_default_jitter_stays_within_base_bounds(httpx_mock):
     """Default jitter is uniform(0, base) — every sample must fall in [0, base]."""
     import httpx
@@ -325,7 +312,6 @@ def test_default_jitter_stays_within_base_bounds(httpx_mock):
         assert 0.0 <= actual <= base, f"jittered delay {actual} outside [0, {base}]"
 
 
-@pytest.mark.unit
 def test_full_jitter_helper_returns_zero_for_zero_base():
     """Edge case: base=0 must return 0 without invoking ``random.uniform``."""
     from snipeit._retry import _full_jitter
@@ -334,7 +320,6 @@ def test_full_jitter_helper_returns_zero_for_zero_base():
     assert _full_jitter(-1.0) == 0.0
 
 
-@pytest.mark.unit
 def test_retry_transport_close_closes_wrapped():
     """Verify that closing the RetryTransport closes the underlying wrapped transport."""
     from snipeit._retry import RetryTransport

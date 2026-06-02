@@ -24,7 +24,6 @@ def client_with_token():
     return client
 
 
-@pytest.mark.unit
 def test_http_logger_emits_debug_on_request(client_with_token, httpx_mock, caplog):
     httpx_mock.add_response(
         method="GET",
@@ -44,7 +43,6 @@ def test_http_logger_emits_debug_on_request(client_with_token, httpx_mock, caplo
     assert re.search(r"\d+\.\d+ ms", msg)
 
 
-@pytest.mark.unit
 def test_token_never_appears_in_logs(client_with_token, httpx_mock, caplog):
     httpx_mock.add_response(
         method="GET",
@@ -61,7 +59,6 @@ def test_token_never_appears_in_logs(client_with_token, httpx_mock, caplog):
             assert SUPER_SECRET_TOKEN not in str(arg)
 
 
-@pytest.mark.unit
 def test_timeout_emits_warning(client_with_token, httpx_mock, caplog):
     httpx_mock.add_exception(
         httpx.TimeoutException("timed out"),
@@ -76,7 +73,6 @@ def test_timeout_emits_warning(client_with_token, httpx_mock, caplog):
     assert any("timed out" in r.getMessage() for r in warnings)
 
 
-@pytest.mark.unit
 def test_request_error_emits_warning(client_with_token, httpx_mock, caplog):
     # ConnectError is retried on GET; register enough for all attempts.
     for _ in range(4):

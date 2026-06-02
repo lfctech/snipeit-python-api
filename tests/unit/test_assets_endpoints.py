@@ -18,7 +18,6 @@ def test_labels_writes_pdf_bytes_directly(snipeit_client, httpx_mock, tmp_path):
     assert save_path.read_bytes() == pdf_bytes
 
 
-@pytest.mark.unit
 def test_audit_by_id_and_asset_audit(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="POST", url="https://snipe.example.test/api/v1/hardware/audit/1", json={"status": "success"}
@@ -36,7 +35,6 @@ def test_audit_by_id_and_asset_audit(snipeit_client, httpx_mock):
     asset.audit(note="checked")
 
 
-@pytest.mark.unit
 def test_audit_overdue_and_due_lists(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="GET",
@@ -50,7 +48,6 @@ def test_audit_overdue_and_due_lists(snipeit_client, httpx_mock):
     assert snipeit_client.assets.list_audit_due()["status"] == "success"
 
 
-@pytest.mark.unit
 def test_restore(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="POST", url="https://snipe.example.test/api/v1/hardware/1/restore", json={"status": "success"}
@@ -63,7 +60,6 @@ def test_restore(snipeit_client, httpx_mock):
     assert out.id == 1
 
 
-@pytest.mark.unit
 def test_licenses_and_files_endpoints(snipeit_client, httpx_mock, tmp_path):
     httpx_mock.add_response(
         method="GET",
@@ -109,7 +105,6 @@ def test_licenses_and_files_endpoints(snipeit_client, httpx_mock, tmp_path):
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.unit
 def test_upload_files_timeout_raises_snipeit_timeout_error(snipeit_client, httpx_mock, tmp_path):
     """A timeout during file upload must surface as SnipeITTimeoutError."""
     import httpx
@@ -132,21 +127,18 @@ def test_upload_files_timeout_raises_snipeit_timeout_error(snipeit_client, httpx
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.unit
 def test_upload_files_empty_paths_raises_value_error(snipeit_client):
     """upload_files([]) must raise ValueError before making any HTTP request."""
     with pytest.raises(ValueError, match="At least one file path"):
         snipeit_client.assets.upload_files(1, [])
 
 
-@pytest.mark.unit
 def test_upload_files_missing_file_raises_file_not_found(snipeit_client, tmp_path):
     """upload_files with a non-existent path must raise FileNotFoundError."""
     with pytest.raises(FileNotFoundError, match="not found"):
         snipeit_client.assets.upload_files(1, [str(tmp_path / "ghost.txt")])
 
 
-@pytest.mark.unit
 def test_upload_files_server_error_json_raises_api_error(snipeit_client, httpx_mock, tmp_path):
     """When the server returns status:error JSON, SnipeITApiError must be raised."""
     from snipeit.exceptions import SnipeITApiError
@@ -163,7 +155,6 @@ def test_upload_files_server_error_json_raises_api_error(snipeit_client, httpx_m
         snipeit_client.assets.upload_files(1, [str(f)])
 
 
-@pytest.mark.unit
 def test_upload_files_non_json_response_raises_api_error(snipeit_client, httpx_mock, tmp_path):
     """When the server returns a non-JSON 200, SnipeITApiError must be raised."""
     from snipeit.exceptions import SnipeITApiError
@@ -181,7 +172,6 @@ def test_upload_files_non_json_response_raises_api_error(snipeit_client, httpx_m
         snipeit_client.assets.upload_files(1, [str(f)])
 
 
-@pytest.mark.unit
 def test_upload_files_closes_file_handles_on_success(snipeit_client, httpx_mock, tmp_path):
     """File handles opened during upload must be closed even on success."""
     f = tmp_path / "file.txt"
@@ -214,7 +204,6 @@ def test_upload_files_closes_file_handles_on_success(snipeit_client, httpx_mock,
     )
 
 
-@pytest.mark.unit
 def test_upload_files_unreadable_file_raises_permission_error(snipeit_client, tmp_path, monkeypatch):
     """When a file exists but is not readable, PermissionError must be raised."""
     import os
@@ -228,7 +217,6 @@ def test_upload_files_unreadable_file_raises_permission_error(snipeit_client, tm
         snipeit_client.assets.upload_files(1, [str(f)])
 
 
-@pytest.mark.unit
 def test_upload_files_handles_file_close_failure_gracefully(snipeit_client, httpx_mock, tmp_path, monkeypatch):
     """If closing an opened file raises an exception, we warn and continue."""
     f = tmp_path / "warn_close.txt"

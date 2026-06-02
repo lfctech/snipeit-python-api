@@ -31,7 +31,6 @@ _simple_vals = st.one_of(
 _key = st.text(min_size=1, max_size=8).filter(lambda s: s != "id" and not s.startswith("_"))
 
 
-@pytest.mark.unit
 @given(
     initial=st.dictionaries(_key, _simple_vals, min_size=0, max_size=5),
     updates=st.dictionaries(_key, _simple_vals, min_size=1, max_size=5),
@@ -67,7 +66,6 @@ def test_apiobject_property_only_sends_changed_fields(initial, updates):
     assert not obj._dirty_set()
 
 
-@pytest.mark.unit
 @given(data=st.dictionaries(_key, _simple_vals, min_size=0, max_size=8))
 @settings(suppress_health_check=[HealthCheck.too_slow])
 def test_apply_server_data_round_trip_clears_dirty(data):
@@ -89,7 +87,6 @@ def test_apply_server_data_round_trip_clears_dirty(data):
     assert obj._dirty_set() == set()
 
 
-@pytest.mark.unit
 @given(data=st.dictionaries(_key, _simple_vals, min_size=1, max_size=6))
 @settings(suppress_health_check=[HealthCheck.too_slow])
 def test_setattr_to_loaded_value_is_noop(data):
@@ -109,7 +106,6 @@ def test_setattr_to_loaded_value_is_noop(data):
     assert obj._dirty_set() == set()
 
 
-@pytest.mark.unit
 @given(
     initial=st.dictionaries(_key, _simple_vals, min_size=0, max_size=4),
     forced=st.lists(_key, min_size=1, max_size=4, unique=True),

@@ -7,7 +7,6 @@ from snipeit.exceptions import SnipeITApiError
 pytestmark = pytest.mark.unit
 
 
-@pytest.mark.unit
 def test_labels_pdf_content(snipeit_client, httpx_mock, tmp_path):
     pdf_bytes = b"%PDF-1.4\n...binary..."
     httpx_mock.add_response(
@@ -24,7 +23,6 @@ def test_labels_pdf_content(snipeit_client, httpx_mock, tmp_path):
     assert os.path.getsize(save_path) == len(pdf_bytes)
 
 
-@pytest.mark.unit
 def test_labels_rejects_non_pdf_content_type(snipeit_client, httpx_mock, tmp_path):
     httpx_mock.add_response(
         method="POST",
@@ -39,7 +37,6 @@ def test_labels_rejects_non_pdf_content_type(snipeit_client, httpx_mock, tmp_pat
     assert "application/json" in str(excinfo.value)
 
 
-@pytest.mark.unit
 def test_labels_sends_exactly_one_accept_header(tmp_path):
     """Regression: labels() previously sent duplicate Accept headers."""
     import httpx
@@ -76,21 +73,18 @@ def test_labels_sends_exactly_one_accept_header(tmp_path):
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.unit
 def test_labels_empty_list_raises_value_error(snipeit_client, tmp_path):
     """labels() with an empty list must raise ValueError before any HTTP call."""
     with pytest.raises(ValueError, match="At least one"):
         snipeit_client.assets.labels(str(tmp_path / "out.pdf"), [])
 
 
-@pytest.mark.unit
 def test_labels_all_blank_strings_raises_value_error(snipeit_client, tmp_path):
     """labels() with only blank/whitespace strings must raise ValueError."""
     with pytest.raises(ValueError, match="No valid asset tags"):
         snipeit_client.assets.labels(str(tmp_path / "out.pdf"), ["", "  "])
 
 
-@pytest.mark.unit
 def test_labels_with_asset_objects_sends_only_valid_tags(snipeit_client, httpx_mock, tmp_path):
     """labels() accepts Asset objects; only assets with a non-None asset_tag are sent."""
     import json as _json

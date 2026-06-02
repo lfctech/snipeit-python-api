@@ -3,7 +3,6 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
-@pytest.mark.unit
 def test_list_all_paginates_and_yields_all(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="GET",
@@ -19,7 +18,6 @@ def test_list_all_paginates_and_yields_all(snipeit_client, httpx_mock):
     assert [i.id for i in items] == [1, 2, 3]
 
 
-@pytest.mark.unit
 def test_list_all_respects_limit(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="GET",
@@ -37,13 +35,11 @@ def test_list_all_respects_limit(snipeit_client, httpx_mock):
     assert [i.id for i in items] == [1, 2]
 
 
-@pytest.mark.unit
 def test_list_all_rejects_offset_in_params(snipeit_client):
     with pytest.raises(ValueError, match="offset"):
         list(snipeit_client.users.list_all(**{"offset": 5}))
 
 
-@pytest.mark.unit
 def test_list_all_terminates_when_rows_empty_and_no_total(snipeit_client, httpx_mock):
     """list_all must stop when rows is empty, even if 'total' is absent from the response.
 

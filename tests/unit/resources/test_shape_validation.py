@@ -5,7 +5,6 @@ from snipeit.exceptions import SnipeITException
 pytestmark = pytest.mark.unit
 
 
-@pytest.mark.unit
 def test_list_non_dict_response_raises(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="GET",
@@ -18,7 +17,6 @@ def test_list_non_dict_response_raises(snipeit_client, httpx_mock):
     assert "Unexpected response shape for list" in str(excinfo.value)
 
 
-@pytest.mark.unit
 def test_list_rows_not_list_raises(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="GET",
@@ -31,7 +29,6 @@ def test_list_rows_not_list_raises(snipeit_client, httpx_mock):
     assert "'rows' must be a list" in str(excinfo.value)
 
 
-@pytest.mark.unit
 def test_get_non_dict_response_raises(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="GET",

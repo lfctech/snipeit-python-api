@@ -23,31 +23,26 @@ pytestmark = pytest.mark.unit
 # ---------------------------------------------------------------------------
 # URL validation
 # ---------------------------------------------------------------------------
-@pytest.mark.unit
 def test_https_required():
     with pytest.raises(ValueError):
         SnipeIT(url="http://snipe.example.com", token="test")
 
 
-@pytest.mark.unit
 def test_url_with_credentials_rejected():
     with pytest.raises(ValueError):
         SnipeIT(url="https://user:pass@snipe.example.com", token="test")
 
 
-@pytest.mark.unit
 def test_url_localhost_http_allowed():
     SnipeIT(url="http://localhost:8000", token="test")
     SnipeIT(url="http://127.0.0.1:8000", token="test")
 
 
-@pytest.mark.unit
 def test_url_localhost_evil_rejected():
     with pytest.raises(ValueError):
         SnipeIT(url="http://localhostevil.com", token="test")
 
 
-@pytest.mark.unit
 def test_repr_redacts_token():
     client = SnipeIT(url="https://snipe.example.test", token="super-secret")
     r = repr(client)
@@ -59,7 +54,6 @@ def test_repr_redacts_token():
 # ---------------------------------------------------------------------------
 # HTTP response handling
 # ---------------------------------------------------------------------------
-@pytest.mark.unit
 def test_delete_returns_none_on_204(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="DELETE",
@@ -70,7 +64,6 @@ def test_delete_returns_none_on_204(snipeit_client, httpx_mock):
     assert result is None
 
 
-@pytest.mark.unit
 def test_delete_returns_body_on_200(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="DELETE",
@@ -83,7 +76,6 @@ def test_delete_returns_body_on_200(snipeit_client, httpx_mock):
     assert result["status"] == "success"
 
 
-@pytest.mark.unit
 def test_status_error_in_json_raises_api_error(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="POST",
@@ -96,7 +88,6 @@ def test_status_error_in_json_raises_api_error(snipeit_client, httpx_mock):
     assert "Something went wrong" in str(excinfo.value)
 
 
-@pytest.mark.unit
 def test_non_json_2xx_raises_snipeit_exception(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="GET",
@@ -109,7 +100,6 @@ def test_non_json_2xx_raises_snipeit_exception(snipeit_client, httpx_mock):
     assert str(excinfo.value) == "Expected JSON response but received invalid or non-JSON content."
 
 
-@pytest.mark.unit
 def test_400_client_error_raises_SnipeITClientError(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="GET",
@@ -121,7 +111,6 @@ def test_400_client_error_raises_SnipeITClientError(snipeit_client, httpx_mock):
         snipeit_client.get("hardware/1")
 
 
-@pytest.mark.unit
 def test_timeout_raises_SnipeITTimeoutError(snipeit_client, httpx_mock):
     httpx_mock.add_exception(
         httpx.TimeoutException("timed out"),
@@ -133,7 +122,6 @@ def test_timeout_raises_SnipeITTimeoutError(snipeit_client, httpx_mock):
     assert str(excinfo.value) == "Request timed out after 10 seconds."
 
 
-@pytest.mark.unit
 def test_generic_request_exception_raises_SnipeITException(snipeit_client, httpx_mock):
     # ConnectError is retried on GET; register enough for all attempts.
     for _ in range(4):  # 1 initial + 3 retries
@@ -147,7 +135,6 @@ def test_generic_request_exception_raises_SnipeITException(snipeit_client, httpx
     assert str(excinfo.value) == "Connection error on GET /api/v1/hardware/1: boom"
 
 
-@pytest.mark.unit
 def test_status_error_default_message(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="POST",
@@ -160,7 +147,6 @@ def test_status_error_default_message(snipeit_client, httpx_mock):
     assert str(excinfo.value) == "Unknown API error"
 
 
-@pytest.mark.unit
 def test_context_manager_calls_close_on_exit():
     close_called = {"count": 0}
     with SnipeIT(url="https://snipe.example.test", token="fake") as client:
@@ -172,7 +158,6 @@ def test_context_manager_calls_close_on_exit():
     assert close_called["count"] == 1
 
 
-@pytest.mark.unit
 def test_context_manager_does_not_suppress_exceptions_and_closes():
     close_called = {"count": 0}
     with pytest.raises(RuntimeError), SnipeIT(url="https://snipe.example.test", token="fake") as client:
@@ -188,7 +173,6 @@ def test_context_manager_does_not_suppress_exceptions_and_closes():
 # ---------------------------------------------------------------------------
 # T9: 3xx redirect and localization-safe lookups
 # ---------------------------------------------------------------------------
-@pytest.mark.unit
 def test_3xx_raises_api_error_with_status_and_location(snipeit_client, httpx_mock):
     """A 3xx response must raise SnipeITApiError carrying the status code and redirect target.
 
@@ -207,7 +191,6 @@ def test_3xx_raises_api_error_with_status_and_location(snipeit_client, httpx_moc
     assert "https://snipe.example.test/login" in str(excinfo.value)
 
 
-@pytest.mark.unit
 def test_get_by_tag_localized_404_raises_not_found_with_tag_in_message(snipeit_client, httpx_mock):
     """A localized 404 from get_by_tag must raise SnipeITNotFoundError and include the tag."""
     httpx_mock.add_response(
@@ -221,7 +204,6 @@ def test_get_by_tag_localized_404_raises_not_found_with_tag_in_message(snipeit_c
     assert "TAG1" in str(excinfo.value)
 
 
-@pytest.mark.unit
 def test_get_by_serial_localized_404_raises_not_found_with_serial_in_message(snipeit_client, httpx_mock):
     """A localized 404 from get_by_serial must raise SnipeITNotFoundError and include the serial."""
     httpx_mock.add_response(
@@ -235,7 +217,6 @@ def test_get_by_serial_localized_404_raises_not_found_with_serial_in_message(sni
     assert "SN999" in str(excinfo.value)
 
 
-@pytest.mark.unit
 def test_get_by_tag_non_404_api_error_propagates(snipeit_client, httpx_mock):
     # 500 triggers retries on GET; register enough for all attempts.
     for _ in range(4):
@@ -252,7 +233,6 @@ def test_get_by_tag_non_404_api_error_propagates(snipeit_client, httpx_mock):
 # ---------------------------------------------------------------------------
 # Coverage targets
 # ---------------------------------------------------------------------------
-@pytest.mark.unit
 def test_redact_headers_masks_authorization():
     h = {"Authorization": "Bearer secret", "Accept": "application/json"}
     r = redact_headers(h)
@@ -260,13 +240,11 @@ def test_redact_headers_masks_authorization():
     assert r["Accept"] == "application/json"
 
 
-@pytest.mark.unit
 def test_redact_headers_empty():
     assert redact_headers({}) == {}
     assert redact_headers(None) == {}
 
 
-@pytest.mark.unit
 def test_companies_create(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="POST",
@@ -277,7 +255,6 @@ def test_companies_create(snipeit_client, httpx_mock):
     assert c.name == "Acme"
 
 
-@pytest.mark.unit
 def test_suppliers_create(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="POST",
@@ -288,7 +265,6 @@ def test_suppliers_create(snipeit_client, httpx_mock):
     assert s.name == "Widgets Co"
 
 
-@pytest.mark.unit
 def test_users_create(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="POST",
@@ -299,7 +275,6 @@ def test_users_create(snipeit_client, httpx_mock):
     assert u.username == "jdoe"
 
 
-@pytest.mark.unit
 def test_retry_after_http_date_parsing(monkeypatch):
     from snipeit._retry import RetryTransport
 
@@ -317,7 +292,6 @@ def test_retry_after_http_date_parsing(monkeypatch):
     assert RetryTransport._parse_retry_after("Thu, 01 Jan 2020 00:00:00 GMT") is None
 
 
-@pytest.mark.unit
 def test_retry_after_invalid_returns_none():
     from snipeit._retry import RetryTransport
 
@@ -326,7 +300,6 @@ def test_retry_after_invalid_returns_none():
     assert RetryTransport._parse_retry_after("") is None
 
 
-@pytest.mark.unit
 def test_mark_dirty_forces_field_into_patch(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="GET",
@@ -351,25 +324,21 @@ def test_mark_dirty_forces_field_into_patch(snipeit_client, httpx_mock):
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.unit
 def test_empty_token_raises():
     with pytest.raises(ValueError, match="token"):
         SnipeIT(url="https://snipe.example.test", token="")
 
 
-@pytest.mark.unit
 def test_whitespace_only_token_raises():
     with pytest.raises(ValueError, match="token"):
         SnipeIT(url="https://snipe.example.test", token="   ")
 
 
-@pytest.mark.unit
 def test_url_with_path_rejected():
     with pytest.raises(ValueError):
         SnipeIT(url="https://snipe.example.test/api", token="t")
 
 
-@pytest.mark.unit
 def test_post_204_raises_snipeit_exception(snipeit_client, httpx_mock):
     """POST returning 204 must raise — callers always expect a JSON body."""
     httpx_mock.add_response(
@@ -383,7 +352,6 @@ def test_post_204_raises_snipeit_exception(snipeit_client, httpx_mock):
     assert "204" in str(excinfo.value)
 
 
-@pytest.mark.unit
 def test_put_204_raises_snipeit_exception(snipeit_client, httpx_mock):
     """PUT returning 204 must raise — callers always expect a JSON body."""
     httpx_mock.add_response(
@@ -396,7 +364,6 @@ def test_put_204_raises_snipeit_exception(snipeit_client, httpx_mock):
     assert "PUT" in str(excinfo.value)
 
 
-@pytest.mark.unit
 def test_patch_204_raises_snipeit_exception(snipeit_client, httpx_mock):
     """PATCH returning 204 must raise — callers always expect a JSON body."""
     httpx_mock.add_response(
@@ -414,7 +381,6 @@ def test_patch_204_raises_snipeit_exception(snipeit_client, httpx_mock):
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.unit
 def test_4xx_with_non_json_body_uses_reason_phrase(snipeit_client, httpx_mock):
     """When the error body is not JSON, the HTTP reason phrase is used as the message."""
     httpx_mock.add_response(
@@ -441,7 +407,6 @@ def test_4xx_with_non_json_body_uses_reason_phrase(snipeit_client, httpx_mock):
     assert str(excinfo.value)
 
 
-@pytest.mark.unit
 def test_4xx_with_messages_list_joins_with_semicolon(snipeit_client, httpx_mock):
     """When messages is a list, items are joined with '; '."""
     httpx_mock.add_response(
@@ -459,7 +424,6 @@ def test_4xx_with_messages_list_joins_with_semicolon(snipeit_client, httpx_mock)
     assert ";" in str(excinfo.value)
 
 
-@pytest.mark.unit
 def test_4xx_with_messages_dict_formats_as_key_value(snipeit_client, httpx_mock):
     """When messages is a dict, it is formatted as 'key: value' pairs."""
     httpx_mock.add_response(
@@ -476,7 +440,6 @@ def test_4xx_with_messages_dict_formats_as_key_value(snipeit_client, httpx_mock)
     assert "required" in str(excinfo.value)
 
 
-@pytest.mark.unit
 def test_4xx_with_null_messages_produces_empty_string(snipeit_client, httpx_mock):
     """When messages is null, the exception message is empty (not a crash)."""
     httpx_mock.add_response(
@@ -490,7 +453,6 @@ def test_4xx_with_null_messages_produces_empty_string(snipeit_client, httpx_mock
     assert str(excinfo.value) == ""
 
 
-@pytest.mark.unit
 def test_pkg_version_lookup_failure_fallback(monkeypatch):
     """Fallback to 'snipeit-api' UA if package version lookup raises an Exception."""
     import importlib.metadata
@@ -503,7 +465,6 @@ def test_pkg_version_lookup_failure_fallback(monkeypatch):
     assert client._http.headers["User-Agent"] == "snipeit-api"
 
 
-@pytest.mark.unit
 def test_raw_request_errors(snipeit_client, httpx_mock):
     """_raw_request maps timeouts and request errors correctly."""
     # 1. Timeout error
@@ -527,7 +488,6 @@ def test_raw_request_errors(snipeit_client, httpx_mock):
     assert "Connection error on POST /api/v1/hardware/1/files" in str(excinfo.value)
 
 
-@pytest.mark.unit
 def test_stream_request_errors(snipeit_client, monkeypatch):
     """_stream_request maps timeouts and request errors correctly."""
 
@@ -550,7 +510,6 @@ def test_stream_request_errors(snipeit_client, monkeypatch):
     assert "Connection error on GET /api/v1/hardware/1/files" in str(excinfo.value)
 
 
-@pytest.mark.unit
 def test_extract_messages_from_non_dict_json_error(snipeit_client, httpx_mock):
     """_extract_messages falls back to response.reason_phrase if body is non-dict JSON."""
     httpx_mock.add_response(

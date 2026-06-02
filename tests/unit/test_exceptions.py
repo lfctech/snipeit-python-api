@@ -11,7 +11,6 @@ from snipeit.exceptions import (
 pytestmark = pytest.mark.unit
 
 
-@pytest.mark.unit
 def test_401_raises_auth_error(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="GET",
@@ -24,7 +23,6 @@ def test_401_raises_auth_error(snipeit_client, httpx_mock):
     assert "Unauthenticated." in str(excinfo.value)
 
 
-@pytest.mark.unit
 def test_404_raises_not_found_error(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="GET",
@@ -37,7 +35,6 @@ def test_404_raises_not_found_error(snipeit_client, httpx_mock):
     assert "Asset not found" in str(excinfo.value)
 
 
-@pytest.mark.unit
 def test_422_raises_validation_error(snipeit_client, httpx_mock):
     error_payload = {
         "messages": "The given data was invalid.",
@@ -54,7 +51,6 @@ def test_422_raises_validation_error(snipeit_client, httpx_mock):
     assert "The given data was invalid." in str(excinfo.value)
 
 
-@pytest.mark.unit
 def test_500_raises_server_error(snipeit_client, httpx_mock):
     # 500 triggers retries on GET; register enough responses for all attempts.
     for _ in range(4):  # 1 initial + 3 retries
@@ -67,7 +63,6 @@ def test_500_raises_server_error(snipeit_client, httpx_mock):
         snipeit_client.assets.get(1)
 
 
-@pytest.mark.unit
 def test_api_error_preserves_response_and_status_code():
     import httpx
 
@@ -82,7 +77,6 @@ def test_api_error_preserves_response_and_status_code():
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.unit
 def test_validation_error_with_unparseable_body_sets_errors_none(caplog):
     """When the 422 response body is not valid JSON, errors must be None and a warning logged."""
     import logging
