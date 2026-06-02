@@ -4,11 +4,11 @@ PY ?= .venv/bin/python
 
 .PHONY: test test-unit check cov cov-html property mut mut-quick mut-report mut-reset clean docker-up docker-down test-integration test-all
 
-# Run unit tests only
+# Run the fast suite: unit + public API contract tests
 test:
 	$(PY) -m pytest tests/unit tests/contract -q -m unit
 
-# Run unit tests only (alias)
+# Run the fast suite (alias)
 test-unit:
 	$(PY) -m pytest tests/unit tests/contract -q -m unit
 
@@ -18,9 +18,9 @@ check:
 	.venv/bin/ruff format --check .
 	.venv/bin/pyright
 
-# Run tests with coverage (branch coverage) and enforce 95%
+# Run the fast suite with source branch coverage and enforce 95%
 cov:
-	$(PY) -m coverage run -m pytest tests/unit tests/contract -q -m unit && \
+	$(PY) -m coverage run --branch --source=snipeit -m pytest tests/unit tests/contract -q -m unit && \
 	$(PY) -m coverage report -m --fail-under=95
 
 # Mutation testing (can be slow)

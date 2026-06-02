@@ -188,7 +188,7 @@ with SnipeIT(url="https://snipe.example.com", token="your-api-token") as api:
 
 ```bash
 make docker-up   # Start local Snipe-IT in Docker
-make test        # Unit tests
+make test        # Fast tests: unit + public API contract tests
 make check       # Lint + type-check
 make test-all    # Unit + integration tests
 ```
@@ -196,10 +196,10 @@ make test-all    # Unit + integration tests
 ## Testing
 
 ```bash
-make test            # Unit tests only (default)
-make test-unit       # Alias
+make test            # Fast tests: unit + public API contract tests
+make test-unit       # Alias for the fast tests
 make test-integration  # Requires Docker
 make test-all        # Both
 make check           # ruff + pyright
-make cov             # Coverage (≥95% enforced)
+make cov             # Source branch coverage (≥95% enforced)
 ```
