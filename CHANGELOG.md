@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+### Bug fixes
+
+- **Asset attachment integration assertion**: Preserve the deleted attachment
+  ID when verifying that Snipe-IT removed the uploaded file.
+
+### Internal / testing
+
+- **Source branch coverage**: Measure coverage for the `snipeit` package with
+  branch tracking instead of including the test suite in statement coverage.
+- **Stable integration stack**: Pin the default Snipe-IT Docker image to
+  `v8.6.1-alpine`, retain a `SNIPEIT_IMAGE` override for manual compatibility
+  runs, and share one readiness script between local runs and CI.
+- **Test organization**: Remove redundant function-level unit markers and
+  split the large asset test module into focused behavior modules.
+
 ## 0.5.0 (2026-05-30)
 
 ### New features
