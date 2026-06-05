@@ -9,6 +9,10 @@
 
 ### Internal / testing
 
+- **Test review cleanup**: Removed redundant unit tests, split bundled
+  endpoint/error tests into focused cases, changed custom-field save tests to
+  stage through the public `set_custom_field()` API, and covered labels PDF
+  writes into missing parent directories.
 - **Source branch coverage**: Measure coverage for the `snipeit` package with
   branch tracking instead of including the test suite in statement coverage.
 - **Stable integration stack**: Pin the default Snipe-IT Docker image to
