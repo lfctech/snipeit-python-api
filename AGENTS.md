@@ -4,7 +4,6 @@ The role of this file is to describe common mistakes and confusion points that a
 
 ## Development Rules
 
-- Work on the `dev` branch. Do not create feature branches.
 - Use [Conventional Commits](https://www.conventionalcommits.org/): `feat:`, `fix:`, `docs:`, `test:`, `ci:`, `chore:`, `refactor:`, `release:`.
 - Split commits per logical change (one commit per feature, fix, or refactor).
 - Match existing code style. Lint rules are in `pyproject.toml` (ruff + pyright).
@@ -15,13 +14,9 @@ The role of this file is to describe common mistakes and confusion points that a
 **The workflow is mandatory — do not skip any step, even for small changes.**
 
 1. Make changes.
-2. Run `make test` (unit + contract tests) and `make check` (ruff + pyright). Fix any failures before committing.
-3. Commit with a conventional commit message.
-4. Repeat steps 1–3 for each logical change.
-5. When finished, add entries to `CHANGELOG.md` under `## Unreleased` grouped by sub-header (`### New features`, `### Bug fixes`, `### Internal`, etc.) matching the existing style.
-6. Commit the changelog update: `docs: update changelog`.
-
-> **Past failure:** An agent completed a multi-file fix but skipped steps 3–6 entirely — no commits were made and the changelog was not updated. The workflow applies to every task, no matter how small.
+2. Run `make test` (unit + contract tests) and `make check` (ruff + pyright). Fix any failures .
+3. Repeat steps 1–2 for each logical change.
+4. When finished, add entries to `CHANGELOG.md` under `## Unreleased` grouped by sub-header (`### New features`, `### Bug fixes`, `### Internal`, etc.) matching the existing style.
 
 ## Common Surprises
 
