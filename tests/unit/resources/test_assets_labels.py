@@ -1,5 +1,3 @@
-import os
-
 import pytest
 
 from snipeit.exceptions import SnipeITApiError
@@ -19,8 +17,24 @@ def test_labels_pdf_content(snipeit_client, httpx_mock, tmp_path):
     save_path = tmp_path / "labels.pdf"
     result = snipeit_client.assets.labels(str(save_path), ["TAG1", "TAG2"])
     assert result == str(save_path)
-    assert os.path.exists(save_path)
-    assert os.path.getsize(save_path) == len(pdf_bytes)
+    assert save_path.read_bytes() == pdf_bytes
+
+
+def test_labels_creates_parent_directory(snipeit_client, httpx_mock, tmp_path):
+    pdf_bytes = b"%PDF-1.4\nnested..."
+    httpx_mock.add_response(
+        method="POST",
+        url="https://snipe.example.test/api/v1/hardware/labels",
+        content=pdf_bytes,
+        headers={"Content-Type": "application/pdf"},
+        status_code=200,
+    )
+    save_path = tmp_path / "missing" / "nested" / "labels.pdf"
+
+    result = snipeit_client.assets.labels(str(save_path), ["TAG1"])
+
+    assert result == str(save_path)
+    assert save_path.read_bytes() == pdf_bytes
 
 
 def test_labels_rejects_non_pdf_content_type(snipeit_client, httpx_mock, tmp_path):

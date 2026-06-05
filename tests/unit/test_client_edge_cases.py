@@ -122,7 +122,7 @@ def test_timeout_raises_SnipeITTimeoutError(snipeit_client, httpx_mock):
     assert str(excinfo.value) == "Request timed out after 10 seconds."
 
 
-def test_generic_request_exception_raises_SnipeITException(snipeit_client, httpx_mock):
+def test_connect_error_raises_snipeit_connection_error(snipeit_client, httpx_mock):
     # ConnectError is retried on GET; register enough for all attempts.
     for _ in range(4):  # 1 initial + 3 retries
         httpx_mock.add_exception(
@@ -245,36 +245,6 @@ def test_redact_headers_empty():
     assert redact_headers(None) == {}
 
 
-def test_companies_create(snipeit_client, httpx_mock):
-    httpx_mock.add_response(
-        method="POST",
-        url="https://snipe.example.test/api/v1/companies",
-        json={"status": "success", "payload": {"id": 1, "name": "Acme"}},
-    )
-    c = snipeit_client.companies.create(name="Acme")
-    assert c.name == "Acme"
-
-
-def test_suppliers_create(snipeit_client, httpx_mock):
-    httpx_mock.add_response(
-        method="POST",
-        url="https://snipe.example.test/api/v1/suppliers",
-        json={"status": "success", "payload": {"id": 1, "name": "Widgets Co"}},
-    )
-    s = snipeit_client.suppliers.create(name="Widgets Co")
-    assert s.name == "Widgets Co"
-
-
-def test_users_create(snipeit_client, httpx_mock):
-    httpx_mock.add_response(
-        method="POST",
-        url="https://snipe.example.test/api/v1/users",
-        json={"status": "success", "payload": {"id": 5, "username": "jdoe"}},
-    )
-    u = snipeit_client.users.create(username="jdoe")
-    assert u.username == "jdoe"
-
-
 def test_retry_after_http_date_parsing(monkeypatch):
     from snipeit._retry import RetryTransport
 
@@ -381,7 +351,7 @@ def test_patch_204_raises_snipeit_exception(snipeit_client, httpx_mock):
 # ---------------------------------------------------------------------------
 
 
-def test_4xx_with_non_json_body_uses_reason_phrase(snipeit_client, httpx_mock):
+def test_5xx_with_non_json_body_uses_reason_phrase(snipeit_client, httpx_mock):
     """When the error body is not JSON, the HTTP reason phrase is used as the message."""
     httpx_mock.add_response(
         method="GET",
@@ -465,9 +435,8 @@ def test_pkg_version_lookup_failure_fallback(monkeypatch):
     assert client._http.headers["User-Agent"] == "snipeit-api"
 
 
-def test_raw_request_errors(snipeit_client, httpx_mock):
-    """_raw_request maps timeouts and request errors correctly."""
-    # 1. Timeout error
+def test_raw_request_timeout_raises_snipeit_timeout_error(snipeit_client, httpx_mock):
+    """_raw_request maps timeouts to SnipeITTimeoutError."""
     httpx_mock.add_exception(
         httpx.TimeoutException("timeout"),
         method="POST",
@@ -477,7 +446,9 @@ def test_raw_request_errors(snipeit_client, httpx_mock):
         snipeit_client._raw_request("POST", "hardware/1/files", timeout=5)
     assert "Request timed out after 5 seconds" in str(excinfo.value)
 
-    # 2. Request error
+
+def test_raw_request_request_error_raises_snipeit_connection_error(snipeit_client, httpx_mock):
+    """_raw_request maps request errors to SnipeITConnectionError."""
     httpx_mock.add_exception(
         httpx.RequestError("request error"),
         method="POST",
@@ -488,10 +459,9 @@ def test_raw_request_errors(snipeit_client, httpx_mock):
     assert "Connection error on POST /api/v1/hardware/1/files" in str(excinfo.value)
 
 
-def test_stream_request_errors(snipeit_client, monkeypatch):
-    """_stream_request maps timeouts and request errors correctly."""
+def test_stream_request_timeout_raises_snipeit_timeout_error(snipeit_client, monkeypatch):
+    """_stream_request maps timeouts to SnipeITTimeoutError."""
 
-    # 1. Timeout error
     def mock_stream_timeout(*args, **kwargs):
         raise httpx.TimeoutException("stream timeout")
 
@@ -500,7 +470,10 @@ def test_stream_request_errors(snipeit_client, monkeypatch):
         pass
     assert "Request timed out after" in str(excinfo.value)
 
-    # 2. Request error
+
+def test_stream_request_request_error_raises_snipeit_connection_error(snipeit_client, monkeypatch):
+    """_stream_request maps request errors to SnipeITConnectionError."""
+
     def mock_stream_request_error(*args, **kwargs):
         raise httpx.RequestError("stream request error", request=httpx.Request("GET", "https://snipe.example.test"))
 

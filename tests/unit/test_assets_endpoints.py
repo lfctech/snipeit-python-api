@@ -3,28 +3,15 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
-def test_labels_writes_pdf_bytes_directly(snipeit_client, httpx_mock, tmp_path):
-    pdf_bytes = b"%PDF-1.4 test"
-    httpx_mock.add_response(
-        method="POST",
-        url="https://snipe.example.test/api/v1/hardware/labels",
-        content=pdf_bytes,
-        headers={"Content-Type": "application/pdf"},
-        status_code=200,
-    )
-    save_path = tmp_path / "labels.pdf"
-    out = snipeit_client.assets.labels(str(save_path), ["TAG1"])
-    assert out == str(save_path)
-    assert save_path.read_bytes() == pdf_bytes
-
-
-def test_audit_by_id_and_asset_audit(snipeit_client, httpx_mock):
+def test_audit_by_id_posts_to_audit_endpoint(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="POST", url="https://snipe.example.test/api/v1/hardware/audit/1", json={"status": "success"}
     )
     resp = snipeit_client.assets.audit_by_id(1, note="checked")
     assert isinstance(resp, dict)
 
+
+def test_asset_audit_posts_and_refreshes_asset(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="POST", url="https://snipe.example.test/api/v1/hardware/1/audit", json={"status": "success"}
     )
@@ -60,7 +47,7 @@ def test_restore(snipeit_client, httpx_mock):
     assert out.id == 1
 
 
-def test_licenses_and_files_endpoints(snipeit_client, httpx_mock, tmp_path):
+def test_get_licenses_endpoint(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="GET",
         url="https://snipe.example.test/api/v1/hardware/1/licenses",
@@ -69,12 +56,16 @@ def test_licenses_and_files_endpoints(snipeit_client, httpx_mock, tmp_path):
     data = snipeit_client.assets.get_licenses(1)
     assert data["status"] == "success"
 
+
+def test_list_files_endpoint(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="GET", url="https://snipe.example.test/api/v1/hardware/1/files", json={"status": "success", "files": []}
     )
     files_list = snipeit_client.assets.list_files(1)
     assert files_list["status"] == "success"
 
+
+def test_upload_files_endpoint_uses_multipart(snipeit_client, httpx_mock, tmp_path):
     f = tmp_path / "hello.txt"
     f.write_text("hello")
     httpx_mock.add_response(
@@ -88,12 +79,16 @@ def test_licenses_and_files_endpoints(snipeit_client, httpx_mock, tmp_path):
     upload_req = httpx_mock.get_requests()[-1]
     assert "multipart/form-data" in upload_req.headers["Content-Type"]
 
+
+def test_download_file_endpoint_writes_bytes(snipeit_client, httpx_mock, tmp_path):
     dest = tmp_path / "dl.txt"
     httpx_mock.add_response(method="GET", url="https://snipe.example.test/api/v1/hardware/1/files/2", content=b"data")
     out_path = snipeit_client.assets.download_file(1, 2, str(dest))
     assert out_path == str(dest)
     assert dest.read_bytes() == b"data"
 
+
+def test_delete_file_endpoint_uses_delete_suffix(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="DELETE", url="https://snipe.example.test/api/v1/hardware/1/files/2/delete", status_code=204
     )
@@ -183,7 +178,6 @@ def test_upload_files_closes_file_handles_on_success(snipeit_client, httpx_mock,
         status_code=200,
     )
     opened_handles: list = []
-    original_open = __builtins__["open"] if isinstance(__builtins__, dict) else open
 
     import builtins
 

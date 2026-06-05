@@ -43,17 +43,10 @@ def test_pending_custom_fields_empty_on_fresh_asset(snipeit_client, httpx_mock):
     assert asset.pending_custom_fields() == {}
 
 
-def test_pending_custom_fields_reflects_internal_state(snipeit_client, httpx_mock):
-    """Whitebox: directly poking the internal dict should be visible via the accessor."""
-    asset = _asset_with_custom_field(snipeit_client, httpx_mock)
-    asset._pending_custom_fields["Owner"] = "alice"
-    assert asset.pending_custom_fields() == {"Owner": "alice"}
-
-
 def test_pending_custom_fields_returns_defensive_copy(snipeit_client, httpx_mock):
     """Mutating the returned dict must not affect internal staging state."""
     asset = _asset_with_custom_field(snipeit_client, httpx_mock)
-    asset._pending_custom_fields["Owner"] = "alice"
+    asset.set_custom_field("Owner", "alice")
     snapshot = asset.pending_custom_fields()
     snapshot["Owner"] = "MUTATED"
     snapshot["NewLabel"] = "extra"
@@ -96,7 +89,7 @@ def test_get_custom_field_returns_new_server_value_after_save(snipeit_client, ht
 
 
 def test_save_flushes_pending_custom_field_as_top_level_column_key(snipeit_client, httpx_mock):
-    """Whitebox-stage a label, then save() — PATCH body must contain the
+    """Stage a label, then save() — PATCH body must contain the
     column name (not the label, not the nested shape)."""
     asset = _asset_with_custom_field(snipeit_client, httpx_mock, asset_id=100)
     httpx_mock.add_response(
@@ -104,8 +97,7 @@ def test_save_flushes_pending_custom_field_as_top_level_column_key(snipeit_clien
         url="https://snipe.example.test/api/v1/hardware/100",
         json={"status": "success", "payload": {"id": 100}},
     )
-    asset._pending_custom_fields["Owner"] = "alice"
-    asset.save()
+    asset.set_custom_field("Owner", "alice").save()
     body = json.loads(httpx_mock.get_requests()[-1].content)
     assert body == {"_snipeit_owner_3": "alice"}
 
@@ -119,7 +111,7 @@ def test_save_combines_regular_field_and_pending_custom_field(snipeit_client, ht
         json={"status": "success", "payload": {"id": 101}},
     )
     asset.name = "Renamed"
-    asset._pending_custom_fields["Owner"] = "carol"
+    asset.set_custom_field("Owner", "carol")
     asset.save()
     body = json.loads(httpx_mock.get_requests()[-1].content)
     assert body == {"name": "Renamed", "_snipeit_owner_3": "carol"}
@@ -133,8 +125,7 @@ def test_save_with_only_pending_custom_field_issues_patch(snipeit_client, httpx_
         url="https://snipe.example.test/api/v1/hardware/102",
         json={"status": "success", "payload": {"id": 102}},
     )
-    asset._pending_custom_fields["Owner"] = "dave"
-    asset.save()
+    asset.set_custom_field("Owner", "dave").save()
     patches = [r for r in httpx_mock.get_requests() if r.method == "PATCH"]
     assert len(patches) == 1
     assert json.loads(patches[0].content) == {"_snipeit_owner_3": "dave"}
@@ -167,8 +158,8 @@ def test_save_multiple_pending_custom_fields_all_sent(snipeit_client, httpx_mock
         url="https://snipe.example.test/api/v1/hardware/104",
         json={"status": "success", "payload": {"id": 104}},
     )
-    asset._pending_custom_fields["Owner"] = "alice"
-    asset._pending_custom_fields["Site"] = "HQ"
+    asset.set_custom_field("Owner", "alice")
+    asset.set_custom_field("Site", "HQ")
     asset.save()
     body = json.loads(httpx_mock.get_requests()[-1].content)
     assert body == {"_snipeit_owner_3": "alice", "_snipeit_site_4": "HQ"}
@@ -225,8 +216,7 @@ def test_save_preserves_local_custom_fields_when_payload_returns_null(snipeit_cl
             },
         },
     )
-    asset._pending_custom_fields["Owner"] = "alice"
-    asset.save()
+    asset.set_custom_field("Owner", "alice").save()
     # Nested shape preserved, value updated from top-level key.
     assert isinstance(asset.custom_fields, dict)
     assert asset.custom_fields["Owner"]["field"] == "_snipeit_owner_3"
@@ -254,8 +244,7 @@ def test_save_strips_stray_snipeit_keys_from_payload(snipeit_client, httpx_mock)
             },
         },
     )
-    asset._pending_custom_fields["Owner"] = "alice"
-    asset.save()
+    asset.set_custom_field("Owner", "alice").save()
     extras = asset.__pydantic_extra__ or {}
     # Stray column keys are NOT in extras.
     assert "_snipeit_other_99" not in extras
@@ -274,8 +263,7 @@ def test_save_clears_pending_custom_fields(snipeit_client, httpx_mock):
             "payload": {"id": 202, "custom_fields": None, "_snipeit_owner_3": "alice"},
         },
     )
-    asset._pending_custom_fields["Owner"] = "alice"
-    asset.save()
+    asset.set_custom_field("Owner", "alice").save()
     assert asset.pending_custom_fields() == {}
 
 
@@ -292,8 +280,7 @@ def test_two_consecutive_saves_without_refresh_succeed(snipeit_client, httpx_moc
             "payload": {"id": 203, "custom_fields": None, "_snipeit_owner_3": "alice"},
         },
     )
-    asset._pending_custom_fields["Owner"] = "alice"
-    asset.save()
+    asset.set_custom_field("Owner", "alice").save()
     assert asset.custom_fields["Owner"]["value"] == "alice"
 
     # Second save — without refresh()
@@ -305,8 +292,7 @@ def test_two_consecutive_saves_without_refresh_succeed(snipeit_client, httpx_moc
             "payload": {"id": 203, "custom_fields": None, "_snipeit_owner_3": "carol"},
         },
     )
-    asset._pending_custom_fields["Owner"] = "carol"
-    asset.save()
+    asset.set_custom_field("Owner", "carol").save()
     assert asset.custom_fields["Owner"]["value"] == "carol"
     # Two PATCHes were sent, both with the column-name top-level key.
     patches = [r for r in httpx_mock.get_requests() if r.method == "PATCH"]
@@ -339,7 +325,7 @@ def test_refresh_clears_pending_custom_fields(snipeit_client, httpx_mock):
     """Even if a stage was queued, refresh() should clear it (server is
     authoritative — the user explicitly asked to refetch)."""
     asset = _asset_with_custom_field(snipeit_client, httpx_mock, asset_id=205, value="bob")
-    asset._pending_custom_fields["Owner"] = "alice"
+    asset.set_custom_field("Owner", "alice")
     httpx_mock.add_response(
         method="GET",
         url="https://snipe.example.test/api/v1/hardware/205",
