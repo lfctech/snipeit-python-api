@@ -9,14 +9,6 @@ The role of this file is to describe common mistakes and confusion points that a
 - Match existing code style. Lint rules are in `pyproject.toml` (ruff + pyright).
 - Python ≥ 3.11. Dependencies: `httpx`, `pydantic v2`.
 
-## Workflow
-
-**The workflow is mandatory — do not skip any step, even for small changes.**
-
-1. Make changes.
-2. Run `make test` (unit + contract tests) and `make check` (ruff + pyright). Fix any failures .
-3. Repeat steps 1–2 for each logical change.
-4. When finished, add entries to `CHANGELOG.md` under `## Unreleased` grouped by sub-header (`### New features`, `### Bug fixes`, `### Internal`, etc.) matching the existing style.
 
 ## Common Surprises
 
