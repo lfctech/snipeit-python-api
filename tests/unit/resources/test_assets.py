@@ -187,6 +187,19 @@ def test_get_by_serial_unexpected_shape_raises_api_error(snipeit_client, httpx_m
         snipeit_client.assets.get_by_serial("SN-BAD")
 
 
+def test_get_by_serial_rejects_non_list_rows(snipeit_client, httpx_mock):
+    from snipeit.exceptions import SnipeITApiError
+
+    httpx_mock.add_response(
+        method="GET",
+        url="https://snipe.example.test/api/v1/hardware/byserial/SN-BAD-ROWS",
+        json={"rows": {"id": 1, "serial": "SN-BAD-ROWS"}},
+    )
+
+    with pytest.raises(SnipeITApiError, match="expected list"):
+        snipeit_client.assets.get_by_serial("SN-BAD-ROWS")
+
+
 def test_get_by_tag_found(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="GET",
