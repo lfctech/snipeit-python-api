@@ -64,7 +64,9 @@ class AssetFilesMixin:
             self.api._raise_for_status(resp)
             try:
                 json_resp = resp.json()
-                if isinstance(json_resp, dict) and json_resp.get("status") == "error":
+                if not isinstance(json_resp, dict):
+                    raise SnipeITApiError("Expected JSON object response from file upload", response=resp)
+                if json_resp.get("status") == "error":
                     raise SnipeITApiError(json_resp.get("messages", "Unknown API error"), response=resp)
                 return json_resp
             except ValueError:

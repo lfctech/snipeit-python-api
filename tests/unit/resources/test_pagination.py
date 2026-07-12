@@ -40,6 +40,19 @@ def test_list_all_rejects_offset_in_params(snipeit_client):
         list(snipeit_client.users.list_all(**{"offset": 5}))
 
 
+@pytest.mark.parametrize(
+    ("kwargs", "message"),
+    [
+        ({"limit": -1}, "limit"),
+        ({"page_size": 0}, "page_size"),
+        ({"page_size": -1}, "page_size"),
+    ],
+)
+def test_list_all_rejects_invalid_pagination_values(snipeit_client, kwargs, message):
+    with pytest.raises(ValueError, match=message):
+        list(snipeit_client.users.list_all(**kwargs))
+
+
 def test_list_all_terminates_when_rows_empty_and_no_total(snipeit_client, httpx_mock):
     """list_all must stop when rows is empty, even if 'total' is absent from the response.
 

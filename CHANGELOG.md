@@ -4,6 +4,9 @@
 
 ### Bug fixes
 
+- **Asset response validation**: Accept a single serial lookup row when the
+  API omits `total`, reject non-object file-upload responses, and fail fast on
+  invalid `list_all()` pagination values.
 - **Asset attachment integration assertion**: Preserve the deleted attachment
   ID when verifying that Snipe-IT removed the uploaded file.
 

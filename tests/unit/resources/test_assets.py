@@ -353,14 +353,15 @@ def test_get_by_serial_zero_total_raises_not_found(snipeit_client, httpx_mock):
         snipeit_client.assets.get_by_serial("SN000")
 
 
-def test_get_by_serial_missing_total_treated_as_not_found(snipeit_client, httpx_mock):
+def test_get_by_serial_missing_total_uses_row_count(snipeit_client, httpx_mock):
     httpx_mock.add_response(
         method="GET",
         url="https://snipe.example.test/api/v1/hardware/byserial/SN111",
         json={"rows": [{"id": 1, "serial": "SN111"}]},
     )
-    with pytest.raises(SnipeITNotFoundError):
-        snipeit_client.assets.get_by_serial("SN111")
+    asset = snipeit_client.assets.get_by_serial("SN111")
+    assert asset.id == 1
+    assert asset.serial == "SN111"
 
 
 def test_create_maintenance_returns_payload(snipeit_client, httpx_mock):

@@ -73,13 +73,16 @@ class AssetsManager(AssetFilesMixin, AssetLabelsMixin, BaseResourceManager[Asset
             raise SnipeITNotFoundError(f"Asset with serial {serial!r} not found.") from None
 
         if isinstance(response, dict) and "rows" in response:
-            if "total" not in response:
-                raise SnipeITNotFoundError(f"Asset with serial {serial!r} not found.")
-            rows = response.get("rows") or []
-            total = response.get("total", 0)
+            rows = response["rows"]
+            if not isinstance(rows, list):
+                raise SnipeITApiError(f"Unexpected 'rows' shape for byserial {serial!r}: expected list.")
+
+            total = response.get("total")
+            if total is None:
+                total = len(rows)
             if len(rows) == 1 and total == 1:
                 return self._make(rows[0])
-            if total > 1:
+            if isinstance(total, int) and total > 1:
                 raise SnipeITApiError(f"Expected 1 asset with serial {serial!r}, but found {total}.")
             raise SnipeITNotFoundError(f"Asset with serial {serial!r} not found.")
 
