@@ -81,6 +81,8 @@ class AssetsManager(AssetFilesMixin, AssetLabelsMixin, BaseResourceManager[Asset
             if total is None:
                 total = len(rows)
             if len(rows) == 1 and total == 1:
+                if not isinstance(rows[0], dict):
+                    raise SnipeITApiError(f"Unexpected row shape for byserial {serial!r}: expected object.")
                 return self._make(rows[0])
             if isinstance(total, int) and total > 1:
                 raise SnipeITApiError(f"Expected 1 asset with serial {serial!r}, but found {total}.")
