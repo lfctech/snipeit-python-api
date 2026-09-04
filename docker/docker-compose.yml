@@ -2,7 +2,7 @@
 
 services:
   app:
-    image: snipe/snipe-it:latest-alpine
+    image: snipe/snipe-it:v8.7.2-alpine
     restart: unless-stopped
     ports:
       - "${APP_PORT:-8000}:80"
@@ -19,7 +19,7 @@ services:
     
 
   seeder:
-    image: snipe/snipe-it:latest-alpine
+    image: snipe/snipe-it:v8.7.2-alpine
     depends_on:
       db:
         condition: service_healthy
