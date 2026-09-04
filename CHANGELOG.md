@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Internal / testing
+
+- **Snipe-IT 8.7.2 compatibility target**: Pin both Docker integration-test
+  services to `snipe/snipe-it:v8.7.2-alpine` for reproducible coverage.
+
 ## 0.5.0 (2026-05-30)
 
 ### New features
