@@ -4,6 +4,9 @@
 
 ### Internal / testing
 
+- Remove four duplicate tests for category creation, status-label routing,
+  unchanged-object saves, and absent Retry-After values; retain their existing
+  parametrized and explicit behavior coverage.
 - **Snipe-IT 8.7.2 compatibility target**: Pin both Docker integration-test
   services to `snipe/snipe-it:v8.7.2-alpine` for reproducible coverage.
 

@@ -252,17 +252,6 @@ def test_in_place_mutation_of_list_field_is_detected():
 
 
 @pytest.mark.unit
-def test_unchanged_object_after_load_does_not_save():
-    """An object loaded from the server with no changes should not PATCH."""
-    mgr = MockManager()
-    obj = ApiObject(mgr, {"id": 1, "name": "unchanged"})
-    obj._path = "test_objects"
-    result = obj.save()
-    assert result is obj
-    assert mgr._patched_path is None
-
-
-@pytest.mark.unit
 def test_save_refreshes_loaded_state():
     """After save, the snapshot is updated so a second mutation is still detected."""
     mgr = MockManager()
