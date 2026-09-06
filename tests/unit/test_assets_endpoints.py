@@ -182,6 +182,20 @@ def test_upload_files_non_json_response_raises_api_error(snipeit_client, httpx_m
 
 
 @pytest.mark.unit
+@pytest.mark.parametrize("body", ["[]", '"unexpected"', "null", "42", "true"])
+def test_upload_files_non_object_json_raises_api_error(snipeit_client, httpx_mock, tmp_path, body):
+    from snipeit.exceptions import SnipeITApiError
+
+    f = tmp_path / "file.txt"
+    f.write_text("data")
+    httpx_mock.add_response(method="POST", content=body, headers={"Content-Type": "application/json"})
+    with pytest.raises(SnipeITApiError, match="Expected JSON object") as exc:
+        snipeit_client.assets.upload_files(1, [str(f)])
+    assert exc.value.response is not None
+    assert exc.value.response.status_code == 200
+
+
+@pytest.mark.unit
 def test_upload_files_closes_file_handles_on_success(snipeit_client, httpx_mock, tmp_path):
     """File handles opened during upload must be closed even on success."""
     f = tmp_path / "file.txt"
