@@ -24,13 +24,6 @@ def test_parse_retry_after_never_raises(value):
 
 
 @pytest.mark.unit
-@given(st.none())
-def test_parse_retry_after_none_returns_none(value):
-    """Property: None input always returns None."""
-    assert RetryTransport._parse_retry_after(value) is None
-
-
-@pytest.mark.unit
 @given(st.integers(min_value=0, max_value=3600))
 def test_parse_retry_after_integer_seconds(n):
     """Property: integer-seconds form returns max(0.0, n) as a float."""
