@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Bug fixes
+
+- Accept serial lookup row envelopes with missing or null totals, and reject
+  malformed rows with `SnipeITApiError`.
+- Reject non-object JSON file-upload responses with `SnipeITApiError`.
+- Reject negative `list_all` limits and nonpositive page sizes before requesting
+  a page.
+
 ### Internal / testing
 
 - Remove four duplicate tests for category creation, status-label routing,

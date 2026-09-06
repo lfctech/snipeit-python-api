@@ -3,6 +3,13 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.parametrize("kwargs", [{"limit": -1}, {"page_size": 0}, {"page_size": -1}])
+def test_list_all_rejects_invalid_bounds_before_request(snipeit_client, httpx_mock, kwargs):
+    with pytest.raises(ValueError):
+        list(snipeit_client.users.list_all(**kwargs))
+    assert httpx_mock.get_requests() == []
+
+
 @pytest.mark.unit
 def test_list_all_paginates_and_yields_all(snipeit_client, httpx_mock):
     httpx_mock.add_response(
