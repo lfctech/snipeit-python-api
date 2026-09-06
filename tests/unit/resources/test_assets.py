@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from snipeit.exceptions import SnipeITNotFoundError, SnipeITStateError
+from snipeit.exceptions import SnipeITApiError, SnipeITNotFoundError, SnipeITStateError
 from snipeit.resources.assets import Asset
 
 pytestmark = pytest.mark.unit
@@ -378,14 +378,34 @@ def test_get_by_serial_zero_total_raises_not_found(snipeit_client, httpx_mock):
 
 
 @pytest.mark.unit
-def test_get_by_serial_missing_total_treated_as_not_found(snipeit_client, httpx_mock):
+@pytest.mark.parametrize("total", [{}, {"total": None}])
+def test_get_by_serial_missing_total_uses_rows(snipeit_client, httpx_mock, total):
     httpx_mock.add_response(
         method="GET",
         url="https://snipe.example.test/api/v1/hardware/byserial/SN111",
-        json={"rows": [{"id": 1, "serial": "SN111"}]},
+        json={"rows": [{"id": 1, "serial": "SN111"}], **total},
     )
-    with pytest.raises(SnipeITNotFoundError):
+    asset = snipeit_client.assets.get_by_serial("SN111")
+    assert asset.id == 1
+    assert asset.serial == "SN111"
+
+
+@pytest.mark.parametrize("rows", [None, {}, "invalid", [None], ["invalid"]])
+def test_get_by_serial_malformed_rows_raise_api_error(snipeit_client, httpx_mock, rows):
+    from snipeit.exceptions import SnipeITApiError
+
+    httpx_mock.add_response(json={"total": 1, "rows": rows})
+    with pytest.raises(SnipeITApiError) as exc:
+        snipeit_client.assets.get_by_serial("SN-BAD")
+    assert type(exc.value) is SnipeITApiError
+
+
+@pytest.mark.parametrize("rows, error", [([], SnipeITNotFoundError), ([{"id": 1}, {"id": 2}], SnipeITApiError)])
+def test_get_by_serial_missing_total_preserves_cardinality(snipeit_client, httpx_mock, rows, error):
+    httpx_mock.add_response(json={"rows": rows})
+    with pytest.raises(error) as exc:
         snipeit_client.assets.get_by_serial("SN111")
+    assert type(exc.value) is error
 
 
 @pytest.mark.unit
