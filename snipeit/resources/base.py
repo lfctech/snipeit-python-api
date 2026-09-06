@@ -339,6 +339,10 @@ class BaseResourceManager(Manager, Generic[T]):
                 "internal pagination and would break page iteration. "
                 "Use 'limit' to cap total results."
             )
+        if limit is not None and limit < 0:
+            raise ValueError("limit must be greater than or equal to zero")
+        if page_size <= 0:
+            raise ValueError("page_size must be greater than zero")
         yielded = 0
         while True:
             # When the caller passes a small ``limit``, never request more rows
