@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.5.1 (2026-09-11)
+
 ### Bug fixes
 
 - Accept serial lookup row envelopes with missing or null totals, and reject
