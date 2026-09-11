@@ -54,7 +54,8 @@ dev = [
 
 [tool.mutmut]
 paths_to_mutate = ["snipeit"]
-also_copy = ["docker/compose.py"]
+# mutmut 3.x copies nested files without creating their parent directory.
+also_copy = ["docker/"]
 tests_dir = ["tests/unit", "tests/contract"]
 mutate_only_covered_lines = true
 runner = "python -m pytest -q -p no:cov -p no:hypothesis"
