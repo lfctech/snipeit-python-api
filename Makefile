@@ -1,6 +1,7 @@
 # Simple local entrypoints
 
 PY ?= .venv/bin/python
+COMPOSE = $(PY) docker/compose.py
 
 .PHONY: test test-unit check cov cov-html property mut mut-quick mut-report mut-reset clean docker-up docker-down test-integration test-all
 
@@ -50,12 +51,12 @@ docker-up:
 		rm -rf docker/api_key.txt; \
 		touch docker/api_key.txt; \
 	fi
-	cd docker && docker compose up -d
+	$(COMPOSE) up -d
 
 # Stop stack and delete volumes. Restore api_key.txt as an empty regular file
 # so the next `make docker-up` has a valid bind-mount target.
 docker-down:
-	cd docker && docker compose down -v
+	$(COMPOSE) down -v
 	rm -rf docker/api_key.txt
 	touch docker/api_key.txt
 
@@ -79,7 +80,7 @@ test-integration:
 		exit 1; \
 	fi; \
 	if [ ! -s docker/api_key.txt ]; then \
-		echo "Timed out waiting for docker/api_key.txt. Check 'docker compose logs --follow seeder'."; \
+		echo "Timed out waiting for docker/api_key.txt. Check '$(COMPOSE) logs --follow seeder'."; \
 		exit 1; \
 	fi
 	@echo "Waiting for Snipe-IT API to accept authenticated requests (up to ~120s)..."
@@ -97,7 +98,7 @@ test-integration:
 		sleep 1; i=$$((i+1)); \
 	done; \
 	if [ "$$code" != "200" ]; then \
-		echo "Timed out waiting for Snipe-IT API. Last status: $$code. Check 'docker compose logs --follow app'."; \
+		echo "Timed out waiting for Snipe-IT API. Last status: $$code. Check '$(COMPOSE) logs --follow app'."; \
 		exit 1; \
 	fi
 	.venv/bin/python -m pytest tests/integration -q -m integration

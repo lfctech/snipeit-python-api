@@ -25,6 +25,9 @@ The role of this file is to describe common mistakes and confusion points that a
 
 ## Common Surprises
 
+- **Bare `docker compose` shares project state between checkouts.**
+  Use the Make targets or `uv run python docker/compose.py` for every stack command, including logs and teardown. The wrapper derives a checkout-specific project name. Port 8000 is still shared, so stop an existing stack before starting another on the default port.
+
 - **`make test` runs unit + contract tests (not just unit).**
   The `test` target includes `tests/contract` — the contract tests validate the public API surface. Don't skip them.
 

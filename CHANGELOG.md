@@ -4,6 +4,8 @@
 
 ### Internal / testing
 
+- Isolate Docker integration volumes and seeder state per checkout, with a shared
+  Compose wrapper for local commands and CI.
 - Check the actual deleted attachment ID in the file roundtrip integration test.
 - Require `SnipeITConnectionError` for streaming connection failures, and verify
   exact label PDF bytes with both existing and missing parent directories.
