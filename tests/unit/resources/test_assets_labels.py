@@ -1,5 +1,3 @@
-import os
-
 import pytest
 
 from snipeit.exceptions import SnipeITApiError
@@ -8,7 +6,8 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.mark.unit
-def test_labels_pdf_content(snipeit_client, httpx_mock, tmp_path):
+@pytest.mark.parametrize("relative_path", ["labels.pdf", "missing/nested/labels.pdf"])
+def test_labels_pdf_content(snipeit_client, httpx_mock, tmp_path, relative_path):
     pdf_bytes = b"%PDF-1.4\n...binary..."
     httpx_mock.add_response(
         method="POST",
@@ -17,11 +16,10 @@ def test_labels_pdf_content(snipeit_client, httpx_mock, tmp_path):
         headers={"Content-Type": "application/pdf"},
         status_code=200,
     )
-    save_path = tmp_path / "labels.pdf"
+    save_path = tmp_path / relative_path
     result = snipeit_client.assets.labels(str(save_path), ["TAG1", "TAG2"])
     assert result == str(save_path)
-    assert os.path.exists(save_path)
-    assert os.path.getsize(save_path) == len(pdf_bytes)
+    assert save_path.read_bytes() == pdf_bytes
 
 
 @pytest.mark.unit
