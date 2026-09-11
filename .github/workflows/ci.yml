@@ -77,7 +77,7 @@ jobs:
         run: |
           rm -rf docker/api_key.txt
           touch docker/api_key.txt
-          cd docker && docker compose up -d
+          uv run python docker/compose.py up -d
 
       - name: Wait for API key
         run: |
@@ -88,7 +88,7 @@ jobs:
           done
           if [ ! -s docker/api_key.txt ]; then
             echo "Timed out waiting for docker/api_key.txt"
-            cd docker && docker compose logs seeder
+            uv run python docker/compose.py logs seeder
             exit 1
           fi
 
@@ -109,7 +109,7 @@ jobs:
           done
           if [ "$code" != "200" ]; then
             echo "Timed out. Last status: $code"
-            cd docker && docker compose logs app
+            uv run python docker/compose.py logs app
             exit 1
           fi
 

@@ -1,4 +1,4 @@
-# Compose file for production.
+# Disposable integration stack; invoke through compose.py for checkout isolation.
 
 services:
   app:
