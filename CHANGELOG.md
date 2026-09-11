@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.5.2 (2026-09-11)
+
 ### Internal / testing
 
 - Isolate Docker integration volumes and seeder state per checkout, with a shared
