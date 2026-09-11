@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Internal / testing
+
+- Isolate Docker integration volumes and seeder state per checkout, with a shared
+  Compose wrapper for local commands and CI.
+
 ## 0.5.1 (2026-09-11)
 
 ### Bug fixes
