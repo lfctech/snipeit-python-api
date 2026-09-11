@@ -64,11 +64,11 @@ def test_download_file_timeout_raises_snipeit_timeout_error(snipeit_client, http
 
 
 @pytest.mark.unit
-def test_download_file_connect_error_raises_snipeit_exception(snipeit_client, httpx_mock, tmp_path):
-    """A connection error during streaming must surface as SnipeITException."""
+def test_download_file_connect_error_raises_snipeit_connection_error(snipeit_client, httpx_mock, tmp_path):
+    """A connection error during streaming must surface as SnipeITConnectionError."""
     import httpx
 
-    from snipeit.exceptions import SnipeITException
+    from snipeit.exceptions import SnipeITConnectionError
 
     # ConnectError on GET is retried (default max_retries=3); register 4 exceptions.
     for _ in range(4):
@@ -77,7 +77,7 @@ def test_download_file_connect_error_raises_snipeit_exception(snipeit_client, ht
             method="GET",
             url="https://snipe.example.test/api/v1/hardware/1/files/10",
         )
-    with pytest.raises(SnipeITException):
+    with pytest.raises(SnipeITConnectionError):
         snipeit_client.assets.download_file(1, 10, str(tmp_path / "out.bin"))
 
 

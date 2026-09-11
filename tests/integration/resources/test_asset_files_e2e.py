@@ -114,6 +114,7 @@ def test_asset_file_upload_download_delete_roundtrip(
         )
 
         # Delete via /delete suffix endpoint.
+        deleted_file_id = uploaded_file_id
         c.assets.delete_file(asset_id, uploaded_file_id)
         uploaded_file_id = None  # mark as cleaned up so the finally block doesn't retry
 
@@ -122,7 +123,7 @@ def test_asset_file_upload_download_delete_roundtrip(
         post_rows = post_delete.get("rows") or post_delete.get("files") or post_delete.get("payload") or []
         ids_after = [int(r.get("id", -1)) for r in post_rows]
         # The file id should no longer appear.
-        assert all(i != (uploaded_file_id or -1) for i in ids_after)
+        assert deleted_file_id not in ids_after
     finally:
         # Best-effort: delete the file if we created it but failed mid-test.
         if uploaded_file_id is not None:
