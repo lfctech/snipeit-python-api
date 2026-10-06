@@ -25,6 +25,12 @@ The role of this file is to describe common mistakes and confusion points that a
 
 ## Common Surprises
 
+- **Maintenance creation is asset-scoped in the client, but not in the API route.**
+  Snipe-IT 8.7.2 and 8.8.0 use `POST /maintenances` with `asset_id`,
+  `maintenance_type_id`, `name`, and `start_date`. The former mocked
+  `hardware/:id/maintenances` route concealed a real failure. Keep live
+  creation/refetch coverage for both explicit type IDs and legacy type names.
+
 - **`uv run` can undo a manually installed Pydantic matrix version.**
   After `uv pip install` selects a matrix version, use `uv run --no-sync` or
   invoke that environment's executables directly. Otherwise the next command

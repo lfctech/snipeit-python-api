@@ -95,12 +95,47 @@ class AssetsManager(AssetFilesMixin, AssetLabelsMixin, BaseResourceManager[Asset
         )
 
     def create_maintenance(
-        self, asset_id: int, asset_improvement: str, supplier_id: int, title: str, **kwargs: Any
+        self,
+        asset_id: int,
+        asset_improvement: str | None = None,
+        supplier_id: int | None = None,
+        title: str | None = None,
+        **kwargs: Any,
     ) -> dict[str, Any]:
-        """Create a new asset maintenance record."""
-        data = {"asset_improvement": asset_improvement, "supplier_id": supplier_id, "title": title}
-        data.update(kwargs)
-        response = self._create(f"{self.path}/{asset_id}/maintenances", data)
+        """Create maintenance using a type ID or the legacy type-name arguments.
+
+        Pass ``maintenance_type_id``, ``name``, and ``start_date`` as keyword
+        arguments. Existing ``asset_improvement`` and ``title`` arguments remain
+        supported: the former resolves an exact, case-insensitive type name and
+        the latter supplies ``name`` unless it is explicitly provided.
+        """
+        data = dict(kwargs)
+        data["asset_id"] = asset_id
+        if supplier_id is not None:
+            data["supplier_id"] = supplier_id
+        if title is not None:
+            data.setdefault("name", title)
+        if "maintenance_type_id" not in data:
+            if not asset_improvement:
+                raise ValueError("Provide maintenance_type_id or asset_improvement")
+            type_name = asset_improvement.strip()
+            response = self._get("maintenance-types", name=type_name)
+            rows = response.get("rows")
+            if not isinstance(rows, list):
+                raise SnipeITApiError("Expected maintenance-types response with a rows list")
+            matches = [
+                row
+                for row in rows
+                if isinstance(row, dict)
+                and isinstance(row.get("name"), str)
+                and row["name"].casefold() == type_name.casefold()
+            ]
+            if not matches:
+                raise SnipeITNotFoundError(f"Maintenance type {type_name!r} not found")
+            if len(matches) != 1 or not isinstance(matches[0].get("id"), int):
+                raise SnipeITApiError(f"Expected one maintenance type ID for {type_name!r}")
+            data["maintenance_type_id"] = matches[0]["id"]
+        response = self._create("maintenances", data)
         return response.get("payload", response)
 
     # ---- Licenses ----

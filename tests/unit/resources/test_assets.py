@@ -411,14 +411,73 @@ def test_get_by_serial_missing_total_preserves_cardinality(snipeit_client, httpx
 @pytest.mark.unit
 def test_create_maintenance_returns_payload(snipeit_client, httpx_mock):
     httpx_mock.add_response(
+        method="GET",
+        url="https://snipe.example.test/api/v1/maintenance-types?name=repair",
+        json={"total": 1, "rows": [{"id": 3, "name": "Repair"}]},
+    )
+    httpx_mock.add_response(
         method="POST",
-        url="https://snipe.example.test/api/v1/hardware/1/maintenances",
-        json={"status": "success", "payload": {"id": 99, "title": "Tune-up"}},
+        url="https://snipe.example.test/api/v1/maintenances",
+        match_json={
+            "asset_id": 1,
+            "maintenance_type_id": 3,
+            "supplier_id": 2,
+            "name": "Tune-up",
+            "start_date": "2026-10-05",
+        },
+        json={"status": "success", "payload": {"id": 99, "name": "Tune-up"}},
     )
-    payload = snipeit_client.assets.create_maintenance(
-        asset_id=1, asset_improvement="repair", supplier_id=2, title="Tune-up"
+    payload = snipeit_client.assets.create_maintenance(1, "repair", 2, "Tune-up", start_date="2026-10-05")
+    assert payload == {"id": 99, "name": "Tune-up"}
+
+
+def test_create_maintenance_explicit_type_and_name_do_not_lookup_legacy_name(snipeit_client, httpx_mock):
+    httpx_mock.add_response(
+        method="POST",
+        url="https://snipe.example.test/api/v1/maintenances",
+        match_json={
+            "asset_id": 1,
+            "maintenance_type_id": 7,
+            "name": "Explicit",
+            "notes": "Keep",
+            "start_date": "2026-10-05",
+        },
+        json={"id": 99},
     )
-    assert payload == {"id": 99, "title": "Tune-up"}
+    assert snipeit_client.assets.create_maintenance(
+        1,
+        "unknown legacy name",
+        title="Legacy",
+        maintenance_type_id=7,
+        name="Explicit",
+        notes="Keep",
+        start_date="2026-10-05",
+    ) == {"id": 99}
+
+
+@pytest.mark.parametrize(
+    "response, error",
+    [
+        ({"rows": []}, SnipeITNotFoundError),
+        ({"rows": [{"id": 3, "name": "Repair"}, {"id": 4, "name": "repair"}]}, SnipeITApiError),
+        ({"rows": [{"id": "not-an-id", "name": "Repair"}]}, SnipeITApiError),
+        ({"rows": [{"id": 3, "name": "Repairs"}]}, SnipeITNotFoundError),
+        ({"rows": None}, SnipeITApiError),
+    ],
+)
+def test_create_maintenance_rejects_unresolved_names_without_post(snipeit_client, httpx_mock, response, error):
+    httpx_mock.add_response(
+        method="GET", url="https://snipe.example.test/api/v1/maintenance-types?name=repair", json=response
+    )
+    with pytest.raises(error):
+        snipeit_client.assets.create_maintenance(1, "repair", 2, "Tune-up", start_date="2026-10-05")
+    assert [request.method for request in httpx_mock.get_requests()] == ["GET"]
+
+
+def test_create_maintenance_requires_a_type_without_network(snipeit_client, httpx_mock):
+    with pytest.raises(ValueError, match="maintenance_type_id or asset_improvement"):
+        snipeit_client.assets.create_maintenance(1, name="Tune-up", start_date="2026-10-05")
+    assert not httpx_mock.get_requests()
 
 
 @pytest.mark.unit
