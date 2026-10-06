@@ -80,8 +80,7 @@ def real_snipeit_client_no_retry():
     Use this for tests that probe endpoints which may not be available on
     every Snipe-IT build (e.g. ``/hardware/labels`` requires the new label
     engine). The default ``real_snipeit_client`` retries 5xx on POST up to
-    5 times with exponential backoff, which can take ~70s before the
-    ``pytest.skip(...)`` branch fires — long enough to look like a hang.
+    5 times with exponential backoff, which can take ~70s before failure.
     With ``max_retries=0`` the failure surfaces immediately.
     """
     url = os.environ.get("SNIPEIT_TEST_URL")

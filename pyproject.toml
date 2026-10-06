@@ -43,6 +43,7 @@ snipeit = ["py.typed"]
 
 [dependency-groups]
 dev = [
+    "pypdf>=6,<7",
     "pytest",
     "pytest-cov",
     "pytest-httpx>=0.30",

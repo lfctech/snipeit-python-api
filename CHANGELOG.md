@@ -11,6 +11,13 @@
 
 ### Bug fixes
 
+- Decode the official successful JSON label response (`payload.pdf`) as strict
+  base64 while retaining raw PDF support. Validate the PDF header before writing,
+  preserve response/status details on malformed responses, and retain existing
+  output files when the server response is invalid.
+- Fail live label regressions instead of skipping API errors; parse generated
+  PDFs and require at least one page on both supported Snipe-IT versions.
+
 - Create asset maintenance through `POST /maintenances` with the selected type
   ID, asset ID, name, and caller-provided start date. Preserve legacy positional
   type-name/title calls through an exact type-name lookup; also accept explicit
