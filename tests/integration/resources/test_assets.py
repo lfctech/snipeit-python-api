@@ -5,6 +5,7 @@ import uuid
 from pathlib import Path
 
 import pytest
+from pypdf import PdfReader
 
 from snipeit import SnipeIT
 from snipeit.exceptions import (
@@ -63,17 +64,13 @@ def test_assets_full_flow(
         # audit
         a = a.audit(note=f"audit-{run_id}")
 
-        # labels to PDF (this endpoint may not be enabled in some Snipe-IT
-        # builds — the new label engine is opt-in). Use a non-retrying client
-        # so that an unavailable/misconfigured endpoint surfaces immediately
-        # instead of looping for ~70s through the default retry budget on
-        # POST + 5xx (max_retries=5, exponential backoff).
+        # The supported disposable runtimes enable the new label engine.
+        # Rendering/client errors must fail this test, never become a skip.
         pdf_path = tmp_path / f"labels-{a.asset_tag}.pdf"
-        try:
-            saved = real_snipeit_client_no_retry.assets.labels(str(pdf_path), [a.asset_tag])
-            assert Path(saved).exists() and Path(saved).stat().st_size > 0
-        except SnipeITApiError:
-            pytest.skip("labels endpoint not available on this Snipe-IT instance")
+        saved = real_snipeit_client_no_retry.assets.labels(str(pdf_path), [a.asset_tag])
+        assert saved == str(pdf_path)
+        assert pdf_path.read_bytes().startswith(b"%PDF-")
+        assert len(PdfReader(pdf_path).pages) >= 1
 
         # list smoke
         listed = c.assets.list()
