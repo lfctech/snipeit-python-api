@@ -25,6 +25,12 @@ The role of this file is to describe common mistakes and confusion points that a
 
 ## Common Surprises
 
+- **`uv run` can undo a manually installed Pydantic matrix version.**
+  After `uv pip install` selects a matrix version, use `uv run --no-sync` or
+  invoke that environment's executables directly. Otherwise the next command
+  restores the lockfile's version and multiple lanes silently test the same
+  dependency. Print the installed version before testing each lane.
+
 - **Bare `docker compose` shares project state between checkouts.**
   Use the Make targets or `uv run python docker/compose.py` for every stack command, including logs and teardown. The wrapper derives a checkout-specific project name. Port 8000 is still shared, so stop an existing stack before starting another on the default port.
   Keep `docker/` in mutmut's `also_copy`: the wrapper regression tests need it in the mutation sandbox, and mutmut 3.x does not create parent directories for individual nested-file entries.

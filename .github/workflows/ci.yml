@@ -39,26 +39,34 @@ jobs:
         run: uv sync --all-extras --python ${{ matrix.python-version }}
 
       - name: Pin pydantic version
-        run: uv pip install "pydantic${{ matrix.pydantic-version }}"
+        run: |
+          uv pip install "pydantic${{ matrix.pydantic-version }}"
+          uv run --no-sync python -c 'import pydantic; print("Pydantic", pydantic.__version__)'
 
       - name: Lint
-        run: uv run ruff check .
+        run: uv run --no-sync ruff check .
 
       - name: Type-check
-        run: uv run pyright
+        run: uv run --no-sync pyright
 
       - name: Unit tests
-        run: uv run pytest tests/unit tests/contract -q -m unit
+        run: uv run --no-sync pytest tests/unit tests/contract -q -m unit
 
       - name: Coverage
         if: matrix.python-version == '3.13' && matrix.pydantic-version == '~=2.10.0'
         run: |
-          uv run coverage run -m pytest tests/unit tests/contract -q -m unit
-          uv run coverage report -m --fail-under=95
+          uv run --no-sync coverage run -m pytest tests/unit tests/contract -q -m unit
+          uv run --no-sync coverage report -m --fail-under=95
 
   integration:
-    name: integration tests
+    name: integration tests (Snipe-IT ${{ matrix.snipeit-version }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        snipeit-version: ["8.7.2", "8.8.0"]
+    env:
+      SNIPEIT_IMAGE: snipe/snipe-it:v${{ matrix.snipeit-version }}-alpine
     steps:
       - uses: actions/checkout@v4
 

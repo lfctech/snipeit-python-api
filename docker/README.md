@@ -44,3 +44,9 @@ name set only in `docker/.env` does not override the wrapper's explicit name.
 ## `.env`
 
 The `.env` file is committed intentionally. It contains only local dev bootstrap values (no real secrets). See the comment block at the top of the file.
+
+## Snipe-IT version coverage
+
+CI runs the integration suite against both Snipe-IT 8.7.2 and 8.8.0. The local
+default remains 8.7.2; select the same 8.8.0 lane with
+`SNIPEIT_IMAGE=snipe/snipe-it:v8.8.0-alpine make test-all`.
