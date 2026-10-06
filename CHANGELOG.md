@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Dependencies
+
+- Require AnyIO 4.14.2 or newer within v4 and lock 4.14.2, addressing
+  GHSA-82r6-8w77-94w6 (TLS hostname validation) and GHSA-5p39-cfhj-2xmp
+  (process-worker stderr deadlock). The explicit minimum also protects
+  consumer installs that do not use this repository's lockfile.
+
 ### Bug fixes
 
 - Create asset maintenance through `POST /maintenances` with the selected type
