@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### Bug fixes
+
+- Create asset maintenance through `POST /maintenances` with the selected type
+  ID, asset ID, name, and caller-provided start date. Preserve legacy positional
+  type-name/title calls through an exact type-name lookup; also accept explicit
+  `maintenance_type_id` and `name` without an extra lookup.
+- Cover both forms with live create/refetch/type/supplier persistence and
+  deletion checks on the supported integration runtimes.
+
 ### Internal / testing
 
 - Run integration CI against Snipe-IT 8.8.0 alongside 8.7.2; allow the local

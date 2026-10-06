@@ -25,6 +25,28 @@ Groups, Reports, Settings, Audit log, Maintenances (asset-level
 `create_maintenance` is the only related method). Use the raw
 `client.get`/`client.post` verbs against those paths if needed.
 
+### Asset maintenance creation
+
+Create maintenance with the numeric type ID from `client.get("maintenance-types")`:
+
+```python
+maintenance = client.assets.create_maintenance(
+    asset_id=42,
+    maintenance_type_id=repair_type_id,
+    name="Battery replacement",
+    start_date="2026-10-05",
+)
+```
+
+Existing positional calls such as
+`client.assets.create_maintenance(42, "Repair", supplier_id, "Battery replacement", start_date="2026-10-05")`
+remain supported. The legacy type name resolves through an exact,
+case-insensitive `maintenance-types` lookup, which requires permission to view
+maintenance types; explicit IDs avoid that additional request. Unknown or
+ambiguous names fail before creating a record. The helper sends `asset_id`,
+`maintenance_type_id`, and `name` to `POST /maintenances` on Snipe-IT 8.7.2 and
+8.8.0; it does not guess a type ID or a start date.
+
 ## Common Pitfalls
 
 ### Typos on model attributes are silently accepted
