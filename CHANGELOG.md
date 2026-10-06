@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Internal / testing
+
+- Run integration CI against Snipe-IT 8.8.0 alongside 8.7.2; allow the local
+  disposable stack to select the same pinned image with `SNIPEIT_IMAGE`.
+- Preserve each explicitly installed Pydantic matrix version during CI checks
+  instead of allowing `uv run` to restore the lockfile version.
+
 ## 0.5.2 (2026-09-11)
 
 ### Internal / testing
