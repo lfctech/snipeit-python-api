@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import contextlib
+import os
 
 # Additional imports for shared fixtures
 import time
@@ -40,8 +41,9 @@ def _configure_integration_env():
             "Run 'make test-integration' to start the local Snipe-IT and generate a token."
         )
 
+    port = os.environ.get("APP_PORT", "8000")
     with pytest.MonkeyPatch.context() as mp:
-        mp.setenv("SNIPEIT_TEST_URL", "http://localhost:8000")
+        mp.setenv("SNIPEIT_TEST_URL", f"http://localhost:{port}")
         mp.setenv("SNIPEIT_TEST_TOKEN", token)
         yield
 

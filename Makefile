@@ -1,6 +1,7 @@
 # Simple local entrypoints
 
 PY ?= .venv/bin/python
+APP_PORT ?= 8000
 COMPOSE = $(PY) docker/compose.py
 
 .PHONY: test test-unit check cov cov-html property mut mut-quick mut-report mut-reset clean docker-up docker-down test-integration test-all
@@ -90,7 +91,7 @@ test-integration:
 		code=$$(curl -s -o /dev/null -w "%{http_code}" -m 5 \
 			-H "Authorization: Bearer $$TOKEN" \
 			-H "Accept: application/json" \
-			http://localhost:8000/api/v1/users/me 2>/dev/null || echo "000"); \
+			http://localhost:$(APP_PORT)/api/v1/users/me 2>/dev/null || echo "000"); \
 		if [ "$$code" = "200" ]; then \
 			echo "API is ready (HTTP 200 on /users/me)"; \
 			break; \
