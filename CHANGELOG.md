@@ -27,6 +27,9 @@
 
 ### Internal / testing
 
+- Honor `APP_PORT` in the integration fixture and API readiness check, so
+  concurrent disposable stacks test the selected local server. Verified the
+  full live suite against Snipe-IT 8.8.1 without changing client behavior.
 - Run integration CI against Snipe-IT 8.8.0 alongside 8.7.2; allow the local
   disposable stack to select the same pinned image with `SNIPEIT_IMAGE`.
 - Preserve each explicitly installed Pydantic matrix version during CI checks
