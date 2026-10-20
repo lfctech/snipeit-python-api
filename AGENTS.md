@@ -38,7 +38,7 @@ The role of this file is to describe common mistakes and confusion points that a
   dependency. Print the installed version before testing each lane.
 
 - **Bare `docker compose` shares project state between checkouts.**
-  Use the Make targets or `uv run python docker/compose.py` for every stack command, including logs and teardown. The wrapper derives a checkout-specific project name. Port 8000 is still shared, so stop an existing stack before starting another on the default port.
+  Use the Make targets or `uv run python docker/compose.py` for every stack command, including logs and teardown. The wrapper derives a checkout-specific project name. Port 8000 is still the shared default. Set `APP_PORT` to a free local port when running stacks concurrently; the Compose mapping, readiness check, and integration fixture must all use that same port. A past run set only the Compose port while the fixture forced 8000, causing connection-refused failures unrelated to server compatibility.
   Keep `docker/` in mutmut's `also_copy`: the wrapper regression tests need it in the mutation sandbox, and mutmut 3.x does not create parent directories for individual nested-file entries.
 
 - **`make test` runs unit + contract tests (not just unit).**
